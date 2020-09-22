@@ -1,0 +1,830 @@
+/***
+ *			3D Graphics routines for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include "game.h"
+
+#define	BIGCLIP		FALSE
+#define	CLIP			TRUE
+#define	DEBUG			FALSE
+#define	SCALEMAX		400
+
+#define	AREA_SKIP	TRUE
+
+
+extern PLAYER	Player;
+
+int			XRes, YRes;			/* Screen resolution */
+FRAC			Mx, My, Mz;			/* Camera World Position */
+int			Angl;					/* Angle around Y axis */
+int			Tilt;					/* Tilt around X axis */
+int			CentreX, CentreY;	/* Dead center on the screen */
+
+int			Num_World_Objs;	/* Number of world Objects */
+extern OBJECT3D		World_Objs[MAX3DOBJS];		/* Total object list */
+
+OBJECT3D		Special_Object;	/* For Special calls */
+
+int			Num_Visable_Objs;	/* Number of visable Objects */
+extern VISABLE3D	Visable_Objs[100];	/* Depth sorted objects (no more than 100) */
+VISABLE3D	VCopy;				/* Temp storage for sorting */
+
+int			Num_Clipped;		/* Debugging counter */
+int			Visable_Quad1;		/* View angle quadrant left side */
+int			Visable_Quad2;		/* View angle quadrant right side */
+
+extern OBJECT3D	*O3D_Areas[64];	/* Pointers to the start of each 3D
+												area */
+extern void DispFrame(UWORD *anim_file, WORD anim, WORD frame, WORD xp, WORD yp);
+extern void	Debug(char *fmt, ...);
+
+#if DEBUG
+extern	UWORD	debug_anm;		/* Sprites of the numbers "0" through "9" */
+#endif
+
+/************************************************************************
+ *																								*
+ *					Three Dimensional Plotting Routines								*
+ *																								*
+ ************************************************************************
+
+	Init3D			- inits 3D package
+	Move3D			- rotation, tilt angles and observer location, distance
+	Transform3D		- maps 3D space onto the 2D screen
+
+ ************************************************************************/
+
+FRAC		CosA, SinA;
+FRAC		CosT, SinT;
+FRAC		CosACosT, SinASinT;
+FRAC		CosASinT, SinACosT;
+FRAC		GndZCos, GndZSin;
+
+#define		Cam3Dds	INT2FRAC(200)
+#define		Cam3Dsf	INT2FRAC(350)
+#define		Scale3D	(Cam3Dsf/SCALEMAX)
+
+/*	Scale3D = fdiv(Cam3Dsf,INT2FRAC(SCALEMAX)); */
+
+void
+Init3D()
+{
+	register short		i;
+
+	Num_World_Objs = 1;			/* First World object is the camera */
+	XRes = 256;
+	YRes = 224;
+	CentreX = XRes/2;
+	CentreY = YRes/2;
+	for (i=0; i < 64; i++)
+		O3D_Areas[i] = NULL;
+}
+
+void
+Move3D(int Ang, int Tlt,FRAC x, FRAC y, FRAC z)
+{
+	register FRAC	Xt, Yt, Zt;
+	register FRAC	OneOverZt;
+
+	Mx = x;
+	My = y;
+	Mz = z;
+	Angl = Ang;
+	Tilt = Tlt;
+	/* Modify first world object to reflect camera position */
+	World_Objs[0].x = x;
+	World_Objs[0].y = y;
+	World_Objs[0].z = z;
+	World_Objs[0].rotation = Ang;
+	World_Objs[0].tilt = Tlt;
+
+	/* Compute area of the world if Z != 0 and set clip mask */
+	World_Objs[0].area = FRAC2INT(y) / (FRAC2INT(WORLD_DEPTH) / 8);
+	World_Objs[0].area <<= 3;
+	World_Objs[0].area += FRAC2INT(x) / (FRAC2INT(WORLD_WIDTH) / 8);
+
+	CosA = fcosd(Angl);
+	SinA = fsind(Angl);
+	CosT = fcosd(Tilt);
+	SinT = fsind(Tilt);
+	CosACosT = fmul(CosA,CosT);
+	SinASinT = fmul(SinA,SinT);
+	CosASinT = fmul(CosA,SinT);
+	SinACosT = fmul(SinA,CosT);
+	/* Optimazations for ground based objects */
+	GndZCos = fmul(-z,CosT);
+	GndZSin = fmul(-z,SinT);
+}
+
+/***
+ *		Transform3D:	Take a world coordinate and transform it to screen co's
+ *							Returns TRUE if point needs to be clipped
+ ***/
+
+WORD		quad;
+
+int
+Transform3D(FRAC X, FRAC Y, FRAC Z, WORD *Xp, WORD *Yp)
+{
+	register	FRAC	tmpf;
+	register	FRAC	Xt, Yt, Zt;
+#if CLIP
+	register	WORD	quad;
+#endif
+
+	/* Do View plane transform */
+	Y -= My;
+	X -= Mx;
+
+#if CLIP
+	/* Reject point if not in visable quadrants */
+	quad = (Y >= 0) ? 0 : 1;
+	if	(X < 0)
+		quad = quad ^ 3;
+/*	quad = (Y >= 0) ? 0 : 2;
+	quad += (X >= 0) ? 0 : 1;		*/
+	if (quad != Visable_Quad1 && quad != Visable_Quad2) {
+		return (TRUE);
+	}
+#if 0
+	/* Do quick 90 degree conic clipping */
+	tmpf = fmul(ftan(Player.Rotation-90),Y);
+	if (X < tmpf)
+		return (TRUE);
+	tmpf = fmul(ftan(Player.Rotation+90),Y);
+	if (X > tmpf)
+		return (TRUE);
+#endif
+#endif
+
+	/* Is this a ground based object? */
+	if (Z) {
+		Z -= Mz;
+		Zt = fmul(X,SinACosT)+fmul(Y,CosACosT)-fmul(Z,SinT);
+		/* If point appears behind view plane, clip it */
+		if (Zt < 0)
+			return (TRUE);
+		Yt = fmul(X,SinASinT)+fmul(Y,CosASinT)+fmul(Z,CosT);
+		Xt = fmul(X,CosA)-fmul(Y,SinA);
+	} else {
+		/* Special Ground based object code */
+		Zt = fmul(X,SinACosT)+fmul(Y,CosACosT)-GndZSin;
+		/* If point appears behind view plane, clip it */
+		if (Zt < 0)
+			return (TRUE);
+		Yt = fmul(X,SinASinT)+fmul(Y,CosASinT)+GndZCos;
+		Xt = fmul(X,CosA)-fmul(Y,SinA);
+	}
+	/* Do Screen transform */
+	tmpf = frec(Zt);	/* Get 1/Zt */
+	*Xp = CentreX+fround(fmul(Cam3Dds,fmul(Xt,tmpf)));
+	*Yp = CentreY-fround(fmul(Cam3Dds,fmul(Yt,tmpf)));
+	return (FALSE);
+}
+
+/***
+ *		Update3DObject:	Moves this 3D object to another part of the world.
+ ***/
+
+void
+Update3DObject(OBJECT3D *ptr)
+{
+	WORD		new_area;
+
+	/* Compute area of the world */
+	ptr->y &= WORLD_DEPTH - 1;
+	ptr->x &= WORLD_WIDTH - 1;
+	new_area = FRAC2INT(ptr->y) / (FRAC2INT(WORLD_DEPTH) / 8);
+	new_area <<= 3;
+	new_area += FRAC2INT(ptr->x) / (FRAC2INT(WORLD_WIDTH) / 8);
+	/* Update doublely linked list pointers */
+	if (new_area != ptr->area) {
+		if (ptr->area != 0xFFFF) {
+			/* First, delete this object from where it is */
+			if (ptr->next == NULL && ptr->prev == NULL)
+				/* Object is only one in list */
+				O3D_Areas[ptr->area] = NULL;
+			else
+				if (ptr->prev == NULL) {
+					/* Object is first in list with more than one entry */
+					O3D_Areas[ptr->area] = ptr->next;
+					ptr->next->prev = NULL;
+				} else
+					if (ptr->next == NULL)
+						/* Object is last in list with more than one entry */
+						ptr->prev->next = NULL;
+					else {
+						/* Object is in the middle of a multiple entry list */
+						ptr->prev->next = ptr->next;
+						ptr->next->prev = ptr->prev;
+					}
+		}
+		/* Insert object into the list */
+		ptr->area = new_area;
+		if (O3D_Areas[new_area] == NULL) {
+			/* New list for this area */
+			O3D_Areas[new_area] = ptr;
+			ptr->prev = ptr->next = NULL;
+		} else {
+			/* Squeeze this new object in as the first in the list */
+			ptr->next = O3D_Areas[new_area];
+			ptr->next->prev = ptr;
+			O3D_Areas[new_area] = ptr;
+			ptr->prev = NULL;
+		}
+	}
+}
+
+OBJECT3D	*
+Add3DObject(UWORD *file, FRAC x, FRAC y, FRAC z)
+{
+	OBJECT3D					*ptr;
+
+	ptr = &World_Objs[Num_World_Objs];
+	memset(ptr,0,sizeof(OBJECT3D));
+	ptr->x = x;
+	ptr->y = y;
+	ptr->z = z;
+	ptr->file = file;
+	ptr->anim = 0;
+	ptr->frame = 0;
+	ptr->noscale = FALSE;
+	ptr->cloaked = FALSE;
+	ptr->flag32 = FALSE;
+	ptr->special = FALSE;
+	ptr->clipped = FALSE;
+	ptr->norot = FALSE;
+	ptr->notilt = FALSE;
+	ptr->rotation = ptr->tilt = 0;
+	ptr->scaler = (unsigned short)Scale3D;
+	ptr->spc_func = 0;
+	ptr->variable = 0;
+	ptr->type = PT_GRND;
+	ptr->parent = 0;
+	ptr->area = 0xFFFF;
+	ptr->next = ptr->prev = NULL;
+	Update3DObject(ptr);
+	Num_World_Objs++;
+	return (ptr);
+}
+
+/* Table to calculate the binacular disparity by using the distance */
+
+short	QAngle1;
+short	QAngle2;
+short	MinAngle = 90;
+short	MaxAngle = 0;
+
+const static short deg2slice[90] = {
+	 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5,
+	 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9,10,10,10,
+	11,11,11,12,12,12,13,13,13,14,14,14,15,15,16,
+	16,16,17,17,17,18,18,18,19,19,19,20,20,21,21,
+	21,22,22,22,23,23,23,24,24,24,25,25,26,26,26,
+	27,27,27,28,28,28,29,29,29,30,30,30,31,31, 0
+};
+
+const short octant[8] = {
+	16,20,28,24,12,8,0,4
+};
+
+#define	VIEWSPAN		45
+
+/***
+ *		GetObjRotation:	Return the rotation of an object relative to
+ *								another object
+ ***/
+ #if 0
+
+WORD
+GetObjRotation(OBJECT3D *src,OBJECT3D *dst)
+{
+	register short			k;
+	register WORD			rotation;		/* Temporary work variables for... */
+	register WORD			object_direction;
+	register FRAC			tmp;
+	register FRAC			tmpx,
+								tmpy;
+	register FRAC			greater,
+								lesser;
+
+	/* Get objects location relative to the player */
+	tmpx = dst->x - src->x;
+	tmpy = dst->y - src->y;
+
+	/* WRAP AROUND WORLD STUFF */
+
+	if (tmpx > WORLD_WIDTH / 2)
+		tmpx = tmpx - WORLD_WIDTH;
+	if (tmpx < - (WORLD_WIDTH / 2))
+		tmpx = WORLD_WIDTH + tmpx;
+
+	if (tmpy > WORLD_DEPTH / 2)
+		tmpy = tmpy - WORLD_DEPTH;
+	if (tmpy < - (WORLD_DEPTH / 2))
+		tmpy = WORLD_DEPTH + tmpy;
+
+
+	if (tmpx >= 0) {
+		k = 4;
+	} else {
+		k = 0;
+		tmpx = -tmpx;
+	}
+	if (tmpy >= 0) {
+		k += 2;
+	} else {
+		tmpy = -tmpy;
+	}
+	lesser = tmpx;
+	greater = tmpy;
+	if (tmpx >= tmpy) {
+		k += 1;
+		lesser = tmpy;
+		greater = tmpx;
+	}
+	rotation = octant[k];		/* now adding the 32 slices */
+	k = 0;
+	tmp = lesser + (lesser >> 1);		/* 1.5 line */
+	if (tmp <= greater) {
+		k++;
+		tmp += lesser;						/* 2.5 line */
+		if (tmp <= greater) {
+			k++;
+			tmp = tmp << 1;				/* 5 line */
+			if (tmp <= greater)
+				k++;
+		}
+	}
+	if ((rotation & 4) == 0)
+		k = k ^ 3;
+	rotation += k;
+
+	return (rotation);
+}
+#endif
+
+/***
+ *		GetRotation:	Return the rotation of an object relative to the player
+ ***/
+
+WORD
+GetRotation(OBJECT3D *ptr)
+{
+	register short			k;
+	register WORD			rotation;		/* Temporary work variables for... */
+	register WORD			object_direction;
+	register FRAC			tmp;
+	register FRAC			tmpx,
+								tmpy;
+	register FRAC			greater,
+								lesser;
+
+	/* Get objects location relative to the player */
+	tmpx = ptr->x - Mx;
+	tmpy = ptr->y - My;
+
+	/* WRAP AROUND WORLD STUFF */
+
+	if (tmpx > WORLD_WIDTH / 2)
+		tmpx = tmpx - WORLD_WIDTH;
+	if (tmpx < - (WORLD_WIDTH / 2))
+		tmpx = WORLD_WIDTH + tmpx;
+
+	if (tmpy > WORLD_DEPTH / 2)
+		tmpy = tmpy - WORLD_DEPTH;
+	if (tmpy < - (WORLD_DEPTH / 2))
+		tmpy = WORLD_DEPTH + tmpy;
+
+
+	if (tmpx >= 0) {
+		k = 4;
+	} else {
+		k = 0;
+		tmpx = -tmpx;
+	}
+	if (tmpy >= 0) {
+		k += 2;
+	} else {
+		tmpy = -tmpy;
+	}
+	lesser = tmpx;
+	greater = tmpy;
+	if (tmpx >= tmpy) {
+		k += 1;
+		lesser = tmpy;
+		greater = tmpx;
+	}
+	rotation = octant[k];		/* now adding the 32 slices */
+	k = 0;
+	tmp = lesser + (lesser >> 1);		/* 1.5 line */
+	if (tmp <= greater) {
+		k++;
+		tmp += lesser;						/* 2.5 line */
+		if (tmp <= greater) {
+			k++;
+			tmp = tmp << 1;				/* 5 line */
+			if (tmp <= greater)
+				k++;
+		}
+	}
+	if ((rotation & 4) == 0)
+		k = k ^ 3;
+	rotation += k;
+
+	return (rotation);
+}
+
+/***
+ *		View3DZone:			Clips and Transforms objects in a zone.
+ ***/
+
+void
+View3DZone(register OBJECT3D *ptr, FRAC ox, FRAC oy)
+{
+	register OBJECT3D		*spc_ptr;
+	register short			i,j;
+	WORD						rotation;		/* Temporary work variables for... */
+	WORD						object_direction;
+	WORD						frm;
+	WORD						xs,ys;
+	WORD						call_ret;		/* Special call function return */
+	UWORD						tilt;				/* computing objects anim/frame */
+	short						angle;
+	FRAC						dist;
+	FRAC						tmp;
+	FRAC						tmpx,tmpy;
+	BYTE						in_special;		/* Loop for more 3D data? */
+	VISABLE3D				*vptr;
+	extern BYTE				SYS_FLICKER;
+	extern UWORD			SYS_DISTDIV;	/* Flicker focus adjustment */
+	extern UWORD			SYS_MINFDIST;	/* Flicker focus adjustor */
+
+	/***
+	 *		Phase II:  Transform and Clip objects
+	 ***/
+	vptr = &Visable_Objs[Num_Visable_Objs];
+	in_special = FALSE;
+	call_ret = 0;
+	do {
+		ptr->clipped = FALSE;
+asm("V3D_Clip1:");
+		do {
+			if (in_special) {
+				/* Call special function again, until we are done */
+				call_ret = spc_ptr->spc_func(spc_ptr);
+			} else
+				if (ptr->special) {
+					/* Just starting a special call... */
+					call_ret = ptr->spc_func(ptr);
+					in_special = TRUE;
+					spc_ptr = ptr;
+					ptr = &Special_Object;
+				}
+			/* Do very fast view rejection for air based objects only */
+asm("V3D_Clip2:");
+			/* Bounding Sphere Clipper */
+			dist = fdist3d((ptr->x)-Mx+ox,(ptr->y)-My+oy,(ptr->z)-Mz);
+			if (dist > INT2FRAC(400)) {
+				ptr->clipped = TRUE;
+				continue;
+			}
+			/* Cloaked object Clipper */
+			if (ptr->cloaked) {
+				ptr->clipped = TRUE;
+				continue;
+			}
+			/* 3D Transform/Clipper, is object behind viewplane? */
+			if (Transform3D(ptr->x+ox,ptr->y+oy,ptr->z,&xs,&ys)) {
+				ptr->clipped = TRUE;
+				continue;
+			}
+			/* 2D View Clipper */
+			if (xs < -20 || ys < -20 || xs > (256+20) || ys > (228+60)) {
+				ptr->clipped = TRUE;
+				continue;
+			}
+asm("V3D_Add2View:");
+			/* Compute scale for visable object */
+			frm = (unsigned long)dist / ptr->scaler;
+			frm = SCALEMAX-frm;
+			if (frm < 0)
+				frm = 0;
+			if (frm > SCALEMAX)
+				frm = SCALEMAX;
+			/* Save scale and adjust X offset */
+			if (ptr->noscale)
+				frm = SCALEMAX;
+			if (SYS_FLICKER) {
+				j = (frm / SYS_DISTDIV) + SYS_MINFDIST;
+				xs += j;
+			}
+			/* Compute new rotation to view plane */
+			if (ptr->z) {
+				/***
+				 *						AIRBORNE OBJECTS
+				 ***/
+	
+				if (!ptr->norot) {
+					rotation = GetRotation(ptr);
+					object_direction = deg2slice[ptr->rotation >> 2];
+					tmp = (rotation - object_direction + 16) & 31;
+					if (ptr->flag32)
+						ptr->frame = tmp; 
+					else
+						ptr->frame = tmp >> 2;
+				}
+	
+				if (!ptr->notilt) {
+					if (ptr->norot)
+						ptr->frame = 0;
+					/* Fudge angle into which frame to use for view */
+					angle = fatan2(dist,Mz-ptr->z);
+					if (angle > 180)
+						angle -= 360;
+					if (angle > 30)
+						angle = 30;
+					if (angle < -30)
+						angle = -30;
+					tilt = (5 - ((angle / 15) + 3)) * 32;
+					if (ptr->flag32)
+						ptr->frame += tilt; 
+					else
+						ptr->frame += tilt >> 2;
+				}
+			} else {
+				/****
+				 *					GROUND BASED OBJECTS
+				 ****/
+	
+				if (!ptr->norot) {
+					rotation = GetRotation(ptr);
+					object_direction = deg2slice[ptr->rotation >> 2];
+					tmp = (rotation - object_direction + 16) & 31;
+					if (ptr->flag32)
+						ptr->frame = tmp; 
+					else
+						ptr->frame = tmp >> 2;
+				}
+	
+				if (!ptr->notilt) {
+					if (ptr->norot)
+						ptr->frame = 0;
+					/* Compute pitch of object */
+					angle = fatan2(dist,Mz);
+					if (angle < MinAngle)
+						MinAngle = angle;
+					if (angle > MaxAngle)
+						MaxAngle = angle;
+					/* Fudge angle into which file number to use for view */
+					if (angle > 30)
+						angle = 30;
+					else
+						if (angle < 0)
+							angle = 0;
+					if (angle)
+						if (ptr->norot)
+							angle = (angle) / 10;
+						else
+							angle = ((angle) / 10) << 3;
+					if (ptr->flag32)
+						angle = angle << 2;
+					ptr->frame += angle;
+				}
+			}
+			/* Object not clipped, so add it to the visable list */
+			vptr->object = ptr;
+			vptr->dist = dist;
+			vptr->scale = frm;
+			vptr->file = ptr->file;
+			vptr->anim = ptr->anim;
+			/* Make the waves animate and move */
+			if (vptr->file == &wave_fpb) {
+				ptr->frame = (ptr->frame + 1) % 12;
+				/* Waves move in the X direction, and wrap */
+				tmp = (ptr->x + INT2FRAC(1)) & INT2FRAC(255);
+				ptr->x &= 0xFF00FFFFl;
+				ptr->x |= tmp;
+			}
+			vptr->frame = ptr->frame;
+			vptr->type = ptr->type;
+			vptr->parent = ptr->parent;
+			vptr->xs = xs;
+			vptr->ys = ys;
+			vptr++;
+			Num_Visable_Objs++;
+		} while (call_ret);
+		if (in_special) {
+			/* Clean up after special calls */
+			ptr = spc_ptr;
+			in_special = FALSE;
+		}
+		ptr = ptr->next;
+	} while (ptr);
+}
+
+/***
+ *		View3DObjects:		Main calling point for 3D to 2D object viewing.
+ *								Clips, Transforms and Sorts the objects.
+ ***/
+
+static const WORD	zone_move[25*2] = {
+/*  X  Y */
+	 0, 0,		/* Current zone */
+	 1,-1,
+	 0,-1,
+	-1,-1,
+	-1, 0,
+	-1, 1,
+	 0, 1,
+	 1, 1,
+	 1, 0,
+
+	 2,-2,
+	 1,-2,
+	 0,-2,
+	-1,-2,
+	-2,-2,
+	-2,-1,
+	-2, 0,
+	-2, 1,
+	-2, 2,
+	-1, 2,
+	 0, 2,
+	 1, 2,
+	 2, 2,
+	 2, 1,
+	 2, 0,
+	 2,-1
+};
+
+void
+View3DObjects(int left)
+{
+	register OBJECT3D		*ptr;
+	register short			i,j;
+	WORD						rotation;		/* Temporary work variables for... */
+	short						angle;
+	FRAC						dist;
+	const WORD				*wptr;
+	FRAC						tmpx,tmpy;
+	VISABLE3D				*vptr;
+	WORD						xs,ys;
+	UWORD						Num_Objs;
+	UWORD						Area_Index;
+	UWORD						Player_Index;		/* What zone is the player in? */
+	extern BYTE				SYS_FLICKER;
+	extern UWORD			SYS_DISTDIV;		/* Flicker focus adjustment */
+	extern UWORD			SYS_MINFDIST;		/* Flicker focus adjustor */
+	extern ULONG			SYS_VCNT;
+
+asm("V3D_PreClip:");
+	/***
+	 *		Phase I:	Precompute clipping information
+	 ***/
+	/* Compute player zone according to sort (see World.C68) */
+	i = (FRAC2INT(Player.Y) / (FRAC2INT(WORLD_DEPTH) / 8));
+	i <<= 3;
+	i += (FRAC2INT(Player.X) / (FRAC2INT(WORLD_WIDTH) / 8));
+	Player_Index = i;
+
+#if 0
+	/* Use this to debug the wrapping... */
+	{
+		extern WORD ScreenCol;
+		extern WORD ScreenRow;
+
+		ScreenCol = 2;
+		ScreenRow = 4;
+		i = 7 - (FRAC2INT(Player.Y) / (FRAC2INT(WORLD_DEPTH) / 8));
+		j = 7 - (FRAC2INT(Player.X) / (FRAC2INT(WORLD_WIDTH) / 8));
+		UI_PrintString("%2X %1d %1d ",Player_Index,j,i);
+	}
+#endif
+
+#if CLIP
+
+	/* Generate the visable quadrant variables */
+	angle = (Player.Rotation + VIEWSPAN) % 360;
+	while (angle < 0)
+		angle += 360;
+	QAngle1 = angle;
+	QAngle2 = angle - (VIEWSPAN << 1);
+	while (QAngle2 < 0)
+		QAngle2 += 360;
+	if (angle < 90) {
+		Visable_Quad1 = 0;
+		Visable_Quad2 = 3;
+	} else {
+		if (angle < 180) {
+			Visable_Quad1 = 1;
+			Visable_Quad2 = 0;
+		} else {
+			if (angle < 270) {
+				Visable_Quad1 = 2;
+				Visable_Quad2 = 1;
+			} else {
+				Visable_Quad1 = 3;
+				Visable_Quad2 = 2;
+			}
+		}
+	}
+
+#endif
+	/* Init the scaler for a new frame */
+	PDQS_Init();
+	/***
+	 *		Phase II:  Transform and Clip objects
+	 ***/
+	/* Only transform objects for left eye, fudge right eye */
+	if (left) {
+		Num_Visable_Objs = 0;
+		Num_Clipped = 0;
+
+		xs = Player_Index & 7;
+		ys = Player_Index >> 3;
+		wptr = zone_move;
+		for (i=0; i < 25; i++) {
+			tmpx = INT2FRAC(0);
+			tmpy = INT2FRAC(0);
+			j = xs + *wptr++;
+			Area_Index = j & 7;
+			/* Wrap X? */
+			if ((j & 7) != j)
+				if (j < 0)
+					tmpx = -WORLD_WIDTH;
+				else
+					tmpx = WORLD_WIDTH;
+			j = ys + *wptr++;
+			Area_Index |= (j & 7) << 3;
+			/* Wrap Y? */
+			if ((j & 7) != j)
+				if (j < 0)
+					tmpy = -WORLD_DEPTH;
+				else
+					tmpy = WORLD_DEPTH;
+			ptr = O3D_Areas[Area_Index];
+			if (ptr)
+				View3DZone(ptr,tmpx,tmpy);
+		}
+	}
+asm("V3D_Sort:");
+	/***
+	 *		Phase III:  Sort only visable objects
+	 ***/
+	/* Insertion Sort... */
+	for (i=1; i < Num_Visable_Objs; i++) {
+		SYS_CopyV3DObj(&VCopy,&Visable_Objs[i]);
+		dist = VCopy.dist;
+		j = i;
+		while ((j > 0) && (Visable_Objs[j-1].dist > dist)) {
+			SYS_CopyV3DObj(&Visable_Objs[j],&Visable_Objs[j-1]);
+			j--;
+		}
+		SYS_CopyV3DObj(&Visable_Objs[j],&VCopy);
+	}
+}
+
+/***
+ *		Send3DObjects:		Add visable objects to the sprite list.
+ ***/
+
+Send3DObjects(int left)
+{
+	register short			i,j;
+	register VISABLE3D	*vptr;
+	extern BYTE				SYS_FLICKER;
+	extern UWORD			SYS_DISTDIV;		/* Flicker focus adjustment */
+	extern UWORD			SYS_MINFDIST;		/* Flicker focus adjustor */
+	extern UWORD			SYS_LASTCHR;
+	extern UWORD			SYS_BASECHR;
+	extern WORD				SYS_VADJ[];
+
+	/***
+	 *		Phase IV:  Display all visable objects in sorted order
+	 ***/
+	vptr = &Visable_Objs[0];
+	for (i=0; i < Num_Visable_Objs; i++) {
+		if (!left && SYS_FLICKER) {
+			j = (vptr->scale / SYS_DISTDIV) + SYS_MINFDIST;
+			j <<= 1;
+			vptr->xs -= j;
+		}
+#if DEBUG
+		/* Print some code for debugging 3D objects */
+		j = vptr->object->flag32;
+		if (j > 10)
+			DispFrame(&debug_anm,0,j / 10,vptr->xs-8,vptr->ys);
+		DispFrame(&debug_anm,0,j % 10,vptr->xs,vptr->ys);
+#endif
+		/* Don't display sprites that will overflow our buffer */
+		j = SYS_LASTCHR - SYS_BASECHR;
+		if (j < 320)	/* 320 is the number of characters max for our buffer */
+			vptr->center_y = PDQS_Scale((UWORD *)vptr->file,vptr->anim,
+				vptr->frame,vptr->xs,vptr->ys - SYS_VADJ[vptr->xs / 16],
+				vptr->scale);
+		vptr++;
+	}
+}

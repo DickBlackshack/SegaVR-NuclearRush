@@ -1,0 +1,38 @@
+/***
+ *			Globals file for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+#include "gems.h"
+
+/*		This is where all the major arrays are defined, so we can use them
+		as a decompression buffer */
+
+#define	XMAX	256
+
+struct SPRLIST {
+	WORD	y;
+	UWORD	link;
+	UWORD	chr;
+	WORD	x;
+};
+
+OBJECT3D		World_Objs[MAX3DOBJS];		/* Total object list */
+UWORD			WORK_CHRLIST[8192];			/*	Maximum number of characters at a time	*/
+VISABLE3D	Visable_Objs[100];	/* Depth sorted objects (no more than 100) */
+ULONG			SYS_HORIZON[28*8];	/* The Horizon Bitmap */
+WORD			SYS_HARRAY1[128];	/* Horizontal Interrupt Vertical Scroll Array */
+WORD			SYS_HARRAY2[128];	/* Horizontal Interrupt Vertical Scroll Array */
+UWORD 		code_line[512];		/* The 1st code line where next_src_byte is sent */
+UWORD			ScaleCode[XMAX*4];	/* Code to generate a scanline of scaled image */
+UWORD			DestOffs[XMAX];
+BYTE			SYS_DCLIST[2048];	/* Data or Ctrl flags */
+UWORD			SYS_DCDATA[2048];	/* WORDs to send */
+struct SPRLIST WORK_SPRLIST[80];
+struct SPRLIST RIGHT_SLIST1[80],LEFT_SLIST1[80];
+struct SPRLIST RIGHT_SLIST2[80],LEFT_SLIST2[80];
+

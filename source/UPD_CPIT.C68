@@ -1,0 +1,410 @@
+/***
+ *			Cockpit Updating for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+
+#define	HUD		TRUE
+#define	CENTERED	TRUE
+#define	MOVECPIT	TRUE
+#define	MAPSHIFT	5		/* 32x32 HUD map displays 1024x1024 */
+
+#define	WCES94	TRUE
+
+WORD	SYS_LAZER;			/* Lazer frame counter, set to 4 to start */
+WORD	SYS_SCRLXB;
+
+int NumCracks;
+CRACKLIST Cracks[10];
+
+VISABLE3D			*v_targetptr;
+VISABLE3D			*demo_targetptr;
+
+
+extern WORD	SYS_NEWXA;
+extern WORD	SYS_NEWXB;
+extern volatile LONG			SYS_VCNT;
+
+extern void	Set_HScroll();
+extern void	SendAnimPal(UWORD *anim_file);
+extern void	DispFrame(UWORD *anim_file,WORD anim,WORD frame,WORD xp,WORD yp);
+extern unsigned long RandomRange(unsigned long max, unsigned long min);
+
+extern UWORD		SYS_CHRATTR;			/* Character Attributes */
+extern UWORD		SYS_AVGFDIST;
+extern FRAC			SYS_BORDERSIZE;
+extern int			NumNukes;			/* Number of nuclear pools in the world */
+extern NUKE_POOL	NukePools[30];		/* Nuke pool information */
+extern PLAYER		Player;
+extern WORD			Player_Fuel;
+extern UWORD		Game_Frame;		/* Game Frame counter */
+extern WORD			ScreenCol;
+extern WORD			ScreenRow;
+extern WORD			Ship_Rotation;
+extern int			Ship_Turn_Speed;
+extern BYTE			SYS_FLICKER;
+extern BYTE			SEND_LEFT;			/*	True if currently sending left data	*/
+extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+extern int			NumDrones;
+extern DRONE		Drones[NUMDRONS];			/* Enemy Drones */
+extern int			NumMines;
+extern DRONE		Mines[NUMMINES];			/* Enemy Mines */
+extern int			NumTanks;
+extern DRONE		Tanks[NUMTANKS];			/* Enemy Tanks */
+extern WORD			Bullet_Obj[NUMBULTS];	/* Player bullets object index */
+extern OBJECT3D	*Bullet_Target[NUMBULTS];
+
+/***
+ *		PutDot:	Compute the position of an object on the map and draw it.
+ ***/
+
+static void
+PutDot(FRAC wx,FRAC wy,WORD frm,int x)
+{
+	int					relative_angle;
+	WORD					dot_x;
+	WORD					dot_y;
+	FRAC					relative_x;
+	FRAC					relative_y;
+	FRAC					dist;
+	FRAC					abs_x;
+	FRAC					abs_y;
+
+	relative_x = wx - Player.X;
+	relative_y = wy - Player.Y;
+
+	/* WRAP AROUND WORLD STUFF */
+
+	if (relative_x > WORLD_WIDTH / 2)
+		relative_x = relative_x - WORLD_WIDTH;
+	if (relative_x < - (WORLD_WIDTH / 2))
+		relative_x = WORLD_WIDTH + relative_x;
+
+	if (relative_y > WORLD_DEPTH / 2)
+		relative_y = relative_y - WORLD_DEPTH;
+	if (relative_y < - (WORLD_DEPTH / 2))
+		relative_y = WORLD_DEPTH + relative_y;
+
+
+#if 0
+	if (relative_x == 0)
+		relative_x = 0x0001;		/* no divide by zero */
+#endif
+
+	abs_x = (relative_x < 0 ? -relative_x : relative_x);
+	abs_y = (relative_y < 0 ? -relative_y : relative_y);
+	if (abs_x < abs_y) {
+		dist += abs_x + (abs_x << 1);		/* abs_x * 3 */
+		dist = (dist > abs_y ? (dist + abs_y + (abs_y << 1)) >> 2 : abs_y);
+	} else {
+		dist += abs_y + (abs_y << 1);		/* abs_y * 3 */
+		dist = (dist > abs_x ? (dist + abs_x + (abs_x << 1)) >> 2 : abs_x);
+	}
+	dist = dist >> MAPSHIFT; 
+	if (dist < INT2FRAC(23)) {		/* approx 16 * square root of 2 */
+		relative_angle = (fatan2(relative_y, relative_x) - Player.Rotation) % 360;
+		if ( relative_angle < 0)
+			relative_angle += 360;
+		abs_x = fmul(dist,fcosd(relative_angle)) + INT2FRAC(16); 
+		dot_x = FRAC2INT(abs_x);
+		abs_y = fmul(dist,fsind(relative_angle)) + INT2FRAC(16);
+		dot_y = FRAC2INT(abs_y);
+		if ( dot_x >= 0 && dot_x < 32 && dot_y >= 0 && dot_y < 32)
+			DispFrame(&hud_art_anm,0,frm,x+154+dot_y,216-dot_x);
+	}
+}
+
+/***
+ *		Hit_Player:	Routine to add damage to players ship
+ ***/
+
+void
+Hit_Player(WORD damage)
+{
+	WORD old_damage;
+
+	old_damage=Player.Damage;
+	if ((Player.Damage - damage) >= 0) {
+		Player.Damage -= damage;
+		if (Player.Damage > 100) {
+			gemsstartsong(SFX_BUTTON_HIT);
+			UI_FlashBlue();
+		} else {
+			gemsstartsong(SFX_SHIP_HIT);
+			UI_FlashRed();
+			if (old_damage > 100) {
+				Player.Items[3] = FALSE;
+				gemsstartsong(VOICE_SHIELD_D);
+			}
+			if (old_damage > 66 && Player.Damage <= 66) {
+				Player.Items[2] = FALSE;
+				gemsstartsong(VOICE_RADAR_D);
+			}
+			if (old_damage > 33 && Player.Damage <= 33) {
+				Player.Items[1] = FALSE;
+				gemsstartsong(VOICE_LASERS_D);
+			}
+
+		}
+	} else
+		Player.Damage = 0;
+}
+
+void Add_Crack()
+{
+	CRACKLIST			*cptr;
+	unsigned long i,j;
+
+	if (NumCracks < 8) {
+		j = (NumCracks) >> 1;
+		i = j + 2;
+		if (i > 5)
+			i = 5;
+		if (j > 5)
+			j = 5;
+		cptr = &Cracks[NumCracks%4];
+		cptr->frame = RandomRange(i,j);
+		if (NumCracks < 4) {
+			cptr->x = RandomRange(240,16);
+			cptr->y = RandomRange(176,16);
+		}
+		NumCracks++;
+	}
+}
+
+WORD
+Hypot(WORD x1, WORD y1, WORD x2, WORD y2)
+{
+	if ((x2 -= x1) < 0)
+		x2 = -x2;
+	if ((y2 -= y1) < 0)
+		y2 = -y2;
+	return (x2 + y2 - (((x2>y2) ? y2 : x2) >> 1) );
+}
+
+/***
+ *		Update_Cockpit:	Display data for Heads Up Display
+ ***/
+
+void
+Update_Cockpit()
+{
+	WORD					i,j;
+	FRAC					count0;
+	UWORD					Addr;
+	WORD					x,y;
+	WORD					ch_x;
+	WORD					Screen_X;
+	DRONE					*dptr;
+	CRACKLIST			*cptr;
+	VISABLE3D			*vptr;
+	OBJECT3D				*tptr;
+	extern VISABLE3D	Visable_Objs[];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+
+#if WCES94
+	if (SYS_FLICKER)
+		if (SEND_LEFT)
+			ch_x = SYS_AVGFDIST;
+		else
+			ch_x = -SYS_AVGFDIST;
+	else
+		ch_x = 0;
+	x = 0;
+#else
+	if (SYS_FLICKER)
+		if (SEND_LEFT)
+			x = SYS_AVGFDIST;
+		else
+			x = -SYS_AVGFDIST;
+	else
+		x = 0;
+#endif
+
+#if HUD
+
+	Screen_X = x;
+#if MOVECPIT
+	x += SYS_NEWXB;
+#endif
+	if (Player.Damage > 66) {
+
+		/* Show player position on HUD */
+		SYS_CHRATTR = 0x8000;
+		DispFrame(&hud_art_anm,0,1,x+169,201);
+
+		/* Show drone positions in the world */
+		dptr = &Drones[0];
+		for (i=0; i < NumDrones; i++,dptr++)
+			PutDot(dptr->Obj->x,dptr->Obj->y,17,x);
+
+		/* Show tank positions in the world */
+		if (Game_Frame & 4) {
+			dptr = &Tanks[0];
+			for (i=0; i < NumTanks; i++,dptr++)
+				PutDot(dptr->Obj->x,dptr->Obj->y,2,x); 
+		}
+
+		/* Show bullet positions in the world */
+		if (Game_Frame & 2)
+			for (i=0; i < NUMBULTS; i++)
+				if (!World_Objs[Bullet_Obj[i]].cloaked)
+					if (Bullet_Target[i] == &World_Objs[0])
+						PutDot(World_Objs[Bullet_Obj[i]].x,
+							World_Objs[Bullet_Obj[i]].y,17,x);
+					else
+						PutDot(World_Objs[Bullet_Obj[i]].x,
+						World_Objs[Bullet_Obj[i]].y,1,x);
+
+		/* Show mine positions in the world */
+		if (Game_Frame & 2) {
+			dptr = &Mines[0];
+			for (i=0; i < NumMines; i++, dptr++)
+				if (!(dptr->Obj->cloaked))
+					PutDot(dptr->Obj->x,dptr->Obj->y,17,x);
+		}
+
+		/* Show ready nuke pool positions in the world */
+		if (Player.Items[2]) 		/* ooze map functioning? */
+			for (i=0; i < NumNukes; i++) {
+				if (!NukePools[i].ready)
+					continue;
+				PutDot(NukePools[i].world_obj->x,NukePools[i].world_obj->y,2,x);
+			}
+
+#if 0
+		/* Show boundary positions in the world */
+		for (count0 = INT2FRAC(0); count0 < WORLD_WIDTH -	(SYS_BORDERSIZE<<1);
+				count0 += INT2FRAC(512)) {
+			PutDot(SYS_BORDERSIZE + count0,SYS_BORDERSIZE,16,x);
+			PutDot(WORLD_WIDTH - SYS_BORDERSIZE,SYS_BORDERSIZE + count0,16,x);
+			PutDot(WORLD_WIDTH - SYS_BORDERSIZE - count0, WORLD_WIDTH -
+				SYS_BORDERSIZE,16,x);
+			PutDot(SYS_BORDERSIZE,WORLD_WIDTH - SYS_BORDERSIZE - count0,16,x);
+		}
+#endif
+	}
+
+	/* Show Gadget */
+	DispFrame(&hud_art_anm,0,11 + Game_Frame % 3,x+82,198);
+
+	/* Show Heading */
+	i = (Ship_Rotation << 1) / 45;
+	DispFrame(&compass_anm,0,i,x+129,207);
+	SYS_CHRATTR = 0;
+
+	/* Show Altitude */
+	DispFrame(&hud_art_anm,0,14,x+7*8+17,25*8+16);
+	ScreenRow = 25;
+	ScreenCol = 7;
+ 	UI_PrintString("%02d",Player.Missiles);
+
+	/* Show Fuel level */
+	if (Player_Fuel <= 5 && ((SYS_VCNT & 0x3FF) < 5))
+		gemsstartsong(VOICE_FUEL_LOW);
+	i = Player_Fuel & 31;
+	SYS_DCListHold();
+	/* Compute address of character to print */
+	Addr = (26 * (64 * 2)) + (12 * 2) + 0xE000;
+	for (j=0; j<4; j++) {
+		SYS_DCAddVAddr(Addr);
+		if (i <= 8) {
+			SYS_DCAddData(1 + 9 - i + 0x8000);
+			i = 0;
+		} else {
+			SYS_DCAddData(1 + 1 + 0x8000);
+			i -= 8;
+		}
+		Addr -= 128;
+	}
+
+	/* Show Gieger level */
+	i = Player.Gieger & 31;
+	/* Compute address of character to print */
+	Addr = (26 * (64 * 2)) + (24 * 2) + 0xE000;
+	SYS_DCAddVAddr(Addr);
+	for (j=0; j<4; j++) {
+		if (i <= 8) {
+			SYS_DCAddData(1 + 18 - i + 0x8000);
+			i = 0;
+		} else {
+			SYS_DCAddData(1 + 10 + 0x8000);
+			i -= 8;
+		}
+	}
+	SYS_DCListGo();
+
+	/* Show Lazer */
+	if (SYS_LAZER) {
+		DispFrame(&llazer_anm,0,4-SYS_LAZER,Screen_X+128-60,178);
+		DispFrame(&rlazer_anm,0,4-SYS_LAZER,Screen_X+128+60,178);
+		if (SYS_FLICKER) {
+			if (SEND_LEFT)
+				SYS_LAZER--;
+		} else
+			SYS_LAZER--;
+	}
+	
+	i = (100 - Player.Damage) / 10;
+
+	if (i > 8)
+		i = 8;
+
+	while (NumCracks < i)
+		Add_Crack();
+
+	/* Draw relative damage */
+	j = NumCracks;
+	if (j > 4)
+		j = 4;
+	cptr = &Cracks[0];
+	for (i=0; i < j; i ++, cptr++)
+		DispFrame(&cracks_anm,0,cptr->frame,x+cptr->x,cptr->y);
+
+	/***
+	 *			Show Cross Hairs
+	 ***/
+	/* Find closest visable drone, tank or mine */
+	i = -1;
+	vptr = &Visable_Objs[0];
+	for (j=0; j < Num_Visable_Objs; j++,vptr++) {
+		tptr = vptr->object;
+		/* Skip if cloaked object */
+		if (tptr->cloaked)
+				continue;
+		if ((vptr->type == PT_DRONE || vptr->type == PT_TANK ||
+			vptr->type == PT_MINE) && (Hypot(128,112,vptr->xs,vptr->ys) < 80)) {
+			i = j;
+			break;
+		}
+	}
+#if WCES94
+	j = ch_x;
+#else
+	j = x;
+#endif
+	DispFrame(&hud_art_anm,0,18,j+128,112);
+	demo_targetptr = v_targetptr = NULL;
+	if (i != -1) {
+		/* Target is closest, start tracking */
+		if (Hypot(128,112,vptr->xs,vptr->ys) < 20) {
+			v_targetptr = vptr;
+			i = 20;
+		} else {
+			demo_targetptr = vptr;
+			i = 19;
+		}
+		x = vptr->xs;
+		/* y = vptr->center_y; */
+		y = -(vptr->scale / 20);
+		if (y < -12)
+			y = -12;
+		y += vptr->ys - (vptr->scale >> 6);
+		DispFrame(&hud_art_anm,0,i,j+x,y);
+	}
+#endif
+}

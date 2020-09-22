@@ -1,0 +1,212 @@
+#****************************************************************************
+#				 NUCLEAR RUSH
+#				   MAKEFILE
+#
+# We use Borland Make version 3.1.
+#
+#	History:
+#		05/11/93:	KLM, Modified heavly for fast development
+#				cycle including RAM Disk support.
+#****************************************************************************
+
+.SILENT
+.path.o = OBJS
+# Tell make where the RAM drive is
+.path.or = D:\
+# STLs are 32x28 character maps (SCE Map files) (M40s are 40x28)
+.path.stl = ART\STILLS
+.path.m40 = ART\STILLS
+# GMPs are SCE Map files, converted to 64x64 character maps
+.path.gmp = ART\BCKGRNDS
+# SPRs are DPaint Animate files converted to Sega Sprite Animation files
+.path.spr = ART\SPRITES
+# ANMs are DPaint Animate files converted to Bitmap Animation files
+.path.anm = ART\BITMAPS
+# RLEs are DPaint Animate files converted to RLE Bitmap Animation files
+.path.rle = ART\BITMAPS
+# GEMS music files are in this directory:
+.path.a = MUSIC
+
+# THESE FILES >MUST< BE PLACED FIRST IN THE LINKED EXECUTABLE
+INITFILES=vectors.o segahdr.o startup.o rlescale.o
+
+# THESE ARE THE C FILES
+COFILES=main.o 3d.o ai.o sprites.o excptn.o math.o ui.o scale.o \
+	horizon.o world.o bullets.o mattai.o upd_cpit.o
+
+# MAKEFILE GIVES ERROR IF TOO MANY FILES TO LINK
+CLNK1=main.o 3d.o ai.o sprites.o excptn.o math.o ui.o scale.o
+CLNK2=horizon.o world.o bullets.o mattai.o upd_cpit.o
+
+# THESE ARE THE 68000 MACRO ASSEMBLER FILES
+AFILES=segalogo.o logo.o segalib.o variable.o headset.o worlds.o
+
+# THESE ARE THE BACKGROUNDS FOR EACH LEVEL
+BGFILES=desert.o midwest.o ice.o forest.o
+
+# THESE ARE 32X28 STATIC SCREENS AND OVERLAYS
+MAPFILES=hud.o gridscrn.o enhance.o cockpit.o nukescrn.o nukeruin.o \
+	droncrsh.o punk1.o punk2.o
+M40FILES=nukelogo.o backgrnd.o
+
+# THESE ARE SCALABLE ANIMATION FILES
+FPBFILES=cactus.o joshua.o pear.o sagebush.o grass.o \
+	maple.o oak.o rock.o sealbone.o tombston.o wellruin.o \
+	house.o igloo32.o jeep.o explode.o pool.o can32.o \
+	rcr32.o tri.o fence.o drift1.o drift2.o drift3.o \
+	drift4.o house32.o tank32.o fragment.o piece1.o nukebomb.o \
+	piece2.o piece3.o piece4.o piece5.o piece6.o zzap.o
+
+# MAKEFILE GIVES ERROR IF TOO MANY FILES TO LINK
+FPBLNK1=cactus.o joshua.o pear.o sagebush.o grass.o maple.o oak.o
+FPBLNK2=rock.o sealbone.o tombston.o wellruin.o	house.o igloo32.o
+FPBLNK3=jeep.o explode.o pool.o can32.o rcr32.o tri.o fence.o nukebomb.o
+FPBLNK4=drift1.o drift2.o drift3.o drift4.o house32.o tank32.o fragment.o
+FPBLNK5=piece1.o piece2.o piece3.o piece4.o piece5.o piece6.o zzap.o
+
+# THESE ARE 32 ANGLE DRONE SHIPS, TOO LARGE TO LINK WITH OTHERS
+SHIPFILES=fed32.o mod32.o zoomer32.o missle32.o mine32.o gramps32.o
+
+# THESE ARE SPRITE ANIMATION FILES, NON-SCALABLE
+FPAFILES=hud_art.o disolve.o infrared.o lasergun.o oozemap.o shield.o \
+	engine.o player.o cloak.o debug.o compass.o forcefld.o cracks.o \
+	llazer.o rlazer.o missles.o
+
+# MAKEFILE GIVES ERROR IF TOO MANY FILES TO LINK
+FPALNK1=hud_art.o disolve.o infrared.o lasergun.o oozemap.o shield.o
+FPALNK2=engine.o player.o cloak.o debug.o compass.o forcefld.o cracks.o
+FPALNK3=llazer.o rlazer.o missles.o
+
+.c68.o :
+	echo Compiling $*.c68
+	com68 -Zw -Of0l3p1r2x1 -g1 -Q $*.c68 $(.path.or)\tmpxxx.s
+	asm68 -AQkl -o $(.path.o)\$*.o $(.path.or)\tmpxxx.s
+
+.s.o :
+	echo Assembling $*.s
+	asm68 -AQkl -o $(.path.o)\$*.o $*.s
+
+.asm.o :
+	echo Macro Assembling $*.asm
+	asm68k -AQkl -o $(.path.o)\$*.o $*.asm
+
+.a.o :
+	echo Assembling the GEMS driver and files
+	asm68k -AQkl -Imusic\ -o $(.path.o)\$&.o music\gems.a
+
+.stl.o :
+	echo Converting $*.stl Still Screen file
+	cvtsce /w32 $*.stl $*.map
+	echoit $*.asm $& map
+	dump /d $*.map >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.map
+
+.m40.o :
+	echo Converting $*.m40 Still Screen file
+	cvtsce /w40 $*.m40 $*.map
+	echoit $*.asm $& map
+	dump /d $*.map >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.map
+
+.gmp.o :
+	echo Converting $*.gmp 64x64 Background file
+	cvtsce /p0 /w64 $*.gmp $*.map
+	echoit $*.asm $& map
+	dump /d $*.map >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.map
+
+.anm.o :
+	echo Converting $*.anm to an Bitmapped Animation file
+	anm2fpa /x /b /r $*.ANM $*.FPB
+	echoit $*.asm $& fpb
+	dump /d $*.fpb >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.fpb
+
+.rle.o :
+	echo Converting $*.rle to an RLE Bitmapped Animation file
+	anm2fpa /x /b /r $*.RLE $*.FPB
+	echoit $*.asm $& fpb
+	dump /d $*.fpb >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.fpb
+
+.spr.o :
+	echo Converting $*.SPR to a Sega Sprite Animation File
+	anm2fpa $*.SPR $*.FPA
+	echoit $*.asm $& anm
+	dump /d $*.fpa >>$*.asm
+	asm68k -AQkl -o $(.path.o)\$&.o $*.asm
+	del $*.asm
+	del $*.fpa
+
+.o.or :
+	echo Moving $. to RAM Drive for linking
+	copy OBJS\$. $(.path.or)\$&.or
+
+x.out : $(INITFILES:.o=.or) $(AFILES:.o=.or) $(COFILES:.o=.or) text_cof.or ships_cof.or gems.or
+	echo Linking...
+	copy makefile.lnk temp.lnk
+	echo $(INITFILES:.o=.or) >>temp.lnk
+	echo $(AFILES:.o=.or) >>temp.lnk
+	echo text_cof.or >>temp.lnk
+	echo ships_cof.or >>temp.lnk
+	echo $(CLNK1:.o=.or) >>temp.lnk
+	echo $(CLNK2:.o=.or) >>temp.lnk
+	echo gems.or >>temp.lnk
+	echo -l c >>temp.lnk
+	D:
+        link68 -i C:temp.lnk -o x.out
+	segaload x.out
+#	nm68 -esv >x.sym
+	C:
+
+text_cof.or : text_cof.o
+
+text_cof.o : $(MAPFILES) $(M40FILES) $(BGFILES) $(FPAFILES) $(FPBFILES)
+	echo Creating relocatable link file from Graphics data...
+	copy graphics.lnk temp.lnk
+	echo $(MAPFILES) >>temp.lnk
+	echo $(M40FILES) >>temp.lnk
+	echo $(BGFILES) >>temp.lnk
+	echo $(FPALNK1) >>temp.lnk
+	echo $(FPALNK2) >>temp.lnk
+	echo $(FPALNK3) >>temp.lnk
+	echo $(FPBLNK1) >>temp.lnk
+	echo $(FPBLNK2) >>temp.lnk
+	echo $(FPBLNK3) >>temp.lnk
+	echo $(FPBLNK4) >>temp.lnk
+	echo $(FPBLNK5) >>temp.lnk
+	cd $(.path.o)
+        link68 -i ..\temp.lnk -o text_cof.o
+	cd ..
+
+ships_cof.or : ships_cof.o
+
+ships_cof.o : $(SHIPFILES)
+	echo Creating relocatable link file from Drone Graphics data...
+	copy graphics.lnk temp.lnk
+	echo $(SHIPFILES) >>temp.lnk
+	cd $(.path.o)
+        link68 -i ..\temp.lnk -o ships_cof.o
+	cd ..
+
+$(COFILES:.o=.c68) : game.h
+	echo Updating $*.c68 because of changed headers
+	touch $&.c68
+
+$(AFILES:.o=.asm) : equates.inc segalib.inc variable.inc sega.i
+	echo Updating $&.asm because of changed include files
+	touch $&.asm
+
+gems.or : gems.o
+
+gems.o : gems.a

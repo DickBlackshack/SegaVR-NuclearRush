@@ -1,0 +1,14 @@
+PROFIT profile summary, Thu Oct 21 17:44:57 1993
+
+  1:ld                              : 78.7%
+  2:_enhance_map                    :  8.8%
+  3:__errno                         :  6.5%
+  4:_RLEMoves                       :  2.3%
+  5:^line1                          :  1.4%
+  6:_gridscrn_map                   :  0.9%
+  7:_sampbank                       :  0.2%
+  8:_nukeruin_map                   :  0.1%
+  9:_nukelogo_map                   :  0.1%
+
+These symbols account for 99.0% of the total.
+Unlisted symbols account for less than 0.1% each.

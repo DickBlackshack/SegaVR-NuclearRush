@@ -1,0 +1,2 @@
+cd \sega\sdebug\source
+

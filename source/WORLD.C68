@@ -1,0 +1,649 @@
+/***
+ *			World Generator for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+#include "gems.h"
+
+#define	DEBUG		FALSE
+
+extern void	Bomb(char *fmt, ...);
+extern void	Debug(char *fmt, ...);
+extern UWORD		SYS_HORZCHRS;
+extern UWORD		SYS_LASTCHR;
+
+/*	random number vars	*/
+int	I;
+unsigned long	w[19];
+
+/*	global vars	*/
+unsigned long	seedValue;					/*	random number seed value	*/
+unsigned int	worldX,worldY;				/*	world size	*/
+unsigned int	borderSize;
+FRAC		SYS_BORDERSIZE;			/* non-play border size	*/
+int				itemCount;					/*	count of items for world	*/
+unsigned int	eachItemCount[30];		/*	count of each item	*/
+
+OBJECT3D		*O3D_Areas[64];				/* Pointers to the start of each 3D
+														area */
+UWORD		World_Background;
+UWORD		World_Time;
+UWORD		World_Num;
+
+typedef struct {
+	UWORD		x;
+	UWORD		y;
+} POS;
+
+
+typedef struct {
+	ULONG		seed;
+	UWORD		border_size;
+	UWORD		background;
+	UWORD		time;
+	UWORD		total_items;
+	UWORD		items[6];
+	POS		NukeLocs[16];
+	POS		DroneLocs[16];
+} WORLD;
+
+#define		NUMWORLDS	1
+
+/***
+ *		Intel format Worlds from RANDOM.EXE
+ ***/
+
+extern const WORLD worlds[32];
+
+/***
+ *		All of the main game palettes.
+ ***/
+
+#include "palettes.c68"
+
+#define	multiplier	41475557l
+
+unsigned long
+Randomize(unsigned long starter)
+{
+	register int					j;
+	register unsigned long		start;
+	extern volatile LONG			SYS_VCNT;
+
+	if (starter == 0) {
+		/*	current time of day as integer */
+		start = SYS_VCNT;
+	} else
+		start = starter;						/*	floating to integer conversion */
+	w[0] = start;
+	w[0] &= 0x0FFFFFFF;
+	for (j = 1; j < 19; j++)
+		w[j] = (w[j - 1] * multiplier) % 0x10000000;	/*	modulo 2**28	*/
+	I = 0;										/*	set to pick w[0] as first random	*/
+													/*	number	*/
+	return (w[0]);
+}
+
+unsigned long
+Random(void)
+{
+	register int				j;
+	register unsigned long	A0,A1,A2;
+
+	if (I == 19) {								/*	all words have been used up	*/
+		I = 0;									/*	reset to first element in array	*/
+		for (j = 0; j < 17; j++) {			/*	exclude last two words	*/
+			/*	load w[j+1], w[j+2] into registers A0,A1	*/
+			A0 = w[j+1];
+			A1 = w[j+2];
+			/*	left shift A1 by b-28	*/	/*	join bits in stream	*/
+			A1 <<= 4;							/*	b = 32	*/
+			/*	left shift A0,A1 by 9	*/	/*	q = 37 is 28 + 9	*/
+			A0 <<= 9;
+			A2 = (A1 & 0xFF800000) >> 23;
+			A0 |= A2;
+			/*	w[j] = (w[j] XOR A0)	*/		/*	the recursion formula	*/
+			w[j] ^= A0;
+			w[j] &= 0x0FFFFFFF;
+		}
+		/*	load w[18],w[0] into A0,A1	*/	/*	now compute w[17]	*/
+		A0 = w[18];
+		A1 = w[0];
+		/*	left shift A1 by b-28	*/		/*	join w[18],w[0] bit streams	*/
+		A1 <<= 4;								/*	b = 32	*/
+		/*	left shift A0,A1 by 9	*/		/*	A0 now has final 19 bits of w[18]	*/
+		A0 <<= 9;
+		A2 = (A1 & 0xFF800000) >> 23;
+		A0 |= A2;
+		/*	w[17] = w[17] XOR A0	*/			/*	and first 9 bits of stream	*/
+													/*	shifted 495	*/
+		w[17] ^= A0;
+		w[17] &= 0x0FFFFFFF;
+		/*	load w[0],w[1] into A0,A1	*/	/*	do similarly for w[18]	*/
+		A0 = w[0];
+		A1 = w[1];
+		/*	left shift A1 by b-28	*/
+		A1 <<= 4;								/*	b = 32	*/
+		/*	left shif A0,A1 by 9	*/
+		A0 <<= 9;
+		A2 = (A1 & 0xFF800000) >> 23;
+		A0 |= A2;
+		/*	w[18] = (w[18] XOR A0)	*/
+		w[18] ^= A0;
+		w[18] &= 0x0FFFFFFF;
+	}
+	/*	I = I + 1	*/
+	I += 1;
+	/*	return a 28 bit value	*/
+	return (w[I - 1]);
+}
+
+unsigned long
+RandomRange(unsigned long max, unsigned long min)
+{
+	unsigned long mod, value;
+
+	if (min >= max)
+		return (max);
+	else {
+		value = Random();
+		mod = max - min;
+		value = (value % mod) + min;
+		return (value);
+	}
+}
+
+void
+GetPoint(unsigned int restrict,unsigned int *Xpoint,unsigned int *Ypoint)
+{
+	unsigned int	rangeXLow,rangeXHigh,rangeYLow,rangeYHigh,maxValue;
+
+	if (restrict) {
+		rangeXLow = borderSize;
+		rangeYLow = borderSize;
+		rangeXHigh = worldX - borderSize;
+		rangeYHigh = worldY - borderSize;
+	} else {
+		rangeXLow = 0;
+		rangeYLow = 0;
+		rangeXHigh = worldX;
+		rangeYHigh = worldY;
+	}
+	/*	get the X coordinate	*/
+	maxValue = rangeXHigh - rangeXLow;
+	*Xpoint = Random() % maxValue;
+	/*	get the Y coordinate	*/
+	maxValue = rangeYHigh - rangeYLow;
+	*Ypoint = Random() % maxValue;
+	if (restrict) {
+		*Xpoint += borderSize;
+		*Ypoint += borderSize;
+	}
+}
+
+int
+CompareZones(OBJECT3D *optr1, OBJECT3D *optr2)
+{
+	int	ret;
+	short	index;
+	ULONG	Sarea1,Sarea2;
+	ULONG	Darea1,Darea2;
+
+	/* Compute area of the world first object is in */
+	index = optr1->area;
+	if (index < 32) {
+		Sarea1 = 0l;
+		Sarea2 = 1l << index;
+	} else {
+		Sarea1 = 1l << (index - 32);
+		Sarea2 = 0l;
+	}
+	/* Compute area of the world second object is in */
+	index = optr2->area;
+	if (index < 32) {
+		Darea1 = 0l;
+		Darea2 = 1l << index;
+	} else {
+		Darea1 = 1l << (index - 32);
+		Darea2 = 0l;
+	}
+	ret = 0;
+	if (Sarea1 < Darea1)
+		ret = -1;
+	else
+		if (Sarea1 > Darea1)
+			ret = 1;
+		else
+			if (Sarea2 < Darea2)
+				ret = -1;
+			else
+				if (Sarea2 > Darea2)
+					ret = 1;
+	return ret;
+}
+
+static const UWORD		*AnmFiles[] = {
+	&house32_fpb,		/* 0 */
+	&joshua_fpb,	/* 1 */
+	&pear_fpb,		/* 2 */
+	&jeep_fpb,		/* 3 */
+	&grass_fpb,		/* 4 */
+	&rock_fpb,		/* 5 */
+	&sagebush_fpb,	/* 6 */
+	&sealbone_fpb,	/* 7 */
+	&tombston_fpb,	/* 8 */
+	&wellruin_fpb,	/* 9 */
+	&oak_fpb,		/* 10 */
+	&rock_fpb,		/* 11 */
+	&maple_fpb,		/* 12 */
+	&cactus_fpb,	/* 13 */
+	&sagebush_fpb,	/* 14 */
+	&sagebush_fpb,	/* 15 */
+	&rock_fpb,		/* 16 */
+	&explode_fpb,	/* 17 */
+	&rock_fpb,		/* 18 */
+	&rock_fpb,		/* 19 */
+	&rock_fpb,		/* 20 */
+	&igloo32_fpb,	/* 21 */
+	&fed32_fpb,		/* 22 */
+	&mod32_fpb,		/* 23 */
+	&zoomer32_fpb,	/* 24 */
+	&pool_fpb,		/* 25 */
+	&missle32_fpb,	/* 26 */
+	&rcr32_fpb,		/* 27 */
+	&can32_fpb,		/* 28 */
+	&drift1_fpb,	/* 29 */
+	&drift2_fpb,	/* 30 */
+	&drift3_fpb,	/* 31 */
+	&house32_fpb,	/* 32 */
+	&drift4_fpb,	/* 33 */
+	&drift4_fpb,	/* 34 */
+
+	&buoy1_fpb,		/* 35 */
+	&buoy2_fpb,		/* 36 */
+	&marker1_fpb,	/* 37 */
+	&marker2_fpb,	/* 38 */
+	&oilpump_fpb,	/* 39 */
+	&silo_fpb,		/* 40 */
+	&sphrtank_fpb,	/* 41 */
+	&grndtank_fpb,	/* 42 */
+	&wave_fpb		/* 43 */
+};
+
+/***
+ *		randpicker table:
+ *			This will allow us to select world objects randomly by group
+ *			Each world type has an index into a table that represents
+ *			the type of object, which is then picked randomly from a list
+ *			of four AnmFiles indecies.
+ *				The array has four items per world type:
+ *					Houses
+ *					Ruines
+ *					Trees
+ *					Grass/Rocks
+ ***/
+
+const static UWORD randpicker[32] = {
+	 0, 8,16,24,	/* Plains */
+	 4,12,32,32,	/* Tundra */
+	 0, 8,20,28,	/* Desert */
+	 0, 8,16,24,	/* Forest */
+
+	 0, 8,16,24,	/* Flatcity */
+	 4,12,32,32,	/* Froznlab */
+	40,40,20,28,	/* Vegas */
+	36,36,44,44		/* Ocean */
+};
+
+const static UWORD		randitems[] = {
+	32,		/* 0 Houses */
+	32,
+	32,
+	32,
+	21,	/* 4 Tundra Houses */
+	21,
+	21,
+	21,
+	3,		/* 8 Ruines */
+	8,
+	9,
+	3,
+	7,		/* 12 Tundra Ruines */
+	5,
+	7,
+	5,
+	12,	/* 16 Trees */
+	10,
+	12,
+	10,
+	13,	/* 20 Desert trees */
+	1,
+	2,
+	1,
+	5,		/* 24 Grasses/Rocks */
+	4,
+	5,
+	4,
+	6,		/* 28 Desert Grasses/Rocks */
+	5,
+	6,
+	5,
+	29,		/* 32 Tundra Rocks and stuff */
+	30,
+	31,
+	34,
+	35,		/* 36 Ocean stuff */
+	37,
+	36,
+	38,
+	39,		/* 40 Vegas stuff */
+	41,
+	40,
+	42,
+	43,		/* 44 Ocean stuff (Waves) */
+	43,
+	43,
+	43
+};
+
+UWORD
+Intel2Mot_Word(UWORD in)
+{
+	UWORD	tmp;
+
+	tmp = in << 8;
+	tmp |= in >> 8;
+	return tmp;
+}
+
+ULONG
+Intel2Mot_Long(ULONG in)
+{
+	ULONG	tmp;
+	UWORD	tmpw;
+
+	tmpw = (UWORD)in << 8;
+	tmpw |= (UWORD)in >> 8;
+	tmp = (ULONG)tmpw << 16;
+	in >>= 16;
+	tmpw = (UWORD)in << 8;
+	tmpw |= (UWORD)in >> 8;
+	tmp |= (ULONG)tmpw;
+	return tmp;
+}
+
+/* File numbers of world objects by TYPE */
+
+const static unsigned long ScaleMax[48] = {
+	0xe000l,0xffffl,0xffffl,0xe000l,0xffffl,0xffffl,0xffffl,0xe000l,
+	0x8000l,0xc000l,0xffffl,0xe000l,0xffffl,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xffffl,0xe000l,0xe000l,0xe000l,0xe000l,
+};
+
+const static unsigned long ScaleMin[48] = {
+	0xe000l,0x8000l,0x8000l,0xe000l,0x8000l,0x4000l,0x4000l,0xe000l,
+	0x4000l,0x6000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+	0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,0xe000l,
+};
+
+
+UWORD		*DroneFiles[] = {
+	&zoomer32_fpb,
+	&fed32_fpb,
+	&gramps32_fpb,
+	&mod32_fpb,
+};
+
+WORD		DroneSpeeds[] = {
+	10,
+	12,
+	6,
+	8
+};
+
+WORD		DroneHitPoints[] = {
+	1,
+	1,
+	2,
+	1
+};
+
+void
+Generate_World(short	num)
+{
+	int				counter,itemCounter;
+	int				item;
+	unsigned int	Xpoint,Ypoint;
+	UWORD				cnt;
+	OBJECT3D			*optr;
+	DRONE				*dptr;
+	extern OBJECT3D World_Objs[];		/* Total object list */
+	extern int		Num_World_Objs;	/* Number of world Objects */
+	extern DRONE	Drones[NUMDRONS];		/* Drone information */
+	extern int		NumDrones;			/* Total number of drones in this world */
+	extern int		DronesAttacking;	/* Number of drones attacking player */
+	extern int		NumNukes;
+	unsigned long	value;
+	unsigned	long	low,high;
+	FRAC				cnt0;
+	extern PLAYER	Player;
+	ULONG				mask1,mask2;
+
+
+	worldX = FRAC2INT(WORLD_WIDTH);
+	worldY = FRAC2INT(WORLD_DEPTH);
+	Randomize(Intel2Mot_Long(worlds[num].seed));
+	borderSize = Intel2Mot_Word(worlds[num].border_size);
+	SYS_BORDERSIZE = INT2FRAC(borderSize);
+	World_Background = Intel2Mot_Word(worlds[num].background);
+	World_Time = Intel2Mot_Word(worlds[num].time);
+	for (counter = 0; counter < 4; counter++) {
+		cnt = Intel2Mot_Word(worlds[num].items[counter]);
+		for (itemCounter = 0; itemCounter < (cnt & 0x3FFF); itemCounter++) {
+			GetPoint(cnt & 0x4000,&Xpoint,&Ypoint);
+			/* Pick an individual object from it's type list... */
+			/* ...without disturbing the random number generator */
+			item = World_Background;
+			item = randpicker[((item << 2) + counter)];
+			item = randitems[(item + (itemCounter & 3))];
+			optr = Add3DObject((UWORD *)AnmFiles[item],
+				INT2FRAC(Xpoint),INT2FRAC(Ypoint),INT2FRAC(0));
+			/* random rotation and size */
+			if (item == 43) {
+				/* This is a wave, it needs to animate */
+				optr->notilt = TRUE;
+				optr->norot = TRUE;
+				optr->frame = RandomRange(11,0);
+			} else {
+				value = Random();
+				optr->rotation = value % 360;
+			}
+			if (item == 21 || item == 32)
+				/* This is a 32 rotation ground object */
+				optr->flag32 = TRUE;
+			high = ScaleMax[item];
+			low  = ScaleMin[item];
+			value = RandomRange(high,low);
+			if (value > 0xFFFF)
+				Bomb("value is too big!\n max=%X min=%X item=%d",ScaleMax,ScaleMin,item);
+			optr->scaler = value;
+		}
+	}
+
+#if 0
+	/* Add fence posts to the world */
+	for (cnt0 = INT2FRAC(0) ; cnt0 < WORLD_WIDTH - (SYS_BORDERSIZE << 1);
+		cnt0 += INT2FRAC(512)) {
+		optr = Add3DObject(&fence_fpb,SYS_BORDERSIZE + cnt0,SYS_BORDERSIZE,
+			INT2FRAC(0));
+		optr->rotation = 0;
+		optr->flag32 = TRUE;
+		optr->notilt = TRUE;
+		optr->scaler = 0xFFFF;
+		optr = Add3DObject(&fence_fpb,WORLD_WIDTH - SYS_BORDERSIZE,
+			SYS_BORDERSIZE + cnt0,INT2FRAC(0));
+		optr->rotation = 0;
+		optr->flag32 = TRUE;
+		optr->notilt = TRUE;
+		optr->scaler = 0xFFFF;
+		optr = Add3DObject(&fence_fpb,WORLD_WIDTH - SYS_BORDERSIZE - cnt0,
+			WORLD_WIDTH - SYS_BORDERSIZE,INT2FRAC(0));
+		optr->rotation = 0;
+		optr->flag32 = TRUE;
+		optr->notilt = TRUE;
+		optr->scaler = 0xFFFF;
+		optr = Add3DObject(&fence_fpb,SYS_BORDERSIZE,
+			WORLD_WIDTH - SYS_BORDERSIZE - cnt0,INT2FRAC(0));
+		optr->rotation = 0;
+		optr->flag32 = TRUE;
+		optr->notilt = TRUE;
+		optr->scaler = 0xFFFF;
+	}
+#endif
+
+	/* Add nuke pools to the world */
+	counter = 4;
+	cnt = Intel2Mot_Word(worlds[num].items[counter]);
+	for (itemCounter = 0; itemCounter < (cnt & 0x3FFF); itemCounter++) {
+		Xpoint = Intel2Mot_Word(worlds[num].NukeLocs[itemCounter].x);
+		Ypoint = Intel2Mot_Word(worlds[num].NukeLocs[itemCounter].y);
+		Random();
+		Random();
+		optr = Add3DObject(&pool_fpb,INT2FRAC(Xpoint),INT2FRAC(Ypoint),INT2FRAC(0));
+		optr->norot = TRUE;
+		AddNuke(optr);
+	}
+
+	/* Add enemy Drones to the world */
+	counter = 4;
+	DronesAttacking = 0;
+	dptr = &Drones[0];
+	NumDrones = 0;
+	cnt = Intel2Mot_Word(worlds[num].items[counter]);
+	for (itemCounter = 0; itemCounter < (cnt & 0x3FFF); itemCounter++) {
+		Xpoint = Intel2Mot_Word(worlds[num].DroneLocs[itemCounter].x);
+		Ypoint = Intel2Mot_Word(worlds[num].DroneLocs[itemCounter].y);
+		optr = Add3DObject(DroneFiles[itemCounter & 3],
+			INT2FRAC(Xpoint),
+			INT2FRAC(Ypoint),
+			INT2FRAC((Random() % 25) + 40));
+		optr->flag32 = TRUE;
+		dptr->Obj = optr;
+		optr->flag32 = TRUE;
+		optr->rotation = Random() % 360;
+		dptr->DroneType = itemCounter & 3;
+		dptr->HitPoints = DroneHitPoints[itemCounter & 3];
+		optr->type = PT_DRONE;
+		optr->parent = dptr;
+		dptr->Thrust = MOV3D * DroneSpeeds[itemCounter & 3];
+		dptr->GotzAGoal = FALSE;
+		dptr->AtakPlyr = FALSE;
+		dptr->Target = dptr->Map1 = dptr->Map2 = 0;
+
+		if (num > 32)
+			dptr->Stealth = TRUE;
+
+		dptr++;
+		NumDrones++;
+	}
+}
+
+void
+View_World()
+{
+	int				item;
+	UWORD				cnt;
+	extern PLAYER	Player;
+
+	/* Set up background map and palette */
+	gemsstopall();
+	DisableInts();
+	/* Set Horizon VRAM Chars Address */
+	SYS_HORZCHRS = (SYS_LASTCHR+2) * 32;
+	switch (World_Background) {
+		case 0:	/* Midwest */
+			DispMap(&midwest_map);
+#if 1
+			/* This song seems to crash the system */
+			gemsstartsong(MUSIC_PLAINS);
+#else
+			gemsstartsong(MUSIC_GLACIAL);
+#endif
+			break;
+		case 1:	/* Ice */
+			DispMap(&ice_map);
+			gemsstartsong(MUSIC_GLACIAL);
+			break;
+		case 2:	/* Desert */
+			DispMap(&desert_map);
+#if 1
+			gemsstartsong(MUSIC_PLAINS);
+#else
+			gemsstartsong(MUSIC_DESERT);
+#endif
+			break;
+		case 3:	/* Forest */
+			DispMap(&forest_map);
+			gemsstartsong(MUSIC_FOREST);
+			break;
+		case 4:	/* Flatcity */
+			DispMap(&flatcity_map);
+			gemsstartsong(MUSIC_DESERT);
+			break;
+		case 5:	/* Froznlab */
+			DispMap(&froznlab_map);
+			gemsstartsong(MUSIC_GLACIAL);
+			break;
+		case 6:	/* Vegas */
+			DispMap(&vegas_map);
+			gemsstartsong(MUSIC_DESERT);
+			break;
+		case 7:	/* Ocean */
+			DispMap(&ocean_map);
+			gemsstartsong(MUSIC_FOREST);
+			break;
+	}
+	cnt = World_Time;
+	/* Do Infrared */
+	if (Player.Items[0] == TRUE && cnt == 2)
+		cnt++;
+	cnt = cnt * (10 * 18);
+	item = World_Background;
+	item = cnt + (item * 18);
+	SYS_SetPalette((UWORD *)&All_Palettes[item]);
+	cnt += 18 * 8;
+	SYS_SetPalette((UWORD *)&All_Palettes[cnt]);
+	cnt += 18;
+	SYS_SetPalette((UWORD *)&All_Palettes[cnt]);
+	/* Set Drone palette... */
+	cnt = World_Time;
+	if (Player.Items[0] == TRUE && cnt == 2)
+		cnt++;
+	cnt = (cnt * 18) + (World_Background * 4 * 18);
+	SYS_SetPalette((UWORD *)&Drone_Palettes[cnt]);
+	EnableInts();
+}
+
+void
+Get_World_Info(short	num)
+{
+	worldX = FRAC2INT(WORLD_WIDTH);
+	worldY = FRAC2INT(WORLD_DEPTH);
+	Randomize(Intel2Mot_Long(worlds[num].seed));
+	borderSize = Intel2Mot_Word(worlds[num].border_size);
+	SYS_BORDERSIZE = INT2FRAC(borderSize);
+	World_Background = Intel2Mot_Word(worlds[num].background);
+	World_Time = Intel2Mot_Word(worlds[num].time);
+	World_Num = num;
+}
+

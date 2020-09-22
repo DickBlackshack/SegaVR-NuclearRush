@@ -1,0 +1,421 @@
+Sierra Systems LINK68  3.1   X.OUT                        5/12/94 16:16
+(2dd2b8d9)
+
+entry point: 00000000
+no relocation info
+executable
+
+ START      END     LENGTH    FILE            SECTION   TYPE
+
+00000000  00204b2b  204b2c  X.OUT            >.text     T 
+00000000  00000ae3  000ae4  STARTUP.O         .text     T 
+00000ae4  00000d0b  000228  SEGALOGO.O        .text     T 
+00000d0c  00001f8b  001280  LOGO.O            .text     T 
+00001f8c  00002673  0006e8  SEGALIB.O         .text     T 
+00002674  00002674  000000  VARIABLE.O        .text     T 
+00002674  0000286f  0001fc  VRDRV.O           .text     T 
+00002870  00003b6f  001300  WORLDS.O          .text     T 
+00003b70  0000408b  00051c  XPNDLZSS.O        .text     T 
+0000408c  0000444f  0003c4  HUD.O             .text     T 
+00004450  0000702f  002be0  GRIDSCRN.O        .text     T 
+00007030  00008a93  001a64  ENHANCE.O         .text     T 
+00008a94  000092eb  000858  COCKPIT.O         .text     T 
+000092ec  0000b5f7  00230c  NUKESCRN.O        .text     T 
+0000b5f8  0000d77f  002188  NUKERUIN.O        .text     T 
+0000d780  0000dd7f  000600  FOCUS.O           .text     T 
+0000dd80  0000fab3  001d34  DRONCRSH.O        .text     T 
+0000fab4  000116cf  001c1c  PUNK1.O           .text     T 
+000116d0  00014363  002c94  PUNK2.O           .text     T 
+00014364  0001598f  00162c  GOODERTH.O        .text     T 
+00015990  000181fb  00286c  UGLYERTH.O        .text     T 
+000181fc  0001910f  000f14  MAP.O             .text     T 
+00019110  00019f7b  000e6c  FP_LOGO.O         .text     T 
+00019f7c  0001b4af  001534  NUKELOGO.O        .text     T 
+0001b4b0  0001e703  003254  BACKGRND.O        .text     T 
+0001e704  0001fee3  0017e0  DESERT.O          .text     T 
+0001fee4  00020f4f  00106c  MIDWEST.O         .text     T 
+00020f50  000222db  00138c  ICE.O             .text     T 
+000222dc  00023e63  001b88  FOREST.O          .text     T 
+00023e64  0002526b  001408  FROZNLAB.O        .text     T 
+0002526c  0002637f  001114  OCEAN.O           .text     T 
+00026380  000275e7  001268  VEGAS.O           .text     T 
+000275e8  0002882f  001248  FLATCITY.O        .text     T 
+00028830  00029243  000a14  HUD_ART.O         .text     T 
+00029244  00030763  007520  DISOLVE.O         .text     T 
+00030764  0003805b  0078f8  INFRARED.O        .text     T 
+0003805c  00039adf  001a84  LASERGUN.O        .text     T 
+00039ae0  0004013b  00665c  OOZEMAP.O         .text     T 
+0004013c  0004487b  004740  SHIELD.O          .text     T 
+0004487c  00046267  0019ec  ENGINE.O          .text     T 
+00046268  000487c7  002560  PLAYER.O          .text     T 
+000487c8  0004ad97  0025d0  CLOAK.O           .text     T 
+0004ad98  0004bef3  00115c  COMPASS.O         .text     T 
+0004bef4  0004d1bf  0012cc  FORCEFLD.O        .text     T 
+0004d1c0  0004e117  000f58  CRACKS.O          .text     T 
+0004e118  0004e4a7  000390  LLAZER.O          .text     T 
+0004e4a8  0004e837  000390  RLAZER.O          .text     T 
+0004e838  00050093  00185c  MISSLES.O         .text     T 
+00050094  0005276f  0026dc  CACTUS.O          .text     T 
+00052770  00056deb  00467c  JOSHUA.O          .text     T 
+00056dec  0005cf67  00617c  PEAR.O            .text     T 
+0005cf68  00061123  0041bc  SAGEBUSH.O        .text     T 
+00061124  00066bdf  005abc  GRASS.O           .text     T 
+00066be0  00069bfb  00301c  MAPLE.O           .text     T 
+00069bfc  0006cad7  002edc  OAK.O             .text     T 
+0006cad8  0006df33  00145c  ROCK.O            .text     T 
+0006df34  000712ef  0033bc  SEALBONE.O        .text     T 
+000712f0  000765ab  0052bc  TOMBSTON.O        .text     T 
+000765ac  0007ac27  00467c  WELLRUIN.O        .text     T 
+0007ac28  000aa523  02f8fc  IGLOO32.O         .text     T 
+000aa524  000ad99f  00347c  JEEP.O            .text     T 
+000ad9a0  000afb53  0021b4  EXPLODE.O         .text     T 
+000afb54  000b00b7  000564  POOL.O            .text     T 
+000b00b8  000b0b33  000a7c  CAN32.O           .text     T 
+000b0b34  000bf86f  00ed3c  RCR32.O           .text     T 
+000bf870  000c22a7  002a38  NUKEBOMB.O        .text     T 
+000c22a8  000c3ae3  00183c  DRIFT1.O          .text     T 
+000c3ae4  000c52df  0017fc  DRIFT2.O          .text     T 
+000c52e0  000c6edb  001bfc  DRIFT3.O          .text     T 
+000c6edc  000c9df7  002f1c  DRIFT4.O          .text     T 
+000c9df8  000ff733  03593c  HOUSE32.O         .text     T 
+000ff734  001129af  01327c  TANK32.O          .text     T 
+001129b0  00113243  000894  PIECE1.O          .text     T 
+00113244  00113a77  000834  PIECE2.O          .text     T 
+00113a78  001140ab  000634  PIECE3.O          .text     T 
+001140ac  0011485f  0007b4  PIECE4.O          .text     T 
+00114860  00114e13  0005b4  PIECE5.O          .text     T 
+00114e14  00115427  000614  PIECE6.O          .text     T 
+00115428  00115b1b  0006f4  ZZAP.O            .text     T 
+00115b1c  00118cd7  0031bc  BUOY1.O           .text     T 
+00118cd8  0011df73  00529c  BUOY2.O           .text     T 
+0011df74  0012016f  0021fc  MARKER1.O         .text     T 
+00120170  00123b4b  0039dc  MARKER2.O         .text     T 
+00123b4c  0012a5e7  006a9c  OILPUMP.O         .text     T 
+0012a5e8  00131903  00731c  SILO.O            .text     T 
+00131904  0013921f  00791c  SPHRTANK.O        .text     T 
+00139220  0013dd9b  004b7c  GRNDTANK.O        .text     T 
+0013dd9c  0013dfdf  000244  NUKESYM.O         .text     T 
+0013dfe0  0013e513  000534  WAVE.O            .text     T 
+0013e514  00155f0f  0179fc  FED32.O           .text     T 
+00155f10  0016bfeb  0160dc  MOD32.O           .text     T 
+0016bfec  00188b07  01cb1c  ZOOMER32.O        .text     T 
+00188b08  0018ec63  00615c  MISSLE32.O        .text     T 
+0018ec64  00195c5f  006ffc  MINE32.O          .text     T 
+00195c60  001bd35b  0276fc  GRAMPS32.O        .text     T 
+001bd35c  001bdb8f  000834  MAIN.O            .text     T 
+001bdb90  001be977  000de8  3D.O              .text     T 
+001be978  001bfdf3  00147c  AI.O              .text     T 
+001bfdf4  001c0387  000594  SPRITES.O         .text     T 
+001c0388  001c0a8f  000708  EXCPTN.O          .text     T 
+001c0a90  001c140b  00097c  MATH.O            .text     T 
+001c140c  001c56ab  0042a0  UI.O              .text     T 
+001c56ac  001c659b  000ef0  SCALE.O           .text     T 
+001c659c  001c7c7f  0016e4  HORIZON.O         .text     T 
+001c7c80  001c924b  0015cc  WORLD.O           .text     T 
+001c924c  001ca5cf  001384  BULLETS.O         .text     T 
+001ca5d0  001caff3  000a24  MATTAI.O          .text     T 
+001caff4  001cb8d3  0008e0  UPD_CPIT.O        .text     T 
+001cb8d4  001cb8d4  000000  GLOBALS.O         .text     T 
+001cb8d4  002033af  037adc  GEMS.O            .text     T 
+002033b0  002033b0  000000  stdio.o           .text     T 
+002033b0  00203c4b  00089c  printf.o          .text     T 
+00203c4c  00203c63  000018  strlen.o          .text     T 
+00203c64  00203ca3  000040  flushbuf.o        .text     T 
+00203ca4  00203d2b  000088  puts.o            .text     T 
+00203d2c  00203d53  000028  strcmp.o          .text     T 
+00203d54  00203e13  0000c0  div32.o           .text     T 
+00203e14  00203e37  000024  div16.o           .text     T 
+00203e38  00203e47  000010  fltstdmy.o        .text     T 
+00203e48  00203ebb  000074  mod32.o           .text     T 
+00203ebc  00203ee3  000028  mod16.o           .text     T 
+00203ee4  0020434f  00046c  signal.o          .text     T 
+00204350  002043bf  000070  perror.o          .text     T 
+002043c0  002043df  000020  toupper.o         .text     T 
+002043e0  00204453  000074  exit.o            .text     T 
+00204454  00204493  000040  fputc.o           .text     T 
+00204494  002044f7  000064  fputs.o           .text     T 
+002044f8  002045d3  0000dc  memset.o          .text     T 
+002045d4  00204653  000080  load_tbl.o        .text     T 
+00204654  00204783  000130  memcpy.o          .text     T 
+00204784  002047db  000058  memmove.o         .text     T 
+002047dc  00204aa7  0002cc  strerror.o        .text     T 
+00204aa8  00204aa8  000000  errno.o           .text     T 
+00204aa8  00204b2b  000084  ctypetab.o        .text     T 
+
+00204b2c  00204b73  000048  X.OUT            >.ld_tbl   T 
+00204b2c  00204b73  000048                    .ld_tbl   T 
+
+ffff0000  ffff0307  000308  X.OUT            >.data     D LOAD(0x204b74) COPY 
+ffff0000  ffff0000  000000  STARTUP.O         .data     D 
+ffff0000  ffff0000  000000  SEGALOGO.O        .data     D 
+ffff0000  ffff0000  000000  LOGO.O            .data     D 
+ffff0000  ffff0000  000000  SEGALIB.O         .data     D 
+ffff0000  ffff0000  000000  VARIABLE.O        .data     D 
+ffff0000  ffff0000  000000  VRDRV.O           .data     D 
+ffff0000  ffff0000  000000  WORLDS.O          .data     D 
+ffff0000  ffff0000  000000  XPNDLZSS.O        .data     D 
+ffff0000  ffff0000  000000  HUD.O             .data     D 
+ffff0000  ffff0000  000000  GRIDSCRN.O        .data     D 
+ffff0000  ffff0000  000000  ENHANCE.O         .data     D 
+ffff0000  ffff0000  000000  COCKPIT.O         .data     D 
+ffff0000  ffff0000  000000  NUKESCRN.O        .data     D 
+ffff0000  ffff0000  000000  NUKERUIN.O        .data     D 
+ffff0000  ffff0000  000000  FOCUS.O           .data     D 
+ffff0000  ffff0000  000000  DRONCRSH.O        .data     D 
+ffff0000  ffff0000  000000  PUNK1.O           .data     D 
+ffff0000  ffff0000  000000  PUNK2.O           .data     D 
+ffff0000  ffff0000  000000  GOODERTH.O        .data     D 
+ffff0000  ffff0000  000000  UGLYERTH.O        .data     D 
+ffff0000  ffff0000  000000  MAP.O             .data     D 
+ffff0000  ffff0000  000000  FP_LOGO.O         .data     D 
+ffff0000  ffff0000  000000  NUKELOGO.O        .data     D 
+ffff0000  ffff0000  000000  BACKGRND.O        .data     D 
+ffff0000  ffff0000  000000  DESERT.O          .data     D 
+ffff0000  ffff0000  000000  MIDWEST.O         .data     D 
+ffff0000  ffff0000  000000  ICE.O             .data     D 
+ffff0000  ffff0000  000000  FOREST.O          .data     D 
+ffff0000  ffff0000  000000  FROZNLAB.O        .data     D 
+ffff0000  ffff0000  000000  OCEAN.O           .data     D 
+ffff0000  ffff0000  000000  VEGAS.O           .data     D 
+ffff0000  ffff0000  000000  FLATCITY.O        .data     D 
+ffff0000  ffff0000  000000  HUD_ART.O         .data     D 
+ffff0000  ffff0000  000000  DISOLVE.O         .data     D 
+ffff0000  ffff0000  000000  INFRARED.O        .data     D 
+ffff0000  ffff0000  000000  LASERGUN.O        .data     D 
+ffff0000  ffff0000  000000  OOZEMAP.O         .data     D 
+ffff0000  ffff0000  000000  SHIELD.O          .data     D 
+ffff0000  ffff0000  000000  ENGINE.O          .data     D 
+ffff0000  ffff0000  000000  PLAYER.O          .data     D 
+ffff0000  ffff0000  000000  CLOAK.O           .data     D 
+ffff0000  ffff0000  000000  COMPASS.O         .data     D 
+ffff0000  ffff0000  000000  FORCEFLD.O        .data     D 
+ffff0000  ffff0000  000000  CRACKS.O          .data     D 
+ffff0000  ffff0000  000000  LLAZER.O          .data     D 
+ffff0000  ffff0000  000000  RLAZER.O          .data     D 
+ffff0000  ffff0000  000000  MISSLES.O         .data     D 
+ffff0000  ffff0000  000000  CACTUS.O          .data     D 
+ffff0000  ffff0000  000000  JOSHUA.O          .data     D 
+ffff0000  ffff0000  000000  PEAR.O            .data     D 
+ffff0000  ffff0000  000000  SAGEBUSH.O        .data     D 
+ffff0000  ffff0000  000000  GRASS.O           .data     D 
+ffff0000  ffff0000  000000  MAPLE.O           .data     D 
+ffff0000  ffff0000  000000  OAK.O             .data     D 
+ffff0000  ffff0000  000000  ROCK.O            .data     D 
+ffff0000  ffff0000  000000  SEALBONE.O        .data     D 
+ffff0000  ffff0000  000000  TOMBSTON.O        .data     D 
+ffff0000  ffff0000  000000  WELLRUIN.O        .data     D 
+ffff0000  ffff0000  000000  IGLOO32.O         .data     D 
+ffff0000  ffff0000  000000  JEEP.O            .data     D 
+ffff0000  ffff0000  000000  EXPLODE.O         .data     D 
+ffff0000  ffff0000  000000  POOL.O            .data     D 
+ffff0000  ffff0000  000000  CAN32.O           .data     D 
+ffff0000  ffff0000  000000  RCR32.O           .data     D 
+ffff0000  ffff0000  000000  NUKEBOMB.O        .data     D 
+ffff0000  ffff0000  000000  DRIFT1.O          .data     D 
+ffff0000  ffff0000  000000  DRIFT2.O          .data     D 
+ffff0000  ffff0000  000000  DRIFT3.O          .data     D 
+ffff0000  ffff0000  000000  DRIFT4.O          .data     D 
+ffff0000  ffff0000  000000  HOUSE32.O         .data     D 
+ffff0000  ffff0000  000000  TANK32.O          .data     D 
+ffff0000  ffff0000  000000  PIECE1.O          .data     D 
+ffff0000  ffff0000  000000  PIECE2.O          .data     D 
+ffff0000  ffff0000  000000  PIECE3.O          .data     D 
+ffff0000  ffff0000  000000  PIECE4.O          .data     D 
+ffff0000  ffff0000  000000  PIECE5.O          .data     D 
+ffff0000  ffff0000  000000  PIECE6.O          .data     D 
+ffff0000  ffff0000  000000  ZZAP.O            .data     D 
+ffff0000  ffff0000  000000  BUOY1.O           .data     D 
+ffff0000  ffff0000  000000  BUOY2.O           .data     D 
+ffff0000  ffff0000  000000  MARKER1.O         .data     D 
+ffff0000  ffff0000  000000  MARKER2.O         .data     D 
+ffff0000  ffff0000  000000  OILPUMP.O         .data     D 
+ffff0000  ffff0000  000000  SILO.O            .data     D 
+ffff0000  ffff0000  000000  SPHRTANK.O        .data     D 
+ffff0000  ffff0000  000000  GRNDTANK.O        .data     D 
+ffff0000  ffff0000  000000  NUKESYM.O         .data     D 
+ffff0000  ffff0000  000000  WAVE.O            .data     D 
+ffff0000  ffff0000  000000  FED32.O           .data     D 
+ffff0000  ffff0000  000000  MOD32.O           .data     D 
+ffff0000  ffff0000  000000  ZOOMER32.O        .data     D 
+ffff0000  ffff0000  000000  MISSLE32.O        .data     D 
+ffff0000  ffff0000  000000  MINE32.O          .data     D 
+ffff0000  ffff0000  000000  GRAMPS32.O        .data     D 
+ffff0000  ffff0000  000000  MAIN.O            .data     D 
+ffff0000  ffff0003  000004  3D.O              .data     D 
+ffff0004  ffff000b  000008  AI.O              .data     D 
+ffff000c  ffff001b  000010  SPRITES.O         .data     D 
+ffff001c  ffff001c  000000  EXCPTN.O          .data     D 
+ffff001c  ffff001c  000000  MATH.O            .data     D 
+ffff001c  ffff01f7  0001dc  UI.O              .data     D 
+ffff01f8  ffff01f8  000000  SCALE.O           .data     D 
+ffff01f8  ffff01f8  000000  HORIZON.O         .data     D 
+ffff01f8  ffff02c7  0000d0  WORLD.O           .data     D 
+ffff02c8  ffff02c8  000000  BULLETS.O         .data     D 
+ffff02c8  ffff0307  000040  MATTAI.O          .data     D 
+ffff0308  ffff0308  000000  UPD_CPIT.O        .data     D 
+ffff0308  ffff0308  000000  GLOBALS.O         .data     D 
+ffff0308  ffff0308  000000  GEMS.O            .data     D 
+ffff0308  ffff0308  000000  stdio.o           .data     D 
+ffff0308  ffff0308  000000  printf.o          .data     D 
+ffff0308  ffff0308  000000  strlen.o          .data     D 
+ffff0308  ffff0308  000000  flushbuf.o        .data     D 
+ffff0308  ffff0308  000000  puts.o            .data     D 
+ffff0308  ffff0308  000000  strcmp.o          .data     D 
+ffff0308  ffff0308  000000  div32.o           .data     D 
+ffff0308  ffff0308  000000  div16.o           .data     D 
+ffff0308  ffff0308  000000  fltstdmy.o        .data     D 
+ffff0308  ffff0308  000000  mod32.o           .data     D 
+ffff0308  ffff0308  000000  mod16.o           .data     D 
+ffff0308  ffff0308  000000  signal.o          .data     D 
+ffff0308  ffff0308  000000  perror.o          .data     D 
+ffff0308  ffff0308  000000  toupper.o         .data     D 
+ffff0308  ffff0308  000000  exit.o            .data     D 
+ffff0308  ffff0308  000000  fputc.o           .data     D 
+ffff0308  ffff0308  000000  fputs.o           .data     D 
+ffff0308  ffff0308  000000  memset.o          .data     D 
+ffff0308  ffff0308  000000  load_tbl.o        .data     D 
+ffff0308  ffff0308  000000  memcpy.o          .data     D 
+ffff0308  ffff0308  000000  memmove.o         .data     D 
+ffff0308  ffff0308  000000  strerror.o        .data     D 
+ffff0308  ffff0308  000000  errno.o           .data     D 
+ffff0308  ffff0308  000000  ctypetab.o        .data     D 
+
+ffff0308  fffff5f3  00f2ec  X.OUT            >.bss      B (00) 
+ffff0308  ffff0b37  000830  STARTUP.O         .bss      B (00) 
+ffff0b38  ffff0b38  000000  SEGALOGO.O        .bss      B (00) 
+ffff0b38  ffff0b38  000000  LOGO.O            .bss      B (00) 
+ffff0b38  ffff0b38  000000  SEGALIB.O         .bss      B (00) 
+ffff0b38  ffff0c93  00015c  VARIABLE.O        .bss      B (00) 
+ffff0c94  ffff0c94  000000  VRDRV.O           .bss      B (00) 
+ffff0c94  ffff0c94  000000  WORLDS.O          .bss      B (00) 
+ffff0c94  ffff0cc7  000034  XPNDLZSS.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  HUD.O             .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  GRIDSCRN.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ENHANCE.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  COCKPIT.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  NUKESCRN.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  NUKERUIN.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FOCUS.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DRONCRSH.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PUNK1.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PUNK2.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  GOODERTH.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  UGLYERTH.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MAP.O             .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FP_LOGO.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  NUKELOGO.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  BACKGRND.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DESERT.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MIDWEST.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ICE.O             .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FOREST.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FROZNLAB.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  OCEAN.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  VEGAS.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FLATCITY.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  HUD_ART.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DISOLVE.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  INFRARED.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  LASERGUN.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  OOZEMAP.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  SHIELD.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ENGINE.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PLAYER.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  CLOAK.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  COMPASS.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FORCEFLD.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  CRACKS.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  LLAZER.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  RLAZER.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MISSLES.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  CACTUS.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  JOSHUA.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PEAR.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  SAGEBUSH.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  GRASS.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MAPLE.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  OAK.O             .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ROCK.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  SEALBONE.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  TOMBSTON.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  WELLRUIN.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  IGLOO32.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  JEEP.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  EXPLODE.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  POOL.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  CAN32.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  RCR32.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  NUKEBOMB.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DRIFT1.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DRIFT2.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DRIFT3.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  DRIFT4.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  HOUSE32.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  TANK32.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE1.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE2.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE3.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE4.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE5.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  PIECE6.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ZZAP.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  BUOY1.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  BUOY2.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MARKER1.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MARKER2.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  OILPUMP.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  SILO.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  SPHRTANK.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  GRNDTANK.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  NUKESYM.O         .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  WAVE.O            .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  FED32.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MOD32.O           .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  ZOOMER32.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MISSLE32.O        .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  MINE32.O          .bss      B (00) 
+ffff0cc8  ffff0cc8  000000  GRAMPS32.O        .bss      B (00) 
+ffff0cc8  ffff0d67  0000a0  MAIN.O            .bss      B (00) 
+ffff0d68  ffff0e1b  0000b4  3D.O              .bss      B (00) 
+ffff0e1c  ffff16f3  0008d8  AI.O              .bss      B (00) 
+ffff16f4  ffff1727  000034  SPRITES.O         .bss      B (00) 
+ffff1728  ffff1728  000000  EXCPTN.O          .bss      B (00) 
+ffff1728  ffff1728  000000  MATH.O            .bss      B (00) 
+ffff1728  ffff1753  00002c  UI.O              .bss      B (00) 
+ffff1754  ffff285f  00110c  SCALE.O           .bss      B (00) 
+ffff2860  ffff28c7  000068  HORIZON.O         .bss      B (00) 
+ffff28c8  ffff2aaf  0001e8  WORLD.O           .bss      B (00) 
+ffff2ab0  ffff2c17  000168  BULLETS.O         .bss      B (00) 
+ffff2c18  ffff2c18  000000  MATTAI.O          .bss      B (00) 
+ffff2c18  ffff2c8b  000074  UPD_CPIT.O        .bss      B (00) 
+ffff2c8c  fffff4e3  00c858  GLOBALS.O         .bss      B (00) 
+fffff4e4  fffff4e4  000000  GEMS.O            .bss      B (00) 
+fffff4e4  fffff537  000054  stdio.o           .bss      B (00) 
+fffff538  fffff538  000000  printf.o          .bss      B (00) 
+fffff538  fffff538  000000  strlen.o          .bss      B (00) 
+fffff538  fffff538  000000  flushbuf.o        .bss      B (00) 
+fffff538  fffff538  000000  puts.o            .bss      B (00) 
+fffff538  fffff538  000000  strcmp.o          .bss      B (00) 
+fffff538  fffff538  000000  div32.o           .bss      B (00) 
+fffff538  fffff538  000000  div16.o           .bss      B (00) 
+fffff538  fffff538  000000  fltstdmy.o        .bss      B (00) 
+fffff538  fffff538  000000  mod32.o           .bss      B (00) 
+fffff538  fffff538  000000  mod16.o           .bss      B (00) 
+fffff538  fffff56b  000034  signal.o          .bss      B (00) 
+fffff56c  fffff56c  000000  perror.o          .bss      B (00) 
+fffff56c  fffff56c  000000  toupper.o         .bss      B (00) 
+fffff56c  fffff5ef  000084  exit.o            .bss      B (00) 
+fffff5f0  fffff5f0  000000  fputc.o           .bss      B (00) 
+fffff5f0  fffff5f0  000000  fputs.o           .bss      B (00) 
+fffff5f0  fffff5f0  000000  memset.o          .bss      B (00) 
+fffff5f0  fffff5f0  000000  load_tbl.o        .bss      B (00) 
+fffff5f0  fffff5f0  000000  memcpy.o          .bss      B (00) 
+fffff5f0  fffff5f0  000000  memmove.o         .bss      B (00) 
+fffff5f0  fffff5f0  000000  strerror.o        .bss      B (00) 
+fffff5f0  fffff5f3  000004  errno.o           .bss      B (00) 
+fffff5f4  fffff5f4  000000  ctypetab.o        .bss      B (00) 
+
+RESERVED SYMBOLS
+
+fffff5f4      heap_org
+00000a0c      heap_len

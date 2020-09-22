@@ -1,0 +1,1018 @@
+/***
+ *			Artificial Intelligence routines for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+#include "gems.h"
+
+WORD			SYS_DOHEADSET;
+extern WORD	UI_DemoMode;
+extern WORD	UI_StopDemo;
+
+/* Switch this define if you wish to communicate with a headset */
+#define	ENEMIES		TRUE
+#define	BULLETS		TRUE
+#define	FILTER		FALSE
+#define	NEW_HT_FMT	TRUE		/* New head tracker data format? */
+#define	SOUNDS		TRUE
+
+#define	CHEAT			TRUE
+
+#define	MAX_ATTACKING	3
+
+
+PLAYER	Player;					/* The data for "The User" */
+
+int		Z_Bob_count;					/* bobbing up and down	*/	
+FRAC		Z_Bob_value;					/* bobbing up and down	*/	
+
+WORD		Headset_Rotation;		/* Direction headset is looking */
+int		Headset_Tilt;			/* Tilt angle that headset is looking */
+WORD		Ship_Rotation;			/* Players drone rotation */
+int		Ship_Turn_Speed;		/* This number is added to rotation */
+int		Ship_Turn_Counter;	/* determines when to change Ship_Turn_Speed */
+
+int		NumDrones;				/* Total number of drones in this world */
+DRONE		Drones[NUMDRONS];		/* Drone information */
+
+int		DronesAttacking;		/* Number of drones attacking player */
+
+int		NumTanks;				/* Total number of tanks in this world */
+DRONE		Tanks[NUMDRONS];		/* Tank information */
+
+int		NumMines;				/* Total number of mines in this world */
+DRONE		Mines[NUMDRONS];		/* Mine information */
+
+int			NumNukes;			/* Number of nuclear pools in the world */
+int			FreeNukes;			/* Number of free nuclear pools in the world */
+NUKE_POOL	NukePools[30];		/* Nuke pool information */
+
+int		DemoTurnMode;			/* 0 = Fly Forward, 1 = Left, 2 = Right */
+int		DemoTurnCount;			/* Number of frames to do this for... */
+
+extern UWORD		SYS_GAMEDONE;
+extern WORD	WorldNum;
+extern WORD	UI_Control;
+
+extern unsigned long	Random(void);
+extern int RandomInt(void);
+extern unsigned long		RandomRange(unsigned long max, unsigned long min);
+extern void	Debug(char *fmt, ...);
+
+/***
+ *		This table converts a Binary Degree (0-255) to a normal Degree (0-360)
+ ***/
+
+const int	BDeg2Deg[256] = {
+	  0,  1,  3,  4,  6,  7,  8, 10,
+	 11, 13, 14, 15, 17, 18, 20, 21,
+	 23, 24, 25, 27, 28, 30, 31, 32,
+	 34, 35, 37, 38, 39, 41, 42, 44,
+	 45, 46, 48, 49, 51, 52, 53, 55,
+	 56, 58, 59, 60, 62, 63, 65, 66,
+	 68, 69, 70, 72, 73, 75, 76, 77,
+	 79, 80, 82, 83, 84, 86, 87, 89,
+	 90, 91, 93, 94, 96, 97, 98,100,
+	101,103,104,105,107,108,110,111,
+	113,114,115,117,118,120,121,122,
+	124,125,127,128,129,131,132,134,
+	135,136,138,139,141,142,143,145,
+	146,148,149,150,152,153,155,156,
+	158,159,160,162,163,165,166,167,
+	169,170,172,173,174,176,177,179,
+	180,181,183,184,186,187,188,190,
+	191,193,194,195,197,198,200,201,
+	203,204,205,207,208,210,211,212,
+	214,215,217,218,219,221,222,224,
+	225,226,228,229,231,232,233,235,
+	236,238,239,240,242,243,245,246,
+	248,249,250,252,253,255,256,257,
+	259,260,262,263,264,266,267,269,
+	270,271,273,274,276,277,278,280,
+	281,283,284,285,287,288,290,291,
+	293,294,295,297,298,300,301,302,
+	304,305,307,308,309,311,312,314,
+	315,316,318,319,321,322,323,325,
+	326,328,329,330,332,333,335,336,
+	338,339,340,342,343,345,346,347,
+	349,350,352,353,354,356,357,359
+};
+
+static int		Head_Flag = FALSE;	/* Headset initialized flag */
+static int		Head_RCnt = 0;			/* Reset counter for headset */
+#if	FILTER
+static int		Head_OldR = 0;			/* Old headset data */
+static int		Head_OldT = 0;			/* Old headset data */
+#endif
+
+#define			ABS(x)	(x<0?-x:x)
+#define			OBESYSTEMS	TRUE		/* Type of Head Tracker */
+
+#if		NEW_HT_FMT
+
+void
+Read_Headset(void )
+{
+	WORD				HeadX;
+	WORD				HeadY;
+	ULONG				tmp;
+	extern ULONG	SYS_HMD_DATA;
+	extern WORD		SYS_READHEAD;
+
+	/* Convert the Data into a form we can use */
+	HeadY = SYS_HMD_DATA & 0xFF;
+	HeadX = (SYS_HMD_DATA >> 8) & 0xFF;
+	HeadY += (SYS_HMD_DATA >> 8) & 0x100;
+	if (HeadY >= 0x0100)
+		HeadY += 0xFE00;
+	HeadX += (SYS_HMD_DATA >> 9) & 0x100;
+/*	Headset_Rotation = HeadX; */
+	Headset_Rotation = 359 - HeadX;
+	/* HeadY goes from -70 to 70 for 15 - 15 degrees */
+/*	Headset_Tilt = 360 - ((HeadY << 1) / 9); */
+	Headset_Tilt = 359 - HeadY;
+}
+
+#else
+
+void
+Read_Headset(void )
+{
+	extern	void				InitHead();
+	extern	int				IsHeadRdy();
+	extern	int				ReadHead();
+	extern	unsigned char	HeadID;
+	extern	unsigned char	HeadRSVD;
+	extern	unsigned char	HeadX;
+	extern	unsigned char	HeadY;
+	extern	unsigned char	HeadErr;
+	WORD							tmp;
+
+#if	OBESYSTEMS
+	if (!Head_Flag) {
+		/* Obe Systems has a bug where the Ready code may not be correct... */
+		InitHead();
+		Head_Flag = TRUE;
+		return;
+	}
+#else
+	if (!Head_Flag && (IsHeadRdy() == 0x10) && !Head_RCnt) {
+		InitHead();
+		Head_Flag = TRUE;
+		return;
+	}
+	if (Head_Flag && HeadErr) {
+		/* We got a time out error, set the Head_RCnt for new Reset */
+		Head_RCnt = 60;
+		Head_Flag = FALSE;
+	}
+	if (Head_RCnt)
+		Head_RCnt--;
+#endif
+	if (IsHeadRdy() == 0x10) {
+		ReadHead();
+		/* Convert the Data into a form we can use */
+		Headset_Rotation = BDeg2Deg[HeadX];
+		Headset_Tilt = BDeg2Deg[HeadY ^ 0xFF];
+#if	FILTER
+		tmp = Headset_Rotation - Head_OldR;
+		tmp = ABS(tmp);
+		if (tmp == 1 || tmp > 20)
+			Headset_Rotation = Head_OldR;
+		Head_OldR = Headset_Rotation;
+		/* Tilt */
+		tmp = Headset_Tilt - Head_OldT;
+		tmp = ABS(tmp);
+		if (tmp == 1 || tmp > 20)
+			Headset_Tilt = Head_OldT;
+		Head_OldT = Headset_Tilt;
+#endif
+	}
+}
+#endif
+
+#if 0
+UWORD		*DroneFiles[] = {
+	&zoomer32_fpb,
+	&fed32_fpb,
+	&gramps32_fpb,
+	&mod32_fpb,
+};
+#endif
+
+void
+Init_Player()
+{
+	int					cnt;
+	OBJECT3D				*optr;
+	DRONE					*dptr;
+	extern int			Num_World_Objs;				/* Number of world Objects */
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+
+	Player.Gieger = 0;
+	Player.Rotation = 180;
+	Ship_Rotation = 180;
+	Ship_Turn_Speed = 0;
+	Ship_Turn_Counter = 0;
+	Headset_Rotation = 0;
+	Player.Tilt = 0;
+	/* Put player in the middle of the world */
+	Player.X = WORLD_WIDTH >> 1;
+	Player.Y = WORLD_DEPTH >> 1;
+	Player.Z = INT2FRAC(30);
+	Z_Bob_count = 0;
+	Z_Bob_value = INT2FRAC(0);
+	Player.Thrust = 0;
+	Player.Rest = 0;
+
+	
+	Init_Mines();
+
+	Init_Tanks();
+
+#if BULLETS
+	Init_Bullets();
+#endif
+	DemoTurnMode = 0;
+	DemoTurnCount = 0;
+}
+
+void
+AddNuke(OBJECT3D *src)
+{
+	NUKE_POOL	*dst;
+	OBJECT3D		*can;
+
+	dst = &NukePools[NumNukes];
+	dst->world_obj = src;
+	src->parent = dst;
+	src->type = PT_POOL;
+	/* Compute total radiation level for this pool, between 2 - 8 cansiters
+		full, each can holds 256 roentgens */
+	dst->level = ((Random() % 6) + 2) << 8;
+	dst->owner = 0;
+	dst->rcr_level = 0;
+	dst->can_frm = 0;
+	dst->can_dir = 0;
+	dst->free = TRUE;
+	dst->ready = FALSE;
+	dst->dead = FALSE;
+	dst->loiter = FALSE;
+	/* Add canister object, cloaked */
+	can = Add3DObject(&can32_fpb,src->x,src->y,INT2FRAC(10));
+	can->notilt = TRUE;
+	can->cloaked = TRUE;
+	dst->can_obj = can;
+	NumNukes++;
+	FreeNukes++;
+}
+
+#if 0
+/***
+ *		Animate_Can:		This is a "special" routine for the 3D package
+ ***/
+
+WORD
+Animate_Can(OBJECT3D *optr)
+{
+	register NUKE_POOL	*nptr;
+	extern	OBJECT3D		Special_Object;	/* For Special calls */
+
+	nptr = &NukePools[optr->variable];
+	if (!nptr->anm_state) {
+		SYS_Copy3DObj(&Special_Object,optr);
+		/* Just render RCR pod */
+		nptr->anm_state = 1;
+		return 1;
+	} else {
+		/* Render floating canister */
+		Special_Object.z = INT2FRAC(nptr->can_frm);
+		Special_Object.file = &can32_fpb;
+		Special_Object.anim = 0;
+		Special_Object.frame = 0;
+		Special_Object.notilt = TRUE;
+		Special_Object.rotation += 15;
+		if (Special_Object.rotation > 359)
+			Special_Object.rotation = 0;
+		nptr->anm_state = 0;
+		/* Add another object to the visable list */
+		return 0;
+	}
+}
+#endif
+
+/***
+ *		Update_Nukes:	Keep the RCRs that are on the pools draining and poping
+ ***/
+
+Update_Nukes()
+{
+	OBJECT3D				*optr;
+	OBJECT3D				*cptr;
+	NUKE_POOL			*nptr;
+	int					cnt,cnt2;
+	FRAC					dist;
+	extern FRAC			Mx, My, Mz;			/* Camera World Position */
+
+	/* Do logic for each Nuke Pool */
+	nptr = &NukePools[0];
+	for (cnt=0; cnt < NumNukes; cnt++, nptr++) {
+
+		/* Don't do a thing with undiscovered or dead pools */
+		if (nptr->free || nptr->dead)
+			continue;
+
+		/* Pool must be in operation */
+		optr = nptr->world_obj;
+
+		if (nptr->ready) {
+			/* Update canister movement */
+			if (nptr->can_dir)
+				if (nptr->can_frm >= 50)
+					nptr->can_dir = 0;
+				else
+					nptr->can_frm++;
+			else
+				if (nptr->can_frm <= 20)
+					nptr->can_dir = 1;
+				else
+					nptr->can_frm--;
+
+			cptr = nptr->can_obj;
+			/* Has player picked it up? */
+			dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+			if (dist < INT2FRAC(65)) {
+#if SOUNDS
+				gemsstartsong(VOICE_CAN_COL);
+#endif
+				UI_FlashGreen();
+				cptr->cloaked = TRUE;
+				Player.Gieger += 3;
+				if (Player.Gieger > 31) {
+					Player.Gieger = 31;
+					Player.Won = TRUE;
+					SYS_GAMEDONE = TRUE;
+				}
+				/* Reset logic */
+#if 0
+				optr->special = FALSE;
+#endif
+				nptr->ready = FALSE;
+				nptr->rcr_level = 0;
+			}
+
+			cptr->z = INT2FRAC(nptr->can_frm);
+			cptr->rotation += 15;
+			if (cptr->rotation > 359)
+				cptr->rotation = 0;
+			continue;
+		}
+
+		/* Drain one unit from source */
+		if (nptr->level) {
+			nptr->level--;
+			if	(nptr->rcr_level < 256)
+				nptr->rcr_level++;
+			else {
+				/* Pop a canister out! */
+				nptr->can_frm = 20;
+#if 0
+				optr->spc_func = &Animate_Can;
+				optr->special = TRUE;
+				optr->variable = cnt;
+#else
+				nptr->can_obj->cloaked = FALSE;
+				nptr->can_obj->z = INT2FRAC(nptr->can_frm);
+#endif
+				nptr->anm_state = 0;
+				nptr->can_dir = 1;
+				nptr->ready = TRUE;
+			}
+		}
+	}
+}
+
+/***
+ *		Update the players movement via joystick and/or headset tracker
+ *
+ *		Current Joystick interface:
+ *			Joy1								Joy2
+ *
+ *			+Thrust							+Tilt
+ *				^		 	Start=Flicker		^			Start
+ *		Lft<	+	>Rht	A=Laser   	Lft<	+	>Rht	A=Reorient View
+ *				v			B=Fire				v			B=Reorient View
+ *			-Thrust		C=Tilt/Cloak	-Tilt			C=Reorient View
+ ***/
+
+void
+Update_Movement()
+{
+	int					tmp_bob;
+	FRAC					old_z, new_thrust;
+	extern UWORD		Player_Fuel;
+	extern WORD			SYS_VTILT;
+	extern FRAC			SYS_BORDERSIZE;
+	extern VISABLE3D	*v_targetptr;
+	extern VISABLE3D	*demo_targetptr;
+
+	/* The Z_Bob Code */
+	tmp_bob = Z_Bob_count;
+	if (Player.Thrust < INT2FRAC(2))
+		tmp_bob = tmp_bob >> 1;
+	if (Player.Thrust < INT2FRAC(5))
+		tmp_bob = tmp_bob >> 1;
+	tmp_bob &= 15;
+	if (tmp_bob < 4)
+		old_z = INT2FRAC(0);
+	else
+		if (tmp_bob < 8)
+			old_z = INT2FRAC(tmp_bob - 3);
+		else
+			if (tmp_bob < 12)
+				old_z = INT2FRAC(4);
+			else
+				old_z = INT2FRAC(15 - tmp_bob);
+	
+	if (Player.Damage <= 0) {
+		/* Drop dead to the ground */
+		Player.Z -= INT2FRAC(2);
+		if (Player.Z < 0)
+			Player.Z = 0;
+	} else {
+		Player.Z = Player.Z + old_z - Z_Bob_value;
+		Z_Bob_value = old_z;
+		if (Player.Z < INT2FRAC(25))
+			Player.Z = INT2FRAC(25);
+		if (Player.Z > INT2FRAC(400))
+			Player.Z = INT2FRAC(400);
+	}
+
+	Z_Bob_count++;
+
+	/* Decrease the attack stall */
+	if (Player.Rest)
+		Player.Rest--;
+#if CHEAT
+	/* Does user want to move to another world? */
+	if (SYS_JoyTable[JOY_A] && SYS_JoyTable[JOY_B] && SYS_JoyTable[JOY_C]) {
+		SYS_GAMEDONE = TRUE;
+		Player.Won = TRUE;
+	}
+#endif
+	/* Is the players fuel out? */
+	if (Player_Fuel <= 0)
+		SYS_GAMEDONE = TRUE;
+	/* Do Altitude or Thrust changes */
+#if 0
+	if (SYS_JoyTable[JOY_A]) {
+		/* Adjust Altitude if needed */
+		if (SYS_JoyTable[JOY_UP])
+			Player.Z += INT2FRAC(2);
+		if (SYS_JoyTable[JOY_DOWN])
+			Player.Z -= INT2FRAC(2);
+		if (Player.Z < INT2FRAC(25))
+			Player.Z = INT2FRAC(25);
+		if (Player.Z > INT2FRAC(400))
+			Player.Z = INT2FRAC(400);
+	} else {
+#endif
+		/* Move players world position */
+		if (!UI_DemoMode) {
+			if (SYS_JoyTable[JOY_UP])
+				Player.Thrust += MOV3D;
+			if (SYS_JoyTable[JOY_DOWN]) {
+				Player.Thrust -= MOV3D;
+				if (Player.Thrust < 0)
+					Player.Thrust = 0;
+				}
+		} else
+			Player.Thrust += MOV3D;
+#if 0
+	}
+#endif
+
+	/* Do Ship Rotation */
+	if (Ship_Turn_Counter != 0)
+		Ship_Turn_Counter--;
+	else {
+		if (Player.Thrust >= INT2FRAC(5))
+			Ship_Turn_Counter++;
+		if (Player.Thrust >= INT2FRAC(2))
+			Ship_Turn_Counter++;
+		/* Do demo turning stuff */
+		if (UI_DemoMode) {
+			/* Should we be tracking a drone? */
+			if (demo_targetptr || v_targetptr) {
+				if (v_targetptr)
+					DemoTurnMode = 0;
+				else
+					if (demo_targetptr->xs < 128)
+						DemoTurnMode = 1;
+					else
+						DemoTurnMode = 2;
+			} else
+				if (DemoTurnCount)
+					DemoTurnCount--;
+				else {
+					/* Pick new direction and time */
+					tmp_bob = Random() % 3;
+					/* Don't do the same move twice */
+					if (tmp_bob == DemoTurnMode)
+						DemoTurnMode = (tmp_bob + 1) % 3;
+					else
+						DemoTurnMode = tmp_bob;
+					if (DemoTurnMode)
+						DemoTurnCount = RandomRange(5,1) * 7;
+					else
+						DemoTurnCount = RandomRange(8,2) * 7;
+			}
+		}
+		if ((SYS_JoyTable[JOY_LEFT] && !UI_DemoMode) ||
+			(UI_DemoMode && DemoTurnMode == 1)) {
+			Ship_Turn_Speed--;
+			if (Ship_Turn_Speed > 0)
+				Ship_Turn_Speed--;
+			if (Ship_Turn_Speed < -15)
+				Ship_Turn_Speed = -15;
+		} else {
+			if ((SYS_JoyTable[JOY_RIGHT] && !UI_DemoMode) ||
+				(UI_DemoMode && DemoTurnMode == 2)) {
+				Ship_Turn_Speed++;
+				if (Ship_Turn_Speed < 0)
+					Ship_Turn_Speed++;
+				if (Ship_Turn_Speed > 15)
+					Ship_Turn_Speed = 15;
+			} else {
+				if (Ship_Turn_Speed >= -2 && Ship_Turn_Speed <= 2)
+					Ship_Turn_Speed = 0;
+				if (Ship_Turn_Speed < -2)
+					Ship_Turn_Speed += 2;
+				if (Ship_Turn_Speed > 2)
+					Ship_Turn_Speed -= 2;
+			}
+		}
+	}
+
+	if (Ship_Turn_Speed != 0)
+		Ship_Rotation += Ship_Turn_Speed / 2;
+	while (Ship_Rotation < 0)
+		Ship_Rotation += 360;
+	while (Ship_Rotation > 359)
+		Ship_Rotation -= 360;
+
+	SYS_VTILT = Ship_Turn_Speed;
+
+	/* Do Tilt and Viewing Rotation */
+	if (SYS_DOHEADSET) {
+		if (!UI_DemoMode)
+			Read_Headset();
+		Player.Rotation = (Headset_Rotation + Ship_Rotation) % 360;
+		/* Clamp Tilt */
+		if (Headset_Tilt > 180) {
+			if (Headset_Tilt < 200)
+				Headset_Tilt = 200;
+		} else
+			if (Headset_Tilt > 120)
+				Headset_Tilt = 120;
+		Player.Tilt = Headset_Tilt;
+	} else {
+		/* Do View Rotation */
+		if (!UI_DemoMode) {
+			if (SYS_Joy2Table[JOY_LEFT])
+				Headset_Rotation -= 8;
+			if (SYS_Joy2Table[JOY_RIGHT])
+				Headset_Rotation += 8;
+		}
+		if (Headset_Rotation < 0)
+			Headset_Rotation = 359;
+		if (Headset_Rotation > 359)
+			Headset_Rotation = 0;
+
+		/* Point player at direction he is looking */
+#if 0
+		if (SYS_Joy2Table[JOY_A] || SYS_Joy2Table[JOY_B] ||
+			SYS_Joy2Table[JOY_C])
+			Headset_Rotation = 0;
+#endif
+		Player.Rotation = (Headset_Rotation + Ship_Rotation) % 360;
+
+		/* Adjust Tilt if needed */
+		if (!UI_DemoMode) {
+			if (SYS_JoyTable[JOY_C]) {
+				if (SYS_JoyTable[JOY_UP])
+					Player.Tilt -= 2;
+				if (SYS_JoyTable[JOY_DOWN])
+					Player.Tilt += 2;
+			}
+			if (SYS_Joy2Table[JOY_UP])
+				Player.Tilt -= 2;
+			if (SYS_Joy2Table[JOY_DOWN])
+				Player.Tilt += 2;
+		}
+		if (Player.Tilt < -48)
+			Player.Tilt = -48;
+		if (Player.Tilt > 48)
+			Player.Tilt = 48;
+	}
+
+	old_z = Player.Z;
+	if (Player.Damage > 0) {
+		/* Only do this if we are still alive! */
+		Player.Z -= fmul(Player.Thrust,fsind(Player.Tilt));
+		if (Player.Items[4]) 		/* engine is twice as fast */
+			Player.Z -= fmul(Player.Thrust,fsind(Player.Tilt));
+		if (Player.Z < INT2FRAC(25))
+			Player.Z = INT2FRAC(25);
+		if (Player.Z > INT2FRAC(400))
+			Player.Z = INT2FRAC(400);
+	}
+	new_thrust = INT2FRAC(100) + old_z - Player.Z;
+	new_thrust = fdiv(new_thrust,INT2FRAC(100));
+	new_thrust = fmul(new_thrust,Player.Thrust);
+
+
+	/* Update new X and Y position */
+
+	Player.X += fmul(new_thrust,fsind(Ship_Rotation));
+	Player.Y += fmul(new_thrust,fcosd(Ship_Rotation));
+
+	if (Player.Items[4]) { 		/* engine is twice as fast */
+		Player.X += fmul(new_thrust,fsind(Ship_Rotation));
+		Player.Y += fmul(new_thrust,fcosd(Ship_Rotation));
+	}
+
+#if 0
+	/* Bump into the edges instead of wrap */
+	if (Player.X < SYS_BORDERSIZE) {
+		Player.X = SYS_BORDERSIZE + INT2FRAC(10);
+		Player.Thrust >>= 2;
+		gemsstartsong(VOICE_ZONE_HIT);
+		UI_FlashBlue();
+	}
+	if (Player.Y < SYS_BORDERSIZE) {
+		Player.Y = SYS_BORDERSIZE + INT2FRAC(10);
+		Player.Thrust >>= 2;
+		gemsstartsong(VOICE_ZONE_HIT);
+		UI_FlashBlue();
+	}
+	if (Player.X > (WORLD_WIDTH-SYS_BORDERSIZE)) {
+		Player.X = WORLD_WIDTH - SYS_BORDERSIZE - INT2FRAC(10);
+		Player.Thrust >>= 2;
+		gemsstartsong(VOICE_ZONE_HIT);
+		UI_FlashBlue();
+	}
+	if (Player.Y > (WORLD_DEPTH-SYS_BORDERSIZE)) {
+		Player.Y = WORLD_DEPTH-SYS_BORDERSIZE - INT2FRAC(10);
+		Player.Thrust >>= 2;
+		gemsstartsong(VOICE_ZONE_HIT);
+		UI_FlashBlue();
+	}
+#else
+	/* Wrap around world */
+	if (Player.X < 0)
+		Player.X = WORLD_WIDTH;
+	if (Player.Y < 0)
+		Player.Y = WORLD_DEPTH;
+	if (Player.X > WORLD_WIDTH)
+		Player.X = 0;
+	if (Player.Y > WORLD_DEPTH)
+		Player.Y = 0;
+#endif
+
+	/* Do drone slowdown */
+	if (Player.Thrust != 0)
+		if (Player.Thrust < -(INT2FRAC(1)>>3)-1)
+			Player.Thrust += fsind(FRAC2INT(Player.Thrust<<1)) << 1;
+		else
+			if (Player.Thrust > (INT2FRAC(1)>>3)-1)
+				Player.Thrust -= fsind(FRAC2INT(Player.Thrust<<1)) << 1;
+			else
+				Player.Thrust = 0;
+}
+
+/***
+ *		Speed, Greed, Pester, Defender, and Stealth
+ ***/
+
+/***	 
+ *		Visable_Drones:	Test all drones and mark the ones that are visable
+ ***/
+
+void
+Visable_Drones()
+{
+	VISABLE3D			*vptr;
+	DRONE					*dptr;
+	int					cnt,cnt2;
+	extern VISABLE3D	Visable_Objs[100];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+
+	/* Update new X and Y Enemy positions */
+	dptr = &Drones[0];
+	for (cnt=0; cnt < NumDrones; cnt++,dptr++) {
+		dptr->Visable = FALSE;
+		vptr = &Visable_Objs[0];
+		for (cnt2=0; cnt2 < Num_Visable_Objs; cnt2++,vptr++)
+			if (dptr->Obj == vptr->object)
+				dptr->Visable = TRUE;
+	}
+}
+
+/***	 
+ *		Visable_Tanks:	Test all tanks and mark the ones that are visable
+ ***/
+
+void
+Visable_Tanks()
+{
+	VISABLE3D			*vptr;
+	DRONE					*dptr;
+	int					cnt,cnt2;
+	extern VISABLE3D	Visable_Objs[100];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+
+	/* Update new X and Y Enemy positions */
+	dptr = &Tanks[0];
+	for (cnt=0; cnt < NumTanks; cnt++,dptr++) {
+		dptr->Visable = FALSE;
+		vptr = &Visable_Objs[0];
+		for (cnt2=0; cnt2 < Num_Visable_Objs; cnt2++,vptr++)
+			if (dptr->Obj == vptr->object)
+				dptr->Visable = TRUE;
+	}
+}
+
+/***
+ *		Update_Drones:	Do Drone A.I.
+ ***/
+
+extern WORD NextRotation(FRAC srcX,FRAC srcY,FRAC srcZ, FRAC dstX,FRAC dstY,FRAC dstZ,WORD srcRotation);
+extern int Fire_At_Player(OBJECT3D *drone);
+
+#define	ONLY_VISIBLE	4
+#define	ONLY_INVISIBLE	15
+
+int
+Update_Drones()
+{
+	OBJECT3D				*optr;
+	OBJECT3D				*tptr;
+	VISABLE3D			*vptr;
+	DRONE					*dptr;
+	void					*pptr;
+	int					cnt,cnt2;
+	int					bflag;
+	int					index;
+	WORD					rot_check1, rot_check2;
+	FRAC					x_check, y_check;
+	BYTE					flag;
+	FRAC					dist;
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern VISABLE3D	Visable_Objs[100];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+	extern FRAC			Mx, My, Mz;			/* Camera World Position */
+	extern WORD			Small_Explosion(OBJECT3D *optr);
+
+	/* Update new X and Y Enemy positions */
+	dptr = &Drones[0];
+	for (cnt=0; cnt<NumDrones; cnt++,dptr++) {
+		optr = dptr->Obj;
+
+		/* If we are blowing up, don't do anything */
+		if (optr->special && optr->spc_func != &Small_Explosion)
+			continue;
+
+		if (dptr->GotzAGoal) {
+			if (dptr->Loiter) {
+				
+				dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+				tptr = dptr->Target;
+
+				if (!Player.Rest && (DronesAttacking < MAX_ATTACKING)) {
+					if (dist < INT2FRAC(350)) {
+						if((dptr->Visable) && (WorldNum < ONLY_INVISIBLE))
+							dptr->Loiter = FALSE;
+
+						if(!(dptr->Visable) && (WorldNum > ONLY_VISIBLE))
+							dptr->Loiter = FALSE;
+
+						if(!(dptr->Loiter)) {
+							dptr->GotzAGoal = TRUE;
+							dptr->AtakPlyr = TRUE;
+							pptr = tptr->parent;
+							pptr->loiter = FALSE;
+							DronesAttacking++;
+						}
+					}
+				}
+				else
+
+					/* Are we with in a few units from the target object? */
+					if (Obj_Dist3D(optr,tptr) > INT2FRAC(100)) {
+						/* Go after our target */
+						optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+							tptr->x,tptr->y,tptr->z,optr->rotation);
+						/* Go down as low as 25 units */
+						optr->z = NextTrackZ(optr->z,INT2FRAC(25));
+					}
+			}
+			if (dptr->AtakPlyr) {
+				/* Special case, attacking the player... */
+				
+				dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+
+				/* If too close, don't spin baby */
+				if (dist > INT2FRAC(120)) 
+					optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+						Mx,My,Mz,optr->rotation);
+				optr->z = NextTrackZ(optr->z,Mz);
+
+				x_check = Mx - (optr->x);
+				y_check = My - (optr->y);
+				
+				rot_check1 = ((optr->rotation) - fatan2(y_check,x_check)) % 360;
+				if (rot_check1 < 0)
+					rot_check1 = - rot_check1;
+				if (rot_check1 > 180)
+					rot_check1 = 360 - rot_check1;
+#if 0
+				rot_check2 = FRAC2INT(dist) >> 4;
+				if (rot_check2 > 20)
+					rot_check2 = 20;
+				
+				if ((dist < INT2FRAC(350)) && (rot_check1 < rot_check2)) {
+#else
+				if ((dist < INT2FRAC(350)) && (rot_check1 < 10)) {
+#endif
+					/* Shoot at player */
+					if ( Fire_At_Player(optr) != 0) 
+						/* Go do something else now... */
+						Player.Rest += (32 - WorldNum) + 10;
+					else
+						Player.Rest += 15; 
+					dptr->GotzAGoal = FALSE;
+					dptr->AtakPlyr = FALSE;
+					DronesAttacking--;
+				}
+			} else {
+				tptr = dptr->Target;
+				/* Are we with in a few units from the target object? */
+				if (Obj_Dist3D(optr,tptr) < INT2FRAC(30)) {
+					/* Did someone get there before us? */
+					if ((ULONG)tptr->file != (ULONG)(&rcr32_fpb)) {
+						/* Change the Nuke pool into an RCR pod! */
+						for (cnt2=0; cnt2 < NumNukes; cnt2++)
+							if (NukePools[cnt2].world_obj == tptr) {
+								NukePools[cnt2].free = FALSE;
+								FreeNukes--;
+								NukePools[cnt2].owner = cnt;
+								break;
+							}
+						tptr->file = &rcr32_fpb;
+						tptr->anim = tptr->frame = 0;
+						tptr->flag32 = TRUE;
+						tptr->norot = FALSE;
+						/* Go do something else now... */
+						dptr->GotzAGoal = FALSE;
+					} else
+						/* Break off and find a new target! */
+						dptr->GotzAGoal = FALSE;
+				} else {
+					/* Go after our target */
+					optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+						tptr->x,tptr->y,tptr->z,optr->rotation);
+					/* Go down as low as 25 units */
+					optr->z = NextTrackZ(optr->z,INT2FRAC(25));
+				}
+			}
+		} else {
+			/* Get a goal! */
+			/* Either turn a free pool into a cannister or
+				if there are no more free pools loiter around a cannister */
+			if (FreeNukes > 0)
+				for (cnt2=0; cnt2 < NumNukes; cnt2++) {
+					/* Are we in the same zone? */
+					if (NukePools[cnt2].world_obj->area == optr->area) {
+						/* Same zone, is it a free pool? */
+						if (NukePools[cnt2].free) {
+							/* Yes, target this pool */
+							dptr->GotzAGoal = TRUE;
+							dptr->Target = NukePools[cnt2].world_obj;
+							break;
+						}
+					}
+				}
+
+			/* If we can't find a goal, is the player around? */
+			if (!Player.Rest && (DronesAttacking < MAX_ATTACKING)) {
+				dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+				if (dist < INT2FRAC(350)) {
+					if((dptr->Visable) && (WorldNum < ONLY_INVISIBLE))
+						dptr->AtakPlyr = TRUE;
+
+					if(!(dptr->Visable) && (WorldNum > ONLY_VISIBLE))
+						dptr->AtakPlyr = TRUE;
+
+					if (dptr->AtakPlyr) {
+						dptr->GotzAGoal = TRUE;
+						DronesAttacking++;
+					}
+				}
+			}	
+			else if (FreeNukes == 0)
+				for (cnt2=0; cnt2 < NumNukes; cnt2++) {
+					/* Are we in the same zone? */
+					if (NukePools[cnt2].world_obj->area == optr->area) {
+						/* Same zone, is it an unloitered pool? */
+						if (!NukePools[cnt2].loiter) {
+							/* Yes, target this pool */
+							dptr->GotzAGoal = TRUE;
+							dptr->Loiter = TRUE;
+							dptr->Target = NukePools[cnt2].world_obj;
+							NukePools[cnt2].loiter = TRUE;
+							break;
+						}
+					}
+				}
+
+			if (!dptr->GotzAGoal && ((WorldNum >= 2 && WorldNum <= 4) ||
+				(WorldNum >= 8))) {
+				/* Got no clue?  Lay a mine... */
+				Add_Mine(optr);
+			}
+		}
+
+		optr->x += fmul(dptr->Thrust,fsind(optr->rotation));
+		optr->y += fmul(dptr->Thrust,fcosd(optr->rotation));
+#if 0
+		/* Bounce around a NxN demo world */
+		if (optr->x < 0) {
+			optr->x = 0;
+			optr->rotation = 360 - (optr->rotation);
+		}
+		if (optr->y < 0) {
+			optr->y = 0;
+			optr->rotation = 180 - (optr->rotation);
+			if (optr->rotation < 0)
+				optr->rotation += 360;
+		}
+		if (optr->x > WORLD_WIDTH) {
+			optr->x = WORLD_WIDTH;
+			optr->rotation = 360 - (optr->rotation);
+		}
+		if (optr->y > WORLD_DEPTH) {
+			optr->y = WORLD_DEPTH;
+			optr->rotation = 180 - (optr->rotation);
+			if (optr->rotation < 0)
+				optr->rotation += 360;
+		}
+#endif
+		/* Update area */
+		Update3DObject(optr);
+	}
+}
+
+/***
+ *		Update the players position in the world.
+ *			Return TRUE if the player moved.
+ ***/
+
+int
+Update_Player()
+{
+	extern volatile	LONG		SYS_VCNT;
+
+	Update_Movement();
+
+#if ENEMIES
+	Visable_Drones();
+	Update_Drones();
+	Update_Mines();
+	Visable_Tanks();
+	Update_Tanks();
+#endif
+
+#if BULLETS
+	Update_Bullets();
+	Fire_Bullet();
+#endif
+
+	Update_Nukes();
+
+	/* Has the player died? */
+	if (Player.Damage <= 0 && Player.Z == 0)
+		SYS_GAMEDONE = TRUE;
+
+	if (UI_DemoMode && SYS_VCNT >= 3600)
+		SYS_GAMEDONE = TRUE;
+
+	if (UI_StopDemo && UI_DemoMode)
+		SYS_GAMEDONE = TRUE;
+
+	return (TRUE);
+}

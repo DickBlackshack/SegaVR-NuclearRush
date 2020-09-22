@@ -1,0 +1,17 @@
+-m
+-P
+MEMORY
+{
+	rom:	ORG(0x00000000)	LEN(0x250000)
+	ram:	ORG(0xFFFF0000)	LEN(0x010000)
+}
+SECTIONS
+{
+    GROUP:
+    {
+        .text: {}
+        .ld_tbl: {ld = ..;}
+    } > rom
+    .data: ALIGN(2) LOAD(ld) COPY {} > ram
+    .bss: {} > ram
+}

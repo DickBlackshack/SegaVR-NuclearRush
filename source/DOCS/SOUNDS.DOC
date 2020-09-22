@@ -1,0 +1,33 @@
+	(FM) Mushroom cloud explosion.
+	(FM) Turbine engine, small.
+	(FM) Turbine engine, medium.
+	(FM) Turbine engine, large.
+	(FM) Canister eject sound.
+	(FM) Photon blast.
+	(FM) Photon blast hit.
+	(FM) Protection Mine searching sound.
+	(D) Geiger counter effect.
+	(D) Static sounds.
+	(D) Arching electronic sounds.
+	(D) Radiation Collection Robot dropping.
+	(D) Protection Mine dropping.
+
+	(D) Computer Voice: "Warning!".
+	(D) Computer Voice: "Radar Destroyed".
+	(D) Computer Voice: "Lasers Destroyed".
+	(D) Computer Voice: "Shields Destroyed".
+	(D) Computer Voice: "Zone Shield Hit".
+	(D) Computer Voice: "Avoid Zone Shields".
+	(D) Computer Voice: "Missle Damage Taken!".
+	(D) Computer Voice: "Mine Damage Taken!".
+	(D) Computer Voice: "Target Locked".
+	(D) Computer Voice: "Zone Clean".
+	(D) Computer Voice: "Fuel Low".
+	(D) Computer Voice: "Canister Collected".
+	(D) Computer Voice: "Congratulations!".
+	(D) Computer Voice: "Good Job!".
+	(D) Computer Voice: "Great Job!".
+	(D) Computer Voice: "Mission Successful".
+	(D) Computer Voice: "Game Over".
+	(D) Computer Voice: "Fuel Depleted".
+	(D) Computer Voice: "Drone Destroyed".

@@ -1,0 +1,240 @@
+/*
+ * xcptn.c (libc) 
+ *
+ * Copyright 1987 - 1992 by Sierra Systems.  All rights reserved. 
+ *
+ * M68000 
+ */
+
+#include <stdio.h>
+#include <signal.h>
+#include "game.h"
+
+extern short    ScreenCol;
+extern short    ScreenRow;	/* Where all Console I/O takes place from */
+
+static void 	dmp_regs(char *);
+static void 	dump_fp_regs(char *);
+static void 	flt2str(char *, char *);
+static char    *itoh(unsigned long, int, char *);
+static char    *get_exception_sp(void);
+
+/*--------------------------- _xcptn_info_000() -----------------------------*/
+
+/*
+ * _xcptn_info_XXX gets a pointer to the portion of the stack containing
+ * information about the exception, and prints the status information saved
+ * by the processor.  The processor specific function for dumping information
+ * stacked by the processor during the exception is ifdef'ed in this file.
+ * The module names should correspond to the defined processor name. 
+ */
+
+void 
+_disp_xcptn_info(long sig)
+{
+	register char  *oldstack;
+	register long   sig_nbr;
+	char           *err_msg;
+	short           status;
+	char            buf[12];
+	WORD				i;
+	UWORD				*ptr;
+	extern UWORD	LogoChars;
+	extern int		UI_ClearScreen(UWORD	Addr);
+
+	sig_nbr = sig & 0xffff;
+	switch (sig_nbr) {
+	case SIGBUS:
+		err_msg = "******** BUS ERROR ********";
+		break;
+	case SIGFPE:
+		err_msg = " FLOATING POINT EXCEPTION *";
+		break;
+	case SIGCHK:
+		err_msg = " CHK INSTRUCTION EXCEPTION ";
+		break;
+	case SIGINT:
+		err_msg = "*** KEYBOARD INTERRUPT ****";
+		break;
+	case SIGILL:
+		err_msg = "*** ILLEGAL INSTRUCTION ***";
+		break;
+	case SIGTRAP:
+		err_msg = "****** TRAPV - TRAPcc *****";
+		break;
+	case SIGPRIV:
+		err_msg = "*** PRIVILEGE VIOLATION ***";
+		break;
+	case SIGADDR:
+		err_msg = "****** ADDRESS ERROR ******";
+		break;
+	case SIGSPUR:
+		err_msg = "*** SPURIOUS INTERRUPT ****";
+		break;
+	case SIGZDIV:
+		err_msg = "***** DIVIDE BY ZERO ******";
+		break;
+		/*
+		 * case SIGUSER:   err_msg = "    USER DEFINED SIGNAL    ";
+		 * break; 
+		 */
+	default:
+		err_msg = "**** UNDEFINED SIGNAL *****";
+	}
+
+	DisableInts();
+
+	oldstack = get_exception_sp();
+
+	/* Upload ASCII font to VDP */
+	SYS_WaitForDMA();
+	UI_ClearScreen(0xC000);
+	UI_ClearScreen(0xE000);
+	UI_InitVDP();
+	UI_KillSprList();
+	DisableInts();
+	ptr = &LogoChars;
+	ptr += 16;
+	SYS_SetVAddr(0x0040);
+	for (i=0; i < (16 * 148); i++)
+		VDATA = *ptr++;
+	ScreenCol = 0;
+	ScreenRow = 4;
+
+	fputs("\n*", stderr);
+	fputs(err_msg, stderr);
+	fputs("*\n", stderr);
+
+	if (sig_nbr == SIGFPE) {
+		fputs(" Integer Divide by Zero\n", stderr);
+	}
+	switch (sig_nbr) {
+	case SIGFPE:
+	case SIGCHK:
+	case SIGINT:
+	case SIGILL:
+	case SIGTRAP:
+	case SIGPRIV:
+	case SIGSPUR:
+	case SIGZDIV:
+		/*
+		 * case SIGUSER: 
+		 */
+		fputs(" PC = ", stderr);
+		fputs(itoh(*(unsigned long *) (oldstack + 66), 6, buf), stderr);
+		fputs("\n SR = ", stderr);
+		fputs(itoh(*(unsigned short *) (oldstack + 64), 4, buf), stderr);
+		fputs("\n", stderr);
+		dmp_regs(oldstack);
+		break;
+
+	case SIGBUS:
+	case SIGADDR:
+		fputs("\n PC = ", stderr);
+		fputs(itoh(*(unsigned long *) (oldstack + 74), 6, buf), stderr);
+		fputs("\n SR = ", stderr);
+		fputs(itoh(*(unsigned short *) (oldstack + 72), 4, buf), stderr);
+		fputs("\n Inst. being executed: ", stderr);
+		fputs(itoh(*(unsigned short *) (oldstack + 70), 4, buf), stderr);
+		fputs("\n Accessed address    : ", stderr);
+		fputs(itoh(*(unsigned long *) (oldstack + 66), 8, buf), stderr);
+		fputs("\n Access information  : ", stderr);
+		fputs((*(unsigned short *) (oldstack + 64) & 0x10) ?
+		      " READ\n" : "WRITE\n", stderr);
+
+		dmp_regs(oldstack);
+		break;
+	default:
+		return;
+	}
+	fputs("*****************************\n", stderr);
+	EnableInts();
+	while (1);
+}
+
+/*----------------------------- dmp_regs() ----------------------------------*/
+
+static void 
+dmp_regs(char *oldstack)
+{
+	int             i;
+	int             c;
+	char            reg[4];
+	char            buf[12];
+	unsigned long  *old_stack;
+
+	old_stack = (unsigned long *) oldstack;
+
+	reg[2] = '\0';
+
+	for (c = 'D'; c >= 'A'; c -= 3, old_stack += 8) {
+		reg[0] = c;
+		for (i = 0; i < 8; i++) {
+			reg[1] = i + '0';
+			putc(' ', stderr);
+			fputs(reg, stderr);
+			putc('=', stderr);
+			fputs(itoh(*(old_stack + i), 8, buf), stderr);
+			putc(' ', stderr);
+			if ((i & 0x1) == 1)
+				putc('\n', stderr);
+		}
+	}
+}
+
+/*------------------------------- itoh() ------------------------------------*/
+
+static char    *
+itoh(unsigned long number, int length, char *buf)
+{
+	register char  *ptr;
+
+	ptr = buf + 9;
+	*--ptr = '\0';
+
+	while (length--) {
+		*--ptr = "0123456789ABCDEF"[number & 0xf];
+		number >>= 4;
+	}
+	return (ptr);
+}
+
+/*------------------------------ flt2str() ----------------------------------*/
+
+/*
+ * flt2str converts a long double value to an 'E' format fp string 
+ */
+
+static void 
+flt2str(char *value, char *buf)
+{
+	register int    length;
+	register char  *ptr;
+
+	length = _f_fltstr(2, value, buf, 'E', 18, 0);
+	ptr = buf + length;
+	while (length++ < 26)
+		*ptr++ = ' ';
+	*ptr = '\0';
+}
+
+/*---------------------------- get_exception_sp() ---------------------------*/
+
+/*
+ * get_exception_sp traces back through 4 frames until the stack area is
+ * reached that contains the information dumped in the exception. 
+ *
+ * get_exception_sp is called only after the following calls are made: 
+ *
+ * <processor exception> <exception handler> __xraise() _dflt_sig()
+ * __disp_xcptn_info()   ...	  no frame used __xcptn_info_XXX() 
+ *
+ * get_exception_sp is completely dependant on this, and will not work in any
+ * other context. 
+ */
+
+asm("_get_exception_sp:");
+asm("	movea.l	(a6),a0");	/* a0 is now address of frame in dflt_sig()   */
+asm("	movea.l	(a0),a0");	/* a0 is now address of frame in _xraise()    */
+asm("	lea 	12(a0),a0");	/* skip back past saved fp, pc and pushed arg */
+asm("	rts");

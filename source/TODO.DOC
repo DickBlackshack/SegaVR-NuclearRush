@@ -1,0 +1,134 @@
+Things to do after Final!:
+	Make use of EEPROM code
+	Add small explosion when hitting but not destroying
+	Change nuke explosion to bitmap and use it with tanks
+	Add new palettes for drones
+	Make night palettes darker
+	Make infrared palettes light to dark greens
+	Fix glitch in sprite scaler
+	Fix vertical scroll glitch, probably a hardware bug
+	Add level finish screen "congrats" (Portraits?)
+		Game won
+	Add screens that say how you died (Portraits?)
+		Statistics:
+			Hit percentages
+			Canisters picked up
+			Enemies destroyed
+
+Things done for Final:
+	Fix bug 19
+	Fix bug 26
+	Fix bug 27
+	Fix bug 93
+	Fix bug 97
+	Fix bug 98
+	Fix bug 99
+	Fix bug 100
+	Fix bug 101
+	Make lasers move with head rotation
+
+Things done for Beta:
+	Tune game levels
+	Manual:
+		Diagram of what all the controls are, including cheat.
+	Make the game use "continues"
+	Add save code to the game
+	Target lock on:
+		Change cursor when target is locked
+		Have a small cursor follow target
+	Repalettize the snow drifts to the new ice world palette
+	Add loitering to drone logic
+	Fix glitch in drone enhance screen after level
+	Fix glitch in title screen after game lost
+	Add voice commands:
+		"Cannister collected"
+		"Fuel low"
+		"Game over"
+		"Lasers destroyed"
+		"Missiles depleated"
+		"Mission succesfull"
+		"Nuclear Rush!"
+		"Radar destroyed"
+		"Sheilds destroyed"
+		"Tank in zone"
+		"Zone shield hit"	
+	Implement all of Toms new palettes.
+	Implement all of Toms new artwork.
+	Artwork:
+		New palettes for cockpit/worlds
+		Storyline artwork, possible animations
+		Intro to world artwork?
+		Portrait
+			Congrats
+			Stern look
+	Attempt horizon tilt
+	Add intro storyline and screens
+	Add intro for each level "welcome"
+	Add level finish screen "congrats" (Portraits?)
+		All cannister picked up
+		Level won
+	Add screens that say how you died (Portraits?)
+		Out of fuel
+		Shot out of sky
+	Make it so player can loose pieces of ship in attacks:
+		Lasers
+		Radar
+
+Things done for Alpha+:
+	Limit number of missles
+		Buy 50 missles per level
+	Add: Joystick button C changes Tilt
+	Make cheat menu
+		Select level
+		Select items
+	Make Game Over restart from begining
+	Make sure you get killed from bullets
+	Don't blow up cannisters
+	Changes reds in desert to yellows
+	Fax list of voice segments
+	Start with lazer, as button A, missles as button B
+	Make missles faster
+	Make some ship fly faster
+	Limit missle tracking range
+	Fix blue wall hits
+	Fix flicker
+
+Things done with Alpha:
+	Add all remaining artwork:
+		Add damage effects [bullet holes]
+		32 rotation tank and logic
+		Laser cannon
+		32 rotation mine
+		Snow drifts in ice world.
+		Fenceposts
+		32 rotation house
+		New "plain" cockpit
+	Attach all drone enhancement functions.
+		Cloaking
+		Shields
+		Laser
+		Faster Engine
+		Ooze map
+		Infra-Red
+	Add stealth drones.
+	Make cross-hair a sprite.
+	Sync the cockpit up with the sprites.
+	Mix music and sound effects files.
+	Change mine logic.
+	Change shrapnel animations.
+	Add blue flash when hitting world edge.
+	Improve the drone AI, have them chase you more.
+	Add fragmented explosion
+	Add Yellow color cycling.
+	Add all level effecting palettes.
+	Reduce the number of objects in the world.
+	Optimize View3DObjects
+	Fix the bugs with clipping.
+	Add edge removal compression.
+	Switch over to Sierra C 3.0.
+	Do performance analysis.
+	Improve bullet AI (make them lose track and miss)
+	Improve bullet targeting.
+	Fix radar bugs with corners.
+	Fix bugs with bullet color on radar.
+

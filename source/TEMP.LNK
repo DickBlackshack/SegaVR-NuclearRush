@@ -1,0 +1,38 @@
+-m
+-P
+MEMORY
+{
+	rom:	ORG(0x00000000)	LEN(0x250000)
+	ram:	ORG(0xFFFF0000)	LEN(0x010000)
+}
+SECTIONS
+{
+    GROUP:
+    {
+        .text: {}
+        .ld_tbl: {ld = ..;}
+    } > rom
+    .data: ALIGN(2) LOAD(ld) COPY {} > ram
+    .bss: {} > ram
+}
+startup.o 
+segalogo.o logo.o segalib.o variable.o vrdrv.o worlds.o  xpndlzss.o 
+hud.o gridscrn.o enhance.o cockpit.o nukescrn.o nukeruin.o focus.o 
+droncrsh.o punk1.o punk2.o gooderth.o uglyerth.o map.o fp_logo.o 
+nukelogo.o backgrnd.o 
+desert.o midwest.o ice.o forest.o froznlab.o ocean.o vegas.o  flatcity.o 
+hud_art.o disolve.o infrared.o lasergun.o oozemap.o shield.o 
+engine.o player.o cloak.o compass.o forcefld.o cracks.o 
+llazer.o rlazer.o missles.o 
+cactus.o joshua.o pear.o sagebush.o grass.o maple.o oak.o 
+rock.o sealbone.o tombston.o wellruin.o igloo32.o 
+jeep.o explode.o pool.o can32.o rcr32.o nukebomb.o 
+drift1.o drift2.o drift3.o drift4.o house32.o tank32.o  
+piece1.o piece2.o piece3.o piece4.o piece5.o piece6.o zzap.o 
+buoy1.o buoy2.o marker1.o marker2.o oilpump.o  
+silo.o sphrtank.o grndtank.o nukesym.o wave.o 
+fed32.o mod32.o zoomer32.o missle32.o mine32.o gramps32.o 
+main.o 3d.o ai.o sprites.o excptn.o math.o ui.o scale.o 
+horizon.o world.o bullets.o mattai.o upd_cpit.o globals.o 
+gems.o 
+-l c 

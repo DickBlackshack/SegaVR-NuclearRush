@@ -1,0 +1,12 @@
+-r
+MEMORY
+{
+	code:	ORG(0x00000000)	LEN(0x1FFF00)
+}
+SECTIONS
+{
+    GROUP:
+    {
+        .text: {}
+    } > code
+}

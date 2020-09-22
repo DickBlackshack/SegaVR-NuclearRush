@@ -1,0 +1,613 @@
+/***
+ *			Main file for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+#include "gems.h"
+
+#define	NOASCII	TRUE
+
+#define	DEBUG		FALSE
+#define	HUD		TRUE
+#define	CENTERED	TRUE
+#define	MAPSHIFT	5		/* 32x32 HUD map displays 1024x1024 */
+#define	SOUNDS		TRUE
+
+#define	FPS		FALSE
+
+extern void	Set_HScroll();
+extern void UI_ClearScreen(UWORD);
+
+/* extern void	Update_Cockpit(); */
+
+extern UWORD		SYS_BASECHR;
+extern UWORD		SYS_BASECHR1;
+extern UWORD		SYS_LASTCHR;
+extern WORD			SYS_LASTSPR;
+extern UWORD		SYS_CHRATTR;			/* Character Attributes */
+
+extern UWORD		SYS_MINFDIST;
+extern UWORD		SYS_MAXFDIST;
+extern UWORD		SYS_DISTDIV;
+extern UWORD		SYS_AVGFDIST;
+extern FRAC			SYS_BORDERSIZE;
+
+extern int			NumCracks;			/* Number of cracks in window */
+
+extern int			NumNukes;			/* Number of nuclear pools in the world */
+extern int			FreeNukes;			/* Number of free nuclear pools in the world */
+extern NUKE_POOL	NukePools[30];		/* Nuke pool information */
+
+extern UWORD		SYS_HORZCHRS;
+extern WORD			SYS_SCRLXB;
+
+extern WORD			SYS_DOCYCLE;
+
+extern WORD			UI_DemoMode;
+
+extern UWORD		STATS_SHOTS;
+extern UWORD		STATS_HITS;
+
+extern void	SendAnimPal(UWORD *anim_file);
+extern void	DispFrame(UWORD *anim_file,WORD anim,WORD frame,WORD xp,WORD yp);
+
+extern PLAYER		Player;
+
+UWORD			Game_Frame;		/* Game Frame counter */
+char			OutBuf[80];
+
+/***
+ *		Debugging display
+ ***/
+
+#include <stdarg.h>
+#include	<ctype.h>
+#include <errno.h>
+
+void
+Bomb(char *fmt, ...)
+{
+	va_list		args;
+	char			OutBuf[128];
+	extern void	DisnableInts();
+	extern void	EHInts();
+	extern WORD ScreenCol;
+	extern WORD ScreenRow;
+
+	ScreenRow = 2;
+	ScreenCol = 1;
+	va_start(args,fmt);
+	DisableInts();
+	vsprintf(OutBuf,fmt,args);
+	puts(OutBuf);
+	perror(" Error");
+	va_end(args);
+	EnableInts();
+	while (1)
+		;
+}
+
+/***
+ *
+ *		Vertical Blank queing code.  Build a list of commands that VBlank
+ *		will do when it has time.
+ *
+ ***/
+
+WORD	SYS_DCLISTLEN;		/* List length */
+WORD	SYS_DCLISTAVL;		/* List ready to send */
+extern BYTE	SYS_DCLIST[2048];	/* Data or Ctrl flags */
+extern UWORD	SYS_DCDATA[2048];	/* WORDs to send */
+
+void
+SYS_DCListHold()
+{
+	SYS_DCLISTAVL = FALSE;
+}
+
+void
+SYS_DCListGo()
+{
+	SYS_DCLISTAVL = TRUE;
+}
+
+void
+SYS_DCAddData(UWORD Value)
+{
+	SYS_DCLIST[SYS_DCLISTLEN] = TRUE;
+	SYS_DCDATA[SYS_DCLISTLEN] = Value;
+	SYS_DCLISTLEN++;
+}
+
+/***
+ *		WaitUntilSafe:		Wait until we know VBlank will not trash VDP
+ ***/
+
+void
+WaitUntilSafe()
+{
+	UWORD			cnt;
+
+	cnt = VCNTR;
+	if (cnt < 1 || cnt > 200)
+		SYS_WaitFrame();
+}
+
+/***
+ *		VDP_puts:		Print text to the VDP
+ ***/
+
+VDP_puts(char *text)
+{
+	char		*ptr;
+	UWORD		Addr;
+	extern WORD ScreenCol;
+	extern WORD ScreenRow;
+
+	SYS_DCListHold();
+	Addr = (ScreenRow * (64 * 2)) + (ScreenCol * 2) + 0xE000;
+	SYS_DCAddVAddr(Addr);
+	for (ptr=text; *ptr; ptr++)
+		SYS_DCAddData(*ptr + 17 | 0xE000);
+	SYS_DCListGo();
+	ScreenRow++;
+	ScreenCol = 0;
+}
+
+/***
+ *		Display debugging information on the screen
+ ***/
+
+void
+Debug(char *fmt, ...)
+{
+	va_list		args;
+	char			OutBuf[128];
+	extern WORD ScreenCol;
+	extern WORD ScreenRow;
+
+	va_start(args,fmt);
+	vsprintf(OutBuf,fmt,args);
+#if 0
+	DisableInts();
+	puts(OutBuf);
+	EnableInts();
+#else
+	VDP_puts(OutBuf);
+#endif
+	va_end(args);
+}
+
+/****** Globals *******/
+WORD ScreenCol;
+WORD ScreenRow;         /* Where all Console I/O takes place from */
+
+WORD	SYS_SCROLLX;
+extern WORD	SYS_NEWXA;
+extern WORD	SYS_NEWXB;
+UWORD	SYS_GAMEDONE;
+UWORD	WorldNum;
+
+BYTE	SEND_LEFT;			/*	True if currently sending left data	*/
+
+/****
+	Background Maps:
+		UWORD	Offset to Palette
+		UWORD	Offset to Map
+		UWORD	Offset to Character Definitions
+		???
+		Palette:
+			WORD	Color Register index
+			UWORD	Number of colors
+				UWORD	RGB Value (Sega format)
+				...
+			...Repeat...
+			-1		End of list
+		Map:
+			UWORD	Width of Map
+			UWORD	Height of Map
+			UWORD	Map[][]
+		???	Insert new blocks here.
+		Character Definitions:
+			BYTE	32 Bytes per character
+ ***/
+
+extern UWORD		SYS_LASTCHR;
+
+#define		DECOMPRESS		TRUE
+
+void
+DispMap(UWORD *map_file)
+{
+	UWORD		*pal;
+	UWORD		*map;
+	UWORD		*chrs;
+	UWORD		*wptr;
+	ULONG		num_bytes;
+	int		i,x,y;
+	int		w,h;
+	int		numchrs;
+	extern OBJECT3D	World_Objs[];
+
+	wptr = map_file;
+	num_bytes = *(ULONG *)wptr;
+	LZ_Open((BYTE *)wptr,(BYTE *)World_Objs + 40000);
+	wptr = (UWORD *)World_Objs;
+	LZ_Read((BYTE *)wptr,num_bytes);
+	pal = (UWORD *)((BYTE *)World_Objs + *wptr++);
+	map = (UWORD *)((BYTE *)World_Objs + *wptr++);
+	chrs = (UWORD *)((BYTE *)World_Objs + *wptr);
+	SYS_SetPalette(pal);
+	/* Dump characters */
+	SYS_SetVAddr(SYS_LASTCHR*32);
+	numchrs = *chrs++;
+	for (i=0; i<numchrs; i++)
+		for (y=0; y<16; y++)
+			VDATA = *chrs++;
+	/* Dump map */
+	SYS_SetVAddr(SYS_LASTCHR*32);
+	w = *map++;
+	h = *map++;
+	if (h > 64)
+		h = 64;
+	i = 0;
+	for (y=0; y<h; y++) {
+		SYS_SetVAddr(0xC000+i);
+		for (x=0; x<w; x++)
+			VDATA = *map++ + SYS_LASTCHR;
+		i += 128;
+	}
+	SYS_LASTCHR += numchrs;
+}
+
+void
+SetMapPal(UWORD *map_file)
+{
+	UWORD		*pal;
+	UWORD		*wptr;
+	ULONG		num_bytes;
+	extern OBJECT3D	World_Objs[];
+
+	wptr = map_file;
+	num_bytes = *(ULONG *)wptr;
+	LZ_Open((BYTE *)wptr,(BYTE *)World_Objs + 40000);
+	wptr = (UWORD *)World_Objs;
+	LZ_Read((BYTE *)wptr,num_bytes);
+	pal = (UWORD *)((BYTE *)World_Objs + *wptr);
+	SYS_SetPalette(pal);
+}
+
+/***
+ *		Display a MAP file on Screen B
+ ***/
+
+void
+DispBMap(UWORD *map_file)
+{
+	UWORD		*pal;
+	UWORD		*map;
+	UWORD		*chrs;
+	UWORD		*wptr;
+	int		i,x,y;
+	int		w,h;
+	int		numchrs;
+	ULONG		num_bytes;
+	extern OBJECT3D	World_Objs[];
+
+	wptr = map_file;
+	num_bytes = *(ULONG *)wptr;
+	LZ_Open((BYTE *)wptr,(BYTE *)World_Objs + 40000);
+	wptr = (UWORD *)World_Objs;
+	LZ_Read((BYTE *)wptr,num_bytes);
+	pal = (UWORD *)((BYTE *)World_Objs + *wptr++);
+	map = (UWORD *)((BYTE *)World_Objs + *wptr++);
+	chrs = (UWORD *)((BYTE *)World_Objs + *wptr);
+	SYS_SetPalette(pal);
+	/* Dump characters */
+	SYS_SetVAddr(SYS_LASTCHR*32);
+	numchrs = *chrs++;
+	for (i=0; i<numchrs; i++)
+		for (y=0; y<16; y++)
+			VDATA = *chrs++;
+	/* Dump map */
+	SYS_SetVAddr(SYS_LASTCHR*32);
+	w = *map++;
+	h = *map++;
+	if (h > 64)
+		h = 64;
+	i = 0;
+	for (y=0; y<h; y++) {
+		SYS_SetVAddr(0xE000+i);
+		for (x=0; x<w; x++)
+			VDATA = *map++ + SYS_LASTCHR | 0x8000;
+		i += 128;
+	}
+	SYS_LASTCHR += numchrs;
+}
+
+volatile	LONG				SYS_VCNT;
+volatile	LONG				SYS_OLDVCNT;
+
+LONG	FPS_List[10];
+WORD	FPS_LPtr;
+
+WORD
+Compute_FPS()
+{
+	WORD		i;
+	LONG		avg;
+
+	FPS_List[FPS_LPtr] = SYS_VCNT - SYS_OLDVCNT;
+	avg = 0;
+	for (i=0; i<10; i++)
+		avg += FPS_List[i];
+	if (FPS_LPtr < 9)
+		FPS_LPtr++;
+	else
+		FPS_LPtr = 0;
+	return ((WORD)(6000/avg));
+}
+
+#define	TEST		0
+
+extern WORD		Ship_Rotation;
+extern int		Ship_Turn_Speed;
+extern BYTE		SYS_FLICKER;
+
+int				Old_Alt;
+int				Alt;
+
+
+extern int			Visable_Quad1;		/* View angle quadrant left side */
+extern int			Visable_Quad2;		/* View angle quadrant right side */
+extern short		MinAngle;
+extern short		MaxAngle;
+
+WORD		Player_Fuel;
+
+
+void
+MainGameLoop(void)
+{
+	int				i,j,k,x,y;
+
+	extern FRAC		Cx,Cy,Cz;
+	extern int		Headset_Tilt;
+	WORD				*wptr;
+	UWORD				*uwptr;
+	UWORD				chrtmp;
+
+	BYTE				moved;
+	BYTE				oldjoy;
+	extern int		Num_Visable_Objs;
+	extern int		Num_Clipped;
+	extern void		Do_UI();
+	extern void		Generate_World(short	num);
+	extern void		Get_World_Info(short	num);
+	extern WORD		PalBuffer[64];
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	/* extern int		NumNukes; */
+	extern WORD		SYS_SAFEDMA;
+
+	Player_Fuel = 31;		/* Enough for eight minutes of play */
+	UI_ClearScreen(0xC000);
+	UI_ClearScreen(0xE000);
+	/***
+	 *			Main Game Loop
+	 ***/
+	while (1) {
+		Get_World_Info(WorldNum);
+		UI_WorldIntro();
+		Game_Frame = 0;
+		SYS_OLDVCNT = SYS_VCNT = 0;
+		Player.Won = FALSE;
+		if (Player.Items[3])
+			Player.Damage = 200;
+		else
+			Player.Damage = 100;
+		NumCracks = 0;
+#if NOASCII
+		SYS_LASTCHR = 1;
+#else
+		SYS_LASTCHR = 148;
+#endif
+
+
+		DisableInts();
+#if HUD
+		DispBMap(&cockpit_map);
+#endif
+		EnableInts();
+
+		View_World();
+		STATS_HITS = STATS_SHOTS = 0;
+
+		InitSprites();
+
+		Init3D();
+		Move3D(180,10,0,0,0);
+		NumNukes = 0;
+		FreeNukes = 0;
+		Generate_World(WorldNum);
+
+		ScreenRow = ScreenCol = 0;
+
+		Init_Player();
+		Init_Horizon();
+		Set_HScroll();
+		/* Clear all the background colors */
+		PalBuffer[0] = 0;
+		PalBuffer[16] = 0;
+		PalBuffer[32] = 0;
+		PalBuffer[48] = 0;
+		SYS_DOCYCLE = TRUE;
+		SYS_FadeIn(10);						/* Fade the new world in */
+		SYS_VCNT = 1l;
+		SYS_GAMEDONE = FALSE;
+		/* Init the scaler for a new world */
+		PDQS_New();
+		while (!SYS_GAMEDONE) {
+#if 	DEBUG
+			ScreenCol = 0;
+			ScreenRow = 2;
+#if 0
+			Debug(" TILT %4d Z %4d THR %4d",
+				Player.Tilt, FRAC2INT (Player.Z), FRAC2INT (Player.Thrust));
+
+/*					60/(SYS_VCNT-SYS_OLDVCNT)); 	*/
+#else
+	#if 1
+		{
+			WORD		fps;
+
+			fps = Compute_FPS();
+		#if 0
+			Debug(" FPS=%2d.%1d Vis=%2d Clip=%2d rot=%3d",
+				fps / 10,
+				fps % 10,
+				Num_Visable_Objs,Num_Clipped, Player.Rotation);
+		#else
+			Debug(" FPS=%2d.%1d ",
+				fps / 10,
+				fps % 10);
+		#endif
+		}
+	#else
+		{
+			extern	UWORD		HeadX;
+			extern	WORD		HeadY;
+
+			Debug(" FPS=%2ld HeadX=%3d HeadY=%3d",
+				60/(SYS_VCNT-SYS_OLDVCNT),HeadX,HeadY);
+		}
+	#endif
+#endif
+#endif
+
+#if FPS
+		{
+			WORD		fps;
+
+			ScreenCol = 2;
+			ScreenRow = 2;
+			fps = Compute_FPS();
+			if (fps < 999)
+				UI_PrintString("%2d.%1d",fps / 10,fps % 10);
+		}
+#endif
+			SYS_OLDVCNT = SYS_VCNT;
+			/* Move Camera */
+			Update_Player();
+#if 0
+			/* Does user want SYS_FLICKER? */
+			if (SYS_JoyTable[JOY_START] && !oldjoy)
+				SYS_FLICKER = ~SYS_FLICKER;
+#else
+			/* Does user want to pause? */
+			if (SYS_JoyTable[JOY_START] && !oldjoy) {
+				WORD		Fuel_Save;
+
+				if (UI_DemoMode) {
+					UI_DemoMode = FALSE;
+					return;
+				}
+				Fuel_Save = Player_Fuel;
+				gemspauseall();
+				ScreenCol = 12;
+				ScreenRow = 12;
+				UI_PrintString("PAUSE");
+				if (SYS_JoyTable[JOY_START])
+					while (SYS_JoyTable[JOY_START])
+						;
+				while (!SYS_JoyTable[JOY_START])
+					;
+				ScreenCol = 12;
+				ScreenRow = 12;
+				UI_PrintString("          ");
+				gemsresumeall();
+				Player_Fuel = Fuel_Save;
+			}
+#endif
+			oldjoy = SYS_JoyTable[JOY_START];	/* For debouncing */
+			if (SYS_FLICKER) {
+				/* Show left sprites */
+				SEND_LEFT = TRUE;
+				Move3D(Player.Rotation,Player.Tilt,Player.X,Player.Y,Player.Z);
+				View3DObjects(TRUE);
+				Set_HScroll();
+				Update_Cockpit();
+				Send3DObjects(TRUE);
+				/* Show right sprites */
+				SEND_LEFT = FALSE;
+				SetSendRight();
+				View3DObjects(FALSE);
+				Update_Cockpit();
+				Send3DObjects(FALSE);
+			} else {
+				/* Move without SYS_FLICKER */
+				SEND_LEFT = TRUE;
+				Move3D(Player.Rotation,Player.Tilt,Player.X,Player.Y,Player.Z);
+				View3DObjects(TRUE);
+				Set_HScroll();
+				Update_Cockpit();
+				Send3DObjects(TRUE);
+			}
+			/* Do a maximum of 15 frames per second! */
+			while (SYS_VCNT-SYS_OLDVCNT < 4)
+			 	SYS_WaitFrame();
+			SetupDMA();								/*	Prepare to DMA sprite data	*/
+			Game_Frame++;
+		}
+		if (!UI_DemoMode) {
+			if (WorldNum == 31 && Player.Won) {
+				UI_GameWon();
+				return;
+			} else
+				UI_NextLevel();
+			if (Player_Fuel && Player.Damage)
+				UI_DroneEnhance();
+			else
+				return;
+		} else {
+			return;
+		}
+	}
+}
+
+void
+main(void)
+{
+	UWORD				*uwptr;
+	extern void		Do_UI();
+	extern WORD		SYS_SAFEDMA;
+	extern UWORD	RLEScaleCode;
+
+	SYS_SAFEDMA = 0xFFFF;
+	/* Init scale code */
+	uwptr = &RLEScaleCode;
+	uwptr[0] = 0x207C;
+	uwptr[3] = 0x227C;
+	uwptr[6] = 0x4EF9;
+	/* Set up default focus distances for Kevin Standard Eyes */
+#if 0
+	SYS_MINFDIST = 43;
+	SYS_MAXFDIST = 66;
+#else
+	SYS_MINFDIST = 0;
+	SYS_MAXFDIST = 23;
+#endif
+	SYS_DISTDIV = 400 / (SYS_MAXFDIST - SYS_MINFDIST);
+	SYS_AVGFDIST = ((SYS_MAXFDIST - SYS_MINFDIST) / 2) + SYS_MINFDIST;
+
+	SYS_NEWXA = SYS_NEWXB = SYS_SCROLLX = 0;
+
+	Do_UI();
+restart:
+	Main_UI();
+	MainGameLoop();
+	goto restart;
+}

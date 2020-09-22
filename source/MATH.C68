@@ -1,0 +1,308 @@
+/***
+ *			Fractional Math routines for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include "game.h"
+
+/***
+ *		frec:		Return the receprical of a FRAC
+ ***/
+
+FRAC
+frec(FRAC a)
+{
+	ULONG		tmp;
+	ULONG		ua;
+
+	ua = (a < 0 ? -a : a);
+	if (ua != 0)
+		tmp = (1l << (FRACSIZE*2-1)) / ua;
+	tmp <<= 1;
+	if (a < 0)
+		tmp = -tmp;
+	return tmp;
+}
+
+int
+fround(FRAC x)
+{
+	return (FRAC2INT(x+(INT2FRAC(1)>>1)));
+}
+
+const FRAC	sintab[91] = {
+/*	0x0000l,0x0477l,0x08EFl,0x0D65l,0x11DBl,0x164Fl,0x1AC2l,0x1F32l, */
+	0x0001l,0x0477l,0x08EFl,0x0D65l,0x11DBl,0x164Fl,0x1AC2l,0x1F32l,
+	0x23A0l,0x280Cl,0x2C74l,0x30D8l,0x3539l,0x3996l,0x3DEEl,0x4241l,
+	0x4690l,0x4AD8l,0x4F1Bl,0x5358l,0x578El,0x5BBEl,0x5FE6l,0x6406l,
+	0x681Fl,0x6C30l,0x7039l,0x7438l,0x782Fl,0x7C1Cl,0x8000l,0x83D9l,
+	0x87A8l,0x8B6Dl,0x8F27l,0x92D5l,0x9679l,0x9A10l,0x9D9Bl,0xA11Bl,
+	0xA48Dl,0xA7F3l,0xAB4Cl,0xAE97l,0xB1D5l,0xB504l,0xB826l,0xBB39l,
+	0xBE3El,0xC134l,0xC41Bl,0xC6F3l,0xC9BBl,0xCC73l,0xCF1Bl,0xD1B3l,
+	0xD43Bl,0xD6B3l,0xD919l,0xDB6Fl,0xDDB3l,0xDFE7l,0xE208l,0xE419l,
+	0xE617l,0xE803l,0xE9DEl,0xEBA6l,0xED5Bl,0xEEFFl,0xF08Fl,0xF20Dl,
+	0xF378l,0xF4D0l,0xF615l,0xF746l,0xF865l,0xF970l,0xFA67l,0xFB4Bl,
+	0xFC1Cl,0xFCD9l,0xFD82l,0xFE17l,0xFE98l,0xFF06l,0xFF60l,0xFFA6l,
+	0xFFD8l,0xFFF6l,0xFFFFl
+/*	0xFFD8l,0xFFF6l,0x10000l */
+};
+
+const FRAC	tantab[91] = {
+	0x00000000l,0x00000477l,0x000008F0l,0x00000D6Al,0x000011E6l,0x00001665l,
+	0x00001AE8l,0x00001F6El,0x000023FAl,0x0000288Bl,0x00002D23l,0x000031C2l,
+	0x0000366Al,0x00003B1Al,0x00003FD3l,0x00004498l,0x00004968l,0x00004E44l,
+	0x0000532Dl,0x00005825l,0x00005D2Dl,0x00006244l,0x0000676El,0x00006CAAl,
+	0x000071FAl,0x0000775Fl,0x00007CDCl,0x00008270l,0x0000881El,0x00008DE7l,
+	0x000093CDl,0x000099D2l,0x00009FF7l,0x0000A63Fl,0x0000ACACl,0x0000B340l,
+	0x0000B9FEl,0x0000C0E8l,0x0000C802l,0x0000CF4El,0x0000D6CFl,0x0000DE89l,
+	0x0000E680l,0x0000EEB9l,0x0000F737l,0x00010000l,0x00010918l,0x00011286l,
+	0x00011C51l,0x0001267El,0x00013116l,0x00013C22l,0x000147AAl,0x000153B9l,
+	0x0001605Al,0x00016D9Bl,0x00017B89l,0x00018A34l,0x000199AFl,0x0001AA0El,
+	0x0001BB67l,0x0001CDD6l,0x0001E177l,0x0001F66Dl,0x00020CE0l,0x000224FEl,
+	0x00023EFCl,0x00025B19l,0x0002799Fl,0x00029AE7l,0x0002BF5Al,0x0002E77Al,
+	0x000313E3l,0x00034556l,0x00037CC7l,0x0003BB67l,0x000402C2l,0x000454DBl,
+	0x0004B462l,0x00052501l,0x0005ABD9l,0x00065052l,0x00071D88l,0x000824F3l,
+	0x000983ADl,0x000B6E17l,0x000E4CF8l,0x001314C5l,0x001CA2E1l,0x00394A3Al,
+	0x00729474l
+};
+
+const int atantab[256] = {
+	0,0,0, 	 						/* 0-2 */
+	1,1,1,1, 		 				/* 3-6 */
+	2,2,2,2,2,  					/* 7-11 */
+	3,3,3,3,							/* 12-15 */
+	4,4,4,4,4,						/* 16-20 */
+	5,5,5,5,							/* 21-24 */
+	6,6,6,6,6,						/* 25-29 */
+	7,7,7,7,							/* 30-33 */
+	8,8,8,8,8,						/* 34-38 */
+	9,9,9,9,							/* 39-42 */
+	10,10,10,10,10,				/* 43-47 */
+	11,11,11,11,11,				/* 48-52 */
+	12,12,12,12,					/* 53-56 */
+	13,13,13,13,13,				/* 57-61 */
+	14,14,14,14,14,				/* 62-66 */
+	15,15,15,15,					/* 67-70 */
+	16,16,16,16,16,16,			/* 71-76 */
+	17,17,17,17,					/* 77-80 */
+	18,18,18,18,18,				/* 81-85 */
+	19,19,19,19,19,				/* 86-90 */
+	20,20,20,20,20,				/* 91-95 */
+	21,21,21,21,21,				/* 96-100 */
+	22,22,22,22,22,22,			/* 101-106 */
+	23,23,23,23,23,				/* 106-111 */
+	24,24,24,24,24,				/* 112-116 */
+	25,25,25,25,25,25,			/* 117-122 */
+	26,26,26,26,26,				/* 123-127 */
+	27,27,27,27,27,27,			/* 128-133 */
+	28,28,28,28,28,28,			/* 134-139 */
+	29,29,29,29,29,				/* 140-144 */
+	30,30,30,30,30,30,			/* 145-150 */
+	31,31,31,31,31,31,			/* 151-156 */
+	32,32,32,32,32,32,32,		/* 157-163 */
+	33,33,33,33,33,33,			/* 164-169 */
+	34,34,34,34,34,34,			/* 170-175 */
+	35,35,35,35,35,35,35,		/* 176-182 */
+	36,36,36,36,36,36,36,36,	/* 183-190 */
+	37,37,37,37,37,37,			/* 191-196 */
+	38,38,38,38,38,38,38,		/* 197-203 */
+	39,39,39,39,39,39,39,39,	/* 204-211 */
+	40,40,40,40,40,40,40,		/* 212-218 */
+	41,41,41,41,41,41,41,41,	/* 219-226 */
+	42,42,42,42,42,42,42,42,	/* 227-234 */
+	43,43,43,43,43,43,43,43,	/* 235-242 */
+	44,44,44,44,44,44,44,44,44,	/* 243-251 */
+	45,45,45,45						/* 252-255 */
+};
+
+#if 0
+	0000l,0477l,08F0l,0D6Al,11E6l,1665l,
+	1AE8l,1F6El,23FAl,288Bl,2D23l,31C2l,
+	366Al,3B1Al,3FD3l,4498l,4968l,4E44l,
+	532Dl,5825l,5D2Dl,6244l,676El,6CAAl,
+	71FAl,775Fl,7CDCl,8270l,881El,8DE7l,
+	93CDl,99D2l,9FF7l,A63Fl,ACACl,B340l,
+	B9FEl,C0E8l,C802l,CF4El,D6CFl,DE89l,
+	E680l,EEB9l,F737l,0x00010000l
+#endif
+
+/***
+ *		Fractional Arctangent routine.
+ *			Accepts X,Y as input and returns the respective angle in degrees
+ ***/
+
+#if	0
+
+int
+fatan2(FRAC x,FRAC y)
+{
+	register int	i;
+	register FRAC	val;
+	register FRAC	*ptr;
+	BYTE				sign;
+
+	/* Make sure X is positive */
+	x = (x < 0 ? -x : x);
+	/* Save the sign of Y for latter */
+	if (y < 0) {
+		sign = TRUE;
+		y = -y;
+	} else
+		sign = FALSE;
+	val = fdiv(y,x);
+	ptr = &tantab[0];
+	for (i=0; i < 91; i++)
+		if (val <= *ptr++)
+			break;
+	return (sign ? -i : i);
+}
+
+#endif
+
+FRAC
+fsind(int Angle)
+{
+	FRAC	ret;
+
+	while (Angle < 0) Angle += 360;
+	Angle %= 360;
+	if (Angle <= 90)
+		ret = sintab[Angle];
+	else
+		if (Angle <= 180)
+			ret = sintab[180-Angle];
+		else
+			if (Angle <= 270)
+				ret = -sintab[Angle-180];
+			else
+				ret = -sintab[360-Angle];
+	return (ret>>(16-FRACSIZE));
+}
+
+FRAC
+fcosd(int Angle)
+{
+	register FRAC	ret;
+
+	while (Angle < 0) Angle += 360;
+	Angle %= 360;
+	if (Angle <= 90)
+		ret = sintab[90-Angle];
+	else
+		if (Angle <= 180)
+			ret = -sintab[Angle-90];
+		else
+			if (Angle <= 270)
+				ret = -sintab[270-Angle];
+			else
+				ret = sintab[Angle-270];
+	return (ret>>(16-FRACSIZE));
+}
+
+FRAC
+ftan(int Angle)
+{
+	register FRAC	ret;
+
+	while (Angle < 0) Angle += 360;
+	Angle %= 360;
+	if (Angle < 90)
+		ret = tantab[Angle];
+	else
+		if (Angle < 180)
+			ret = -tantab[180-Angle];
+		else
+		if (Angle < 270)
+			ret = tantab[Angle-180];
+		else
+			ret = -(tantab[360-Angle]);
+	return (ret>>(16-FRACSIZE));
+}
+
+/***
+ *		fdist3d:		Calculate the Distance from the Camera quickly
+ ***/
+
+FRAC
+fdist3d(FRAC x,FRAC y,FRAC z)
+{
+	register FRAC	tmp;
+	register FRAC	maxc,medc,minc;
+
+	maxc = (x < 0 ? -x : x);
+	medc = (y < 0 ? -y : y);
+	minc = (z < 0 ? -z : z);
+	/* Sort */
+	if (maxc < medc) {
+		tmp = maxc;
+		maxc = medc;
+		medc = tmp;
+	}
+	if (maxc < minc) {
+		tmp = maxc;
+		maxc = minc;
+		minc = tmp;
+	}
+	/* Compute 1/4 of medium & min in 1 step */
+	medc += minc;
+	maxc += (medc >> 2);
+	return (maxc);
+}
+
+/***
+ *		A Fast Approximation to the Hypotenuse
+ *		by Alan Paeth
+ *		from "Graphics Gems", Academic Press, 1990
+ ***/
+
+/*
+ * gives approximate distance from (x1,y1) to (x2,y2)
+ * with only overestimations, and then never by more
+ * than (9/8) + one bit uncertainty.
+ */
+
+WORD
+dist2d(WORD x1,WORD y1,WORD x2,WORD y2)
+{
+	if ((x2 -= x1) < 0)
+		x2 = -x2;
+	if ((y2 -= y1) < 0)
+		y2 = -y2;
+	return (x2 + y2 - (((x2>y2) ? y2 : x2) >> 1) );
+}
+
+/* returns true IFF a test point (xp, yp) is to within a
+ * pixel of the circle of center (xc, yc) and radius r.
+ * "d" is an approximate length to circle's center, with
+ * 1.0*r < dist < 1.12*r < (9/8)*r used for coarse testing.
+ * The 9/8 ratio suggests the code: (x)<<3 and ((x)<<3)-(x).
+ * Variables xp, yp, r and d should be of 32-bit precision.
+ *
+ * Note: (9/8) forms a very tight, proper inner bound but
+ * must be slackened by one pixel for the outside test (#2)
+ * to account for the -1/2 pixel absolute error introduced
+ * when "idist" halves an odd integer; else rough clipping
+ * will trim occasional points on the circle's perimeter.
+ */
+
+WORD
+PntOnCirc(WORD xp,WORD yp,WORD xc,WORD yc,WORD r)
+{
+	WORD	d = dist2d(xp, yp, xc, yc);
+
+	if (r > d)
+		return(0);		/* far-in  */
+	if (9*r < 8*(d-1))
+		return(0);		/* far-out */
+/* full test: r < hypot(xp-xc,yp-yc) < r+1 */
+	xp -= xc;
+	yp -= yc;
+	d = xp*xp + yp*yp;
+	if (d < r*r)
+		return(0);		/* near-in */
+	r += 1;
+	if (d > r*r)
+		return(0);		/* near-out */
+	return(1);			/* WITHIN */
+}

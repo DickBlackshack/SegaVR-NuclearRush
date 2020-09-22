@@ -1,0 +1,296 @@
+
+RAM Symbol Table
+
+Name                  Value   Class          Type          Size   Line  Section
+
+_MinAngle           |ffff0000|extern|               short|      |     |.data
+_MaxAngle           |ffff0002|extern|               short|      |     |.data
+_Head_Flag          |ffff0004|static|                 int|      |     |.data
+_Head_RCnt          |ffff0008|static|                 int|      |     |.data
+_CHR_1length        |ffff000c|extern|             u_short|      |     |.data
+_CHR_2length        |ffff000e|extern|             u_short|      |     |.data
+_CHR_3length        |ffff0010|extern|             u_short|      |     |.data
+_SPR_Video_Addr     |ffff0012|extern|             u_short|      |     |.data
+_SPR_NLlength       |ffff0014|extern|             u_short|      |     |.data
+_SPR_NRlength       |ffff0016|extern|             u_short|      |     |.data
+_SPR_Llength        |ffff0018|extern|             u_short|      |     |.data
+_SPR_Rlength        |ffff001a|extern|             u_short|      |     |.data
+_title_story        |ffff001c|static|           char*[52]|   208|  534|.data
+_won_story          |ffff00ec|static|           char*[24]|    96|  895|.data
+_start_items        |ffff014c|static|            char*[4]|    16| 1066|.data
+_start_items2       |ffff015c|static|            char*[2]|     8| 1071|.data
+_levels             |ffff0164|static|            char*[4]|    16| 1166|.data
+_opt_items          |ffff0174|static|            char*[5]|    20| 1174|.data
+_ASCII2CODE         |ffff0188|static|               char*|      |     |.data
+_cheat_items        |ffff018c|static|            char*[3]|    12| 2015|.data
+_AnmFiles           |ffff0198|static|        u_short*[43]|   172|  248|.data
+_DroneFiles         |ffff0244|extern|         u_short*[4]|    16|  374|.data
+_DroneSpeeds        |ffff0254|extern|            short[4]|     8|  381|.data
+_DroneHitPoints     |ffff025c|extern|            short[4]|     8|  388|.data
+_MinePower          |ffff0264|extern|           short[32]|    64|  254|.data
+_edata              |ffff02a4|extern|                    |      |     |(ABS)
+_SYS_HFLAG          |ffff02a4|static|                    |      |     |.bss
+_DISP_LEFT          |ffff02a6|static|                    |      |     |.bss
+_SYS_DOCYCLE        |ffff02a8|extern|                    |      |     |.bss
+_SYS_NODMA          |ffff02aa|extern|                    |      |     |.bss
+_SYS_SAFEDMA        |ffff02ac|extern|                    |      |     |.bss
+_SYS_NEWXA          |ffff02ae|extern|                    |      |     |.bss
+_SYS_NEWXB          |ffff02b0|extern|                    |      |     |.bss
+_SYS_VLINE          |ffff02b2|extern|                    |      |     |.bss
+_SYS_READHEAD       |ffff02b4|extern|                    |      |     |.bss
+_SYS_HMD_DATA       |ffff02b6|extern|                    |      |     |.bss
+_SYS_HMD_ERROR      |ffff02ba|extern|                    |      |     |.bss
+_RLEScaleCode       |ffff02be|extern|                    |      |     |.bss
+_RLESAddr           |ffff02c0|extern|                    |      |     |.bss
+_RLEDAddr           |ffff02c6|extern|                    |      |     |.bss
+_RLEJAddr           |ffff02cc|extern|                    |      |     |.bss
+_RLEMoves           |ffff02d0|extern|                    |      |     |.bss
+_VdpShadow          |ffff0ad0|extern|                    |      |     |.bss
+VDPSlaves           |ffff0ad0|extern|                    |      |     |.bss
+VDP_ModeSet1        |ffff0ad1|extern|                    |      |     |.bss
+VDP_ModeSet2        |ffff0ad3|extern|                    |      |     |.bss
+VDP_PatternA        |ffff0ad5|extern|                    |      |     |.bss
+VDP_Window          |ffff0ad7|extern|                    |      |     |.bss
+VDP_PatternB        |ffff0ad9|extern|                    |      |     |.bss
+VDP_SpriteAttr      |ffff0adb|extern|                    |      |     |.bss
+VDP_Reg6            |ffff0add|extern|                    |      |     |.bss
+VDP_BackCol         |ffff0adf|extern|                    |      |     |.bss
+VDP_Reg8            |ffff0ae1|extern|                    |      |     |.bss
+VDP_Reg9            |ffff0ae3|extern|                    |      |     |.bss
+VDP_HIntReg         |ffff0ae5|extern|                    |      |     |.bss
+VDP_ModeSet3        |ffff0ae7|extern|                    |      |     |.bss
+VDP_ModeSet4        |ffff0ae9|extern|                    |      |     |.bss
+VDP_HScroll         |ffff0aeb|extern|                    |      |     |.bss
+VDP_Reg14           |ffff0aed|extern|                    |      |     |.bss
+VDP_AutoInc         |ffff0aef|extern|                    |      |     |.bss
+VDP_ScrollSize      |ffff0af1|extern|                    |      |     |.bss
+VDP_WindowHPos      |ffff0af3|extern|                    |      |     |.bss
+VDP_WindowVPos      |ffff0af5|extern|                    |      |     |.bss
+DMASlaves           |ffff0af6|extern|                    |      |     |.bss
+VDP_DMALenLo        |ffff0af7|extern|                    |      |     |.bss
+VDP_DMALenHi        |ffff0af9|extern|                    |      |     |.bss
+VDP_DMASrcLo        |ffff0afb|extern|                    |      |     |.bss
+VDP_DMASrcMid       |ffff0afd|extern|                    |      |     |.bss
+VDP_DMASrcHi        |ffff0aff|extern|                    |      |     |.bss
+FlyBackFlag         |ffff0b00|extern|                    |      |     |.bss
+KeyHit              |ffff0b02|extern|                    |      |     |.bss
+_SYS_JoyHit         |ffff0b02|extern|                    |      |     |.bss
+KeyTab1             |ffff0b04|extern|                    |      |     |.bss
+_SYS_JoyTable       |ffff0b04|extern|                    |      |     |.bss
+KeyTab2             |ffff0b14|extern|                    |      |     |.bss
+_SYS_Joy2Table      |ffff0b14|extern|                    |      |     |.bss
+CellMapCols         |ffff0b24|extern|                    |      |     |.bss
+CellMapRows         |ffff0b26|extern|                    |      |     |.bss
+DMATemp             |ffff0b28|extern|                    |      |     |.bss
+PalBuffer           |ffff0b2c|extern|                    |      |     |.bss
+_PalBuffer          |ffff0b2c|extern|                    |      |     |.bss
+PalTemp             |ffff0bac|extern|                    |      |     |.bss
+temp_seek           |ffff0c2c|static|                    |      |     |.bss
+temp_total          |ffff0c30|static|                    |      |     |.bss
+temp_xpnd_buff      |ffff0c34|static|                    |      |     |.bss
+lz_start            |ffff0c38|static|                    |      |     |.bss
+lz_current          |ffff0c3c|static|                    |      |     |.bss
+buff_start          |ffff0c40|static|                    |      |     |.bss
+lz_pointer          |ffff0c44|static|                    |      |     |.bss
+lz_seek_value       |ffff0c48|static|                    |      |     |.bss
+buff_pointer        |ffff0c4c|static|                    |      |     |.bss
+bit_pointer         |ffff0c4e|static|                    |      |     |.bss
+xpnd_total          |ffff0c50|static|                    |      |     |.bss
+ring_lo             |ffff0c54|static|                    |      |     |.bss
+ring_hi             |ffff0c58|static|                    |      |     |.bss
+bit_mask            |ffff0c5c|static|                    |      |     |.bss
+_Game_Frame         |ffff0c60|extern|             u_short|      |     |.bss
+_OutBuf             |ffff0c62|extern|            char[80]|    80|   56|.bss
+_SYS_DCLISTLEN      |ffff0cb2|extern|               short|      |     |.bss
+_SYS_DCLISTAVL      |ffff0cb4|extern|               short|      |     |.bss
+_ScreenCol          |ffff0cb6|extern|               short|      |     |.bss
+_ScreenRow          |ffff0cb8|extern|               short|      |     |.bss
+_SYS_SCROLLX        |ffff0cba|extern|               short|      |     |.bss
+_SYS_GAMEDONE       |ffff0cbc|extern|             u_short|      |     |.bss
+_WorldNum           |ffff0cbe|extern|             u_short|      |     |.bss
+_SEND_LEFT          |ffff0cc0|extern|              u_char|      |     |.bss
+_SYS_VCNT           |ffff0cc2|extern|                long|      |     |.bss
+_SYS_OLDVCNT        |ffff0cc6|extern|                long|      |     |.bss
+_FPS_List           |ffff0cca|extern|            long[10]|    40|  313|.bss
+_FPS_LPtr           |ffff0cf2|extern|               short|      |     |.bss
+_Old_Alt            |ffff0cf4|extern|                 int|      |     |.bss
+_Alt                |ffff0cf8|extern|                 int|      |     |.bss
+_Player_Fuel        |ffff0cfc|extern|               short|      |     |.bss
+_XRes               |ffff0d00|extern|                 int|      |     |.bss
+_YRes               |ffff0d04|extern|                 int|      |     |.bss
+_Mx                 |ffff0d08|extern|                long|      |     |.bss
+_My                 |ffff0d0c|extern|                long|      |     |.bss
+_Mz                 |ffff0d10|extern|                long|      |     |.bss
+_Angl               |ffff0d14|extern|                 int|      |     |.bss
+_Tilt               |ffff0d18|extern|                 int|      |     |.bss
+_CentreX            |ffff0d1c|extern|                 int|      |     |.bss
+_CentreY            |ffff0d20|extern|                 int|      |     |.bss
+_Num_World_Objs     |ffff0d24|extern|                 int|      |     |.bss
+_Special_Object     |ffff0d28|extern|        struct-obj3d|    46|     |.bss
+_Num_Visable_Objs   |ffff0d56|extern|                 int|      |     |.bss
+_VCopy              |ffff0d5a|extern|       struct-.0fake|    30|     |.bss
+_Num_Clipped        |ffff0d78|extern|                 int|      |     |.bss
+_Visable_Quad1      |ffff0d7c|extern|                 int|      |     |.bss
+_Visable_Quad2      |ffff0d80|extern|                 int|      |     |.bss
+_CosA               |ffff0d84|extern|                long|      |     |.bss
+_SinA               |ffff0d88|extern|                long|      |     |.bss
+_CosT               |ffff0d8c|extern|                long|      |     |.bss
+_SinT               |ffff0d90|extern|                long|      |     |.bss
+_CosACosT           |ffff0d94|extern|                long|      |     |.bss
+_SinASinT           |ffff0d98|extern|                long|      |     |.bss
+_CosASinT           |ffff0d9c|extern|                long|      |     |.bss
+_SinACosT           |ffff0da0|extern|                long|      |     |.bss
+_GndZCos            |ffff0da4|extern|                long|      |     |.bss
+_GndZSin            |ffff0da8|extern|                long|      |     |.bss
+_quad               |ffff0dac|extern|               short|      |     |.bss
+_QAngle1            |ffff0dae|extern|               short|      |     |.bss
+_QAngle2            |ffff0db0|extern|               short|      |     |.bss
+_SYS_DOHEADSET      |ffff0db4|extern|               short|      |     |.bss
+_Player             |ffff0db6|extern|       struct-.4fake|    46|     |.bss
+_Z_Bob_count        |ffff0de4|extern|                 int|      |     |.bss
+_Z_Bob_value        |ffff0de8|extern|                long|      |     |.bss
+_Headset_Rotation   |ffff0dec|extern|               short|      |     |.bss
+_Headset_Tilt       |ffff0dee|extern|                 int|      |     |.bss
+_Ship_Rotation      |ffff0df2|extern|               short|      |     |.bss
+_Ship_Turn_Speed    |ffff0df4|extern|                 int|      |     |.bss
+_Ship_Turn_Counter  |ffff0df8|extern|                 int|      |     |.bss
+_NumDrones          |ffff0dfc|extern|                 int|      |     |.bss
+_Drones             |ffff0e00|extern|   struct-.5fake[20]|   520|   38|.bss
+_DronesAttacking    |ffff1008|extern|                 int|      |     |.bss
+_NumTanks           |ffff100c|extern|                 int|      |     |.bss
+_Tanks              |ffff1010|extern|   struct-.5fake[20]|   520|   43|.bss
+_NumMines           |ffff1218|extern|                 int|      |     |.bss
+_Mines              |ffff121c|extern|   struct-.5fake[20]|   520|   46|.bss
+_NumNukes           |ffff1424|extern|                 int|      |     |.bss
+_FreeNukes          |ffff1428|extern|                 int|      |     |.bss
+_NukePools          |ffff142c|extern|   struct-.3fake[30]|   600|   50|.bss
+_SYS_LASTSPR        |ffff1684|extern|               short|      |     |.bss
+_SYS_LASTCHR        |ffff1686|extern|             u_short|      |     |.bss
+_SYS_BASECHR        |ffff1688|extern|             u_short|      |     |.bss
+_SYS_BASECHR1       |ffff168a|extern|             u_short|      |     |.bss
+_SYS_BASECHR2       |ffff168c|extern|             u_short|      |     |.bss
+_SYS_CHRATTR        |ffff168e|extern|             u_short|      |     |.bss
+_SYS_PAGE           |ffff1690|extern|               short|      |     |.bss
+_CHR_1video_addr    |ffff1692|extern|             u_short|      |     |.bss
+_CHR_1src_addr      |ffff1694|extern|            u_short*|      |     |.bss
+_CHR_2video_addr    |ffff1698|extern|             u_short|      |     |.bss
+_CHR_2src_addr      |ffff169a|extern|            u_short*|      |     |.bss
+_CHR_3video_addr    |ffff169e|extern|             u_short|      |     |.bss
+_CHR_3src_addr      |ffff16a0|extern|            u_short*|      |     |.bss
+_SPR_NLsrc_addr     |ffff16a4|extern|     struct-SPRLIST*|     0|     |.bss
+_SPR_NRsrc_addr     |ffff16a8|extern|     struct-SPRLIST*|     0|     |.bss
+_SPR_Lsrc_addr      |ffff16ac|extern|     struct-SPRLIST*|     0|     |.bss
+_SPR_Rsrc_addr      |ffff16b0|extern|     struct-SPRLIST*|     0|     |.bss
+_NEW_HORZLEN        |ffff16b4|extern|             u_short|      |     |.bss
+_SYS_FLICKER        |ffff16b8|extern|              u_char|      |     |.bss
+_UI_Continue        |ffff16ba|extern|               short|      |     |.bss
+_UI_GameLevel       |ffff16bc|extern|               short|      |     |.bss
+_UI_NumContinues    |ffff16be|extern|               short|      |     |.bss
+_UI_Control         |ffff16c0|extern|               short|      |     |.bss
+_UI_AccessCode      |ffff16c2|extern|            char[10]|    10|   45|.bss
+_UI_Password        |ffff16cc|extern|       struct-.5fake|     4|     |.bss
+_SYS_MINFDIST       |ffff16d0|extern|             u_short|      |     |.bss
+_SYS_MAXFDIST       |ffff16d2|extern|             u_short|      |     |.bss
+_SYS_AVGFDIST       |ffff16d4|extern|             u_short|      |     |.bss
+_SYS_DISTDIV        |ffff16d6|extern|             u_short|      |     |.bss
+_CopyScale          |ffff16d8|extern|       u_short[1040]|  2080|   57|.bss
+_PDQS_SourceAddr    |ffff1ef8|extern|            u_short*|      |     |.bss
+_PDQS_DestAddr      |ffff1efc|extern|            u_short*|      |     |.bss
+_DBlockSize         |ffff1f00|extern|               short|      |     |.bss
+_DExtra             |ffff1f02|extern|               short|      |     |.bss
+_DEnd               |ffff1f04|extern|               short|      |     |.bss
+_Old_LastCHR        |ffff1f06|extern|             u_short|      |     |.bss
+_old_yp             |ffff1f08|static|               short|      |     |.bss
+_SYS_HAPTR          |ffff1f0c|extern|              short*|      |     |.bss
+_SYS_HATOGGLE       |ffff1f10|extern|               short|      |     |.bss
+_PX                 |ffff1f12|extern|                 int|      |     |.bss
+_PY                 |ffff1f16|extern|                 int|      |     |.bss
+_SYS_HORZCHRS       |ffff1f1a|extern|             u_short|      |     |.bss
+_SYS_HORZLEN        |ffff1f1c|extern|             u_short|      |     |.bss
+_SYS_VTILT          |ffff1f1e|extern|               short|      |     |.bss
+_SYS_VSCROLL        |ffff1f20|extern|           short[20]|    40|  420|.bss
+_SYS_VADJ           |ffff1f48|extern|           short[20]|    40|  421|.bss
+_I                  |ffff1f70|extern|                 int|      |     |.bss
+_w                  |ffff1f74|extern|          u_long[19]|    76|   21|.bss
+_seedValue          |ffff1fc0|extern|              u_long|      |     |.bss
+_worldX             |ffff1fc4|extern|               u_int|      |     |.bss
+_worldY             |ffff1fc8|extern|               u_int|      |     |.bss
+_borderSize         |ffff1fcc|extern|               u_int|      |     |.bss
+_SYS_BORDERSIZE     |ffff1fd0|extern|                long|      |     |.bss
+_itemCount          |ffff1fd4|extern|                 int|      |     |.bss
+_eachItemCount      |ffff1fd8|extern|           u_int[30]|   120|   29|.bss
+_O3D_Areas          |ffff2050|extern|   struct-obj3d*[64]|   256|   31|.bss
+_O3D_Num_Objects    |ffff2150|extern|         u_short[64]|   128|   33|.bss
+_O3D_NextIndex      |ffff21d0|extern|             u_short|      |     |.bss
+_World_Background   |ffff21d2|extern|             u_short|      |     |.bss
+_World_Time         |ffff21d4|extern|             u_short|      |     |.bss
+_Bullet_Cnt         |ffff21d8|extern|               short|      |     |.bss
+_Bullet_Obj         |ffff21da|extern|           short[20]|    40|   24|.bss
+_Bullet_Orig_Rotatio|ffff2202|extern|           short[20]|    40|   25|.bss
+_Bullet_Rotation    |ffff222a|extern|           short[20]|    40|   26|.bss
+_Bullet_Target      |ffff2252|extern|   struct-obj3d*[20]|    80|   27|.bss
+_Bullet_HitOrMiss   |ffff22a2|extern|           short[20]|    40|   28|.bss
+_Bullet_TrackCnt    |ffff22ca|extern|           short[20]|    40|   29|.bss
+_Bullet_Decay       |ffff22f2|extern|           short[20]|    40|   30|.bss
+_Bullet_Enemy       |ffff231a|extern|          u_char[20]|    20|   31|.bss
+_aflag              |ffff232e|extern|                 int|      |     |.bss
+_bflag              |ffff2332|extern|                 int|      |     |.bss
+_cflag              |ffff2336|extern|                 int|      |     |.bss
+_bullet_left        |ffff233a|extern|                 int|      |     |.bss
+_SYS_LAZER          |ffff2340|extern|               short|      |     |.bss
+_SYS_SCRLXB         |ffff2342|extern|               short|      |     |.bss
+_NumCracks          |ffff2344|extern|                 int|      |     |.bss
+_Cracks             |ffff2348|extern|    struct-crack[10]|   100|   20|.bss
+_v_targetptr        |ffff23ac|extern|      struct-.2fake*|     0|     |.bss
+_World_Objs         |ffff23b0|extern|   struct-obj3d[366]| 16836|   24|.bss
+_WORK_CHRLIST       |ffff6574|extern|       u_short[8192]| 16384|   25|.bss
+_Visable_Objs       |ffffa574|extern|  struct-.2fake[100]|  3000|   26|.bss
+_SYS_HORIZON        |ffffb12c|extern|         u_long[224]|   896|   27|.bss
+_SYS_HARRAY1        |ffffb4ac|extern|          short[128]|   256|   28|.bss
+_SYS_HARRAY2        |ffffb5ac|extern|          short[128]|   256|   29|.bss
+_code_line          |ffffb6ac|extern|        u_short[512]|  1024|   30|.bss
+_ScaleCode          |ffffbaac|extern|       u_short[1024]|  2048|   31|.bss
+_DestOffs           |ffffc2ac|extern|        u_short[256]|   512|   32|.bss
+_SYS_DCLIST         |ffffc4ac|extern|        u_char[2048]|  2048|   33|.bss
+_SYS_DCDATA         |ffffccac|extern|       u_short[2048]|  4096|   34|.bss
+_WORK_SPRLIST       |ffffdcac|extern|  struct-SPRLIST[80]|   640|   35|.bss
+_RIGHT_SLIST1       |ffffdf2c|extern|  struct-SPRLIST[80]|   640|   36|.bss
+_LEFT_SLIST1        |ffffe1ac|extern|  struct-SPRLIST[80]|   640|   36|.bss
+_RIGHT_SLIST2       |ffffe42c|extern|  struct-SPRLIST[80]|   640|   37|.bss
+_LEFT_SLIST2        |ffffe6ac|extern|  struct-SPRLIST[80]|   640|   37|.bss
+__iob               |ffffe92c|extern|                    |      |     |.bss
+__errno             |ffffea38|extern|                    |      |     |.bss
+_end                |ffffea3c|extern|                    |      |     |(ABS)
+heap_org            |ffffea3c|extern|                    |      |     |(ABS)
+
+
+Current VRAM Memory Map:
+
+	With 8x8 ASCII Font:
+	Logo & ASCII Font	$0000 - $1280
+	Background Maps		$1280 -
+
+	Without 8x8 ASCII Font:
+	Background Maps		$0020 -
+
+	Sprite Data
+	Sprite List		$B400
+	Horizontal Scroll	$B800
+	LED Font RED		$B820
+	LED Font GREEN		$BB00 - $BDE0
+	Screen A		$C000 - $DFFF
+	Screen B		$E000 - $FFFF
+
+We use Borland Make version 3.1.
+
+Sierra Systems:
+	68000 C Compiler 3.00
+	68000 Assembler 3.00
+	68000 Macro Asm 3.00
+	68020 Linker 3.00
+
+Any special utility used in the development of this program is used in
+the makefile and no where else.  Each utility and it's source is on the
+source disk, and usage information is obtained by typing that utilities
+name with out any parameters.
+

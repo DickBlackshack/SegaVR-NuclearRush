@@ -1,0 +1,629 @@
+/***
+ *			Artificial Intelligence routines for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+
+#define CLOSE 	0x400000		/*  64 in frac */
+#define FAR		0x1800000	/* 384 in frac */
+#define	DEBUG	TRUE
+
+extern WORD		SYS_LAZER;			/* Lazer frame counter, set to 4 to start */
+extern WORD	WorldNum;
+
+extern FRAC			SYS_BORDERSIZE;
+extern WORD			UI_GameLevel;
+
+/***
+ *		NextRotation:	Return the new rotation of an object tracking
+ *								another object
+ ***/
+
+#if 0
+
+WORD
+NextRotation(FRAC srcX,FRAC srcY,FRAC srcZ, FRAC dstX,FRAC dstY,FRAC dstZ,
+			WORD srcRotation)
+
+{
+ 	extern const short octant[8];
+	register short			k;
+	register WORD			rotation;		
+	register WORD			object_direction; 
+	WORD						temp_direction; 
+	register FRAC			tmp;
+	register FRAC			tmpx,
+								tmpy,
+								tmpz;
+	register FRAC			greater,
+								lesser;
+
+	if (srcRotation < 0)
+		Bomb("Ooops! rot=%d",srcRotation); 
+
+	/* find out what slice the target is in */
+	tmpx = dstX - srcX;
+	tmpy = dstY - srcY;
+
+	/* WRAP AROUND WORLD STUFF */
+
+	if (tmpx > WORLD_WIDTH / 2)
+		tmpx = tmpx - WORLD_WIDTH;
+	if (tmpx < - (WORLD_WIDTH / 2))
+		tmpx = WORLD_WIDTH + tmpx;
+
+	if (tmpy > WORLD_DEPTH / 2)
+		tmpy = tmpy - WORLD_DEPTH;
+	if (tmpy < - (WORLD_DEPTH / 2))
+		tmpy = WORLD_DEPTH + tmpy;
+
+	/* if closer in xy than z, we will return srcRotation */
+	tmpz = dstZ - srcZ;
+	if (tmpz < 0)
+		tmpz = -tmpz;
+
+	if (tmpx >= 0) {
+		k = 4;
+	} else {
+		k = 0;
+		tmpx = -tmpx;
+	}
+	if (tmpy >= 0) {
+		k += 2;
+	} else {
+		tmpy = -tmpy;
+	}
+	lesser = tmpx;
+	greater = tmpy;
+	if (tmpx >= tmpy) {
+		k += 1;
+		lesser = tmpy;
+		greater = tmpx;
+	}
+	rotation = octant[k];		/* now adding the 32 slices */
+	k = 0;
+	tmp = lesser + (lesser >> 1);		/* 1.5 line */
+	if (tmp <= greater) {
+		k++;
+		tmp += lesser;						/* 2.5 line */
+		if (tmp <= greater) {
+			k++;
+			tmp = tmp << 1;				/* 5 line */
+			if (tmp <= greater)
+				k++;
+		}
+	}
+	if ((rotation & 4) == 0)
+		k = k ^ 3;
+	rotation += k;						/* the slice */
+	rotation = (rotation * 11) + (rotation >> 2);	/* times 11.25 for degrees */
+	object_direction = (rotation + srcRotation) >> 1;
+	temp_direction = object_direction - srcRotation;
+	if (temp_direction > 180)
+		temp_direction -= 360;
+	if (temp_direction > 90 || temp_direction < -90)
+		object_direction = (180 + object_direction) % 360;	/* the 50 % solution */
+	tmp = tmpx+tmpy;
+
+	if (tmp < tmpz)
+		return (srcRotation);
+	else {
+		rotation = (object_direction + srcRotation) >> 1;
+		temp_direction = rotation - srcRotation;
+		if (temp_direction > 180)
+			temp_direction -= 360;
+		if (temp_direction > 90 || temp_direction < -90)
+			rotation = (rotation + 180) % 360;	/* the 50 % solution */
+
+		if (tmp < CLOSE)
+			return (object_direction);
+		else
+			if (tmp < FAR)
+				return (rotation);
+			else
+				return (srcRotation);
+		}
+
+}
+
+#else
+
+WORD
+NextRotation(FRAC srcX,FRAC srcY,FRAC srcZ, FRAC dstX,FRAC dstY,FRAC dstZ,
+			WORD srcRotation)
+
+{
+	register WORD			rotation;		
+	register WORD			object_direction; 
+	WORD						temp_direction; 
+	register FRAC			tmp;
+	register FRAC			tmpx,
+								tmpy,
+								tmpz;
+
+	/* find out what slice the target is in */
+	tmpx = dstX - srcX;
+	tmpy = dstY - srcY;
+	rotation = fatan2(tmpy,tmpx);
+	object_direction = (rotation + srcRotation) >> 1;
+	temp_direction = object_direction - srcRotation;
+	if (temp_direction > 180)
+		temp_direction -= 360;
+	if (temp_direction > 90 || temp_direction < -90)
+		object_direction = (180 + object_direction) % 360;	/* the 50 % solution */
+	tmp = tmpx+tmpy;
+
+	if (tmp < tmpz)
+		return (srcRotation);
+	else {
+		rotation = (object_direction + srcRotation) >> 1;
+		temp_direction = rotation - srcRotation;
+		if (temp_direction > 180)
+			temp_direction -= 360;
+		if (temp_direction > 90 || temp_direction < -90)
+			rotation = (rotation + 180) % 360;	/* the 50 % solution */
+
+		if (tmp < CLOSE)
+			return (object_direction);
+		else
+			if (tmp < FAR)
+				return (rotation);
+			else
+				return (srcRotation);
+		}
+}
+
+#endif
+
+/***
+ *		NextTrackZ:	Return the new tilt of an object tracking
+ *								another object
+ ***/
+
+
+FRAC
+NextTrackZ(FRAC srcZ,FRAC dstZ)
+{
+	register FRAC	tmpz;
+	register FRAC	tmp;
+
+#if 1
+	tmpz = dstZ - srcZ;
+	if (tmpz < INT2FRAC(-4))
+		tmpz = INT2FRAC(-4);
+	if (tmpz > INT2FRAC( 4))
+		tmpz = INT2FRAC(4);
+	tmpz += srcZ;
+	return (tmpz); 
+
+#else
+	tmp = (tmpz < 0 ? -tmpz : tmpz);
+	if (tmp < INT2FRAC(2))
+		/* Don't bother with very small moves */
+		tmp = dstZ;
+	else {
+		if (tmp > INT2FRAC(6))
+			tmp = INT2FRAC(2);
+		else
+			tmp = INT2FRAC(1);
+		if (tmpz < 0)
+			tmp = dstZ + tmp;
+		else
+			tmp = dstZ - tmp;
+	}
+	return (tmp);
+#endif
+}
+
+
+/******************************************************************
+ **
+ **			Matthew's Mine and Tank logic
+ **
+ ******************************************************************/
+
+
+extern PLAYER		Player;
+extern int			NumMines;
+extern DRONE		Mines[NUMMINES];
+extern int			NumTanks;
+extern DRONE		Tanks[NUMTANKS];
+
+void
+Init_Mines()
+{
+	int					cnt;
+	OBJECT3D				*optr;
+	DRONE					*dptr;
+
+	dptr = &Mines[0];
+	NumMines = 0;
+	for (cnt=0; cnt<NUMMINES; cnt++) {
+		optr = Add3DObject(&mine32_fpb,Player.X,Player.Y,Player.Z);
+		optr->cloaked = TRUE;
+		optr->flag32 = TRUE;
+
+		optr->type = PT_MINE;
+		optr->parent = dptr;
+		dptr->Obj = optr;
+		optr->flag32 = TRUE;
+		optr->rotation = Random() % 360;
+		dptr->Thrust = MOV3D * (3 + UI_GameLevel);
+		dptr->HitPoints = 1;
+		dptr->GotzAGoal = FALSE;
+		dptr->AtakPlyr = FALSE;
+		dptr->Target = dptr->Map1 = dptr->Map2 = 0;
+		dptr++;
+	}
+}
+
+void
+Init_Tanks()
+{
+	int					cnt;
+	OBJECT3D				*optr;
+	DRONE					*dptr;
+
+	dptr = &Tanks[0];
+	NumTanks = 0;
+	for (cnt=0; cnt < NUMTANKS; cnt++) {
+		optr = Add3DObject(&tank32_fpb,Player.X,Player.Y,INT2FRAC(1));
+		optr->cloaked = TRUE;
+		optr->flag32 = TRUE;
+
+		optr->type = PT_TANK;
+		optr->parent = dptr;
+		dptr->Obj = optr;
+		optr->flag32 = TRUE;
+		optr->rotation = Random() % 360;
+		dptr->Thrust = MOV3D * (5 + UI_GameLevel);
+		dptr->HitPoints = 1;
+		dptr->GotzAGoal = FALSE;
+		dptr->AtakPlyr = FALSE;
+		dptr->Target = dptr->Map1 = dptr->Map2 = 0;
+		dptr++;
+	}
+}
+
+/*
+extern WORD NextRotation(FRAC srcX,FRAC srcY,FRAC srcZ, FRAC dstX,FRAC dstY,FRAC dstZ,WORD srcRotation);
+*/
+
+int Fire_At_Player(OBJECT3D *drone);
+
+WORD MinePower[] = {
+						7,7,7,7,7,7,7,
+						8,8,8,8,8,8,8,
+						12,12,12,12,12,12,
+						20,20,20,20,20,20,
+						20,20,20,20,20,20
+};
+
+int
+Update_Mines()
+{
+	OBJECT3D				*optr;
+	OBJECT3D				*tptr;
+	VISABLE3D			*vptr;
+	DRONE					*dptr;
+	int					cnt,cnt2;
+	int					bflag;
+	int					index;
+	WORD					rot_check1, rot_check2;
+	FRAC					x_check, y_check;
+	BYTE					flag;
+	FRAC					dist;
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern VISABLE3D	Visable_Objs[100];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+	extern FRAC			Mx, My, Mz;			/* Camera World Position */
+	extern WORD	UI_GameLevel;
+
+	/* Update new X and Y Enemy positions */
+	dptr = &Mines[0];
+	for (cnt=0; cnt<NumMines; cnt++,dptr++) {
+		optr = dptr->Obj;
+
+		/* If not active or blowing up, don't do anything */
+		if (optr->cloaked || optr->special)
+			continue;
+
+		if (dptr->GotzAGoal) {
+			if (dptr->AtakPlyr) {
+				dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+				if (dist < INT2FRAC(350)) {
+					/* Special case, attacking the player... */
+					optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+						Mx,My,Mz,optr->rotation);
+					optr->z = NextTrackZ(optr->z,Mz);
+					dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+					if (dist < INT2FRAC(20)) {
+						Hit_Player(MinePower[WorldNum] + UI_GameLevel);
+						dptr->GotzAGoal = FALSE;
+						dptr->AtakPlyr = FALSE;
+						optr->cloaked = TRUE;
+						Player.Rest += 40;
+					}
+				}
+			}
+		} else {
+			/* Get a goal! */
+			dptr->GotzAGoal = TRUE;
+			dptr->AtakPlyr = TRUE;
+		}
+
+		optr->x += fmul(dptr->Thrust,fsind(optr->rotation));
+		optr->y += fmul(dptr->Thrust,fcosd(optr->rotation));
+
+		/* Bounce around a NxN demo world */
+		if (optr->x < 0) {
+			optr->x = 0;
+			optr->rotation = 360 - (optr->rotation);
+		}
+		if (optr->y < 0) {
+			optr->y = 0;
+			optr->rotation = 180 - (optr->rotation);
+			if (optr->rotation < 0)
+				optr->rotation += 360;
+		}
+		if (optr->x > WORLD_WIDTH) {
+			optr->x = WORLD_WIDTH;
+			optr->rotation = 360 - (optr->rotation);
+		}
+		if (optr->y > WORLD_DEPTH) {
+			optr->y = WORLD_DEPTH;
+			optr->rotation = 180 - (optr->rotation);
+			if (optr->rotation < 0)
+				optr->rotation += 360;
+		}
+		/* Update area of this object */
+		Update3DObject(optr);
+	}
+}
+
+Add_Mine(OBJECT3D *sptr)
+{
+	int					cnt;
+	BYTE					flag;
+	OBJECT3D				*optr;
+	DRONE					*dptr;
+	extern int			NumMines;
+	extern DRONE		Mines[NUMMINES];
+
+	if (NumMines < NUMMINES) {
+		/* Add a fresh mine to our world */
+		dptr = &Mines[NumMines];
+		optr = dptr->Obj;
+		optr->cloaked = FALSE;
+		optr->x = sptr->x;
+		optr->y = sptr->y;
+		optr->z = sptr->z;
+		NumMines++;
+	} else {
+		/* Mine list full, look for cloaked objects */
+		dptr = &Mines[0];
+		flag = FALSE;
+		for (cnt=0; cnt<NUMMINES; cnt++,dptr++) {
+			optr = dptr->Obj;
+			if (optr->cloaked) {
+				flag = TRUE;
+				break;
+			}
+		}
+		if (flag) {
+			optr->cloaked = FALSE;
+			optr->x = sptr->x;
+			optr->y = sptr->y;
+			optr->z = sptr->z;
+		}
+	}
+}
+
+
+extern FRAC	Obj_Dist2D(OBJECT3D *src, OBJECT3D *dst);
+
+Update_Tanks()
+{
+	OBJECT3D				*optr;
+	OBJECT3D				*tptr;
+	VISABLE3D			*vptr;
+	DRONE					*dptr;
+	int					cnt,cnt1,cnt2;
+	int					bflag;
+	int					index;
+	WORD					rot_check1, rot_check2;
+	FRAC					x_check, y_check;
+	BYTE					flag;
+	FRAC					dist;
+	extern NUKE_POOL	NukePools[30];		/* Nuke pool information */
+	extern int			NumNukes;			/* Number of nuclear pools in the world */
+	NUKE_POOL			*nptr;
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern VISABLE3D	Visable_Objs[100];
+	extern int			Num_Visable_Objs;	/* Number of visable Objects */
+	extern FRAC			Mx, My, Mz;			/* Camera World Position */
+	extern volatile LONG			SYS_VCNT;
+	extern UWORD		Game_Frame;		/* Game Frame counter */
+
+	if (SYS_VCNT > 7200) {
+		if (NumTanks == 0) { /* start up the tanks! */
+			dptr = &Tanks[0];
+			for (cnt=0; cnt < 4; cnt++,dptr++) {
+				optr = dptr->Obj;
+				Add_Tank(optr);
+			}
+		} else {
+			/* Update new X and Y Enemy positions */
+			dptr = &Tanks[0];
+			for (cnt=0; cnt < NumTanks; cnt++,dptr++) {
+				optr = dptr->Obj;
+		
+				/* If not active or blowing up, don't do anything */
+				if (optr->cloaked || optr->special)
+					continue;
+
+				dist = fdist3d((optr->x)-Mx,(optr->y)-My,(optr->z)-Mz);
+				x_check = Mx - (optr->x);
+				y_check = My - (optr->y);
+
+				rot_check1 = ((optr->rotation) - fatan2(y_check, x_check)) % 360;
+				if (rot_check1 < 0)
+					rot_check1 = - rot_check1;
+				if (rot_check1 > 180)
+					rot_check1 = 360 - rot_check1;
+				if ((dist < INT2FRAC(250)) && (rot_check1 < 30)) {
+				/* Special case, attacking the player... */
+					optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+						Mx,My,Mz,optr->rotation);
+						  
+					rot_check2 = FRAC2INT(dist) >> 3;
+					if (rot_check2 < 20)
+						rot_check2 = 20;
+				
+
+					if ((rot_check1 < rot_check2) && !(Game_Frame & 15))
+						/* Shoot at player */
+						if (Fire_At_Player(optr) != 0) 
+							/* Go do something else now... */
+							Player.Rest += 40;
+						dptr->GotzAGoal = FALSE;
+						dptr->AtakPlyr = FALSE;
+
+				} else {
+					if (dptr->GotzAGoal) {  /* Find a pod and steal it */
+						tptr = dptr->Target;
+						if (Obj_Dist2D(optr,tptr) < INT2FRAC(10)) {
+							nptr = &NukePools[0];
+							for (cnt1 = 0; cnt1 < NumNukes; cnt1++, nptr++)
+								if (tptr == nptr->can_obj) {
+									nptr->ready = FALSE;
+									nptr->rcr_level = 0;
+									tptr->cloaked = TRUE;
+									break;
+								}
+							dptr->GotzAGoal = FALSE;
+						} else {
+							optr->rotation = NextRotation(optr->x,optr->y,optr->z,
+								tptr->x,tptr->y,tptr->z,optr->rotation);
+						}
+					} else {
+					/* Get a goal! */
+						if ((cnt & 3) == (Game_Frame & 3))
+							for (cnt2=0; cnt2 < NumNukes; cnt2++) {
+								/* Are we in the same zone? */
+								if (NukePools[cnt2].world_obj->area == optr->area) {
+									/* Same zone, is it a free pool? */
+									if (NukePools[cnt2].ready) {
+										/* Yes, target this pool */
+										dptr->GotzAGoal = TRUE;
+										dptr->Target = NukePools[cnt2].can_obj;
+										break;
+									}
+								}
+							}
+					}
+				}
+			
+				optr->x += fmul(dptr->Thrust,fsind(optr->rotation));
+				optr->y += fmul(dptr->Thrust,fcosd(optr->rotation));
+				optr->z = INT2FRAC(1);
+
+				/* Bounce around a NxN demo world */
+				if (optr->x < SYS_BORDERSIZE) {
+					optr->x = SYS_BORDERSIZE;
+					optr->rotation = 360 - (optr->rotation);
+				}
+				if (optr->y < SYS_BORDERSIZE) {
+					optr->y = SYS_BORDERSIZE;
+					optr->rotation = 180 - (optr->rotation);
+					if (optr->rotation < 0)
+						optr->rotation += 360;
+				}
+				if (optr->x > WORLD_WIDTH - SYS_BORDERSIZE) {
+					optr->x = WORLD_WIDTH - SYS_BORDERSIZE;
+					optr->rotation = 360 - (optr->rotation);
+				}
+				if (optr->y > WORLD_DEPTH - SYS_BORDERSIZE) {
+					optr->y = WORLD_DEPTH - SYS_BORDERSIZE;
+					optr->rotation = 180 - (optr->rotation);
+					if (optr->rotation < 0)
+						optr->rotation += 360;
+				}
+				/* Update area of this object */
+				Update3DObject(optr);
+			}
+		}
+	}	
+}
+		
+
+Add_Tank(OBJECT3D *sptr)
+{
+	int					cnt;
+	BYTE					flag;
+	OBJECT3D				*optr;
+	DRONE					*dptr;
+	extern int			NumTanks;
+	extern DRONE		Tanks[NUMTANKS];
+
+	gemsstartsong(VOICE_TANKIN_Z);
+	if (NumTanks < NUMTANKS) {
+		/* Add a fresh tank to our world */
+		dptr = &Tanks[NumTanks];
+		optr = dptr->Obj;
+		optr->cloaked = FALSE;
+		if (NumTanks & 1) {
+			optr->x = SYS_BORDERSIZE;
+			optr->rotation = 45;
+		} else {
+			optr->x = WORLD_WIDTH - SYS_BORDERSIZE;
+			optr->rotation = -45;
+		}
+		if (NumTanks & 2)
+			optr->y = SYS_BORDERSIZE;
+		else {
+			optr->y = WORLD_DEPTH - SYS_BORDERSIZE;
+			optr->rotation = 180 - (optr->rotation);
+		}
+		if (optr->rotation < 0)
+			optr->rotation += 360;
+		optr->z = INT2FRAC(1);
+		NumTanks++;
+	} else {
+		/* Tank list full, look for cloaked objects */
+		dptr = &Tanks[0];
+		flag = FALSE;
+		for (cnt=0; cnt<NUMTANKS; cnt++,dptr++) {
+			optr = dptr->Obj;
+			if (optr->cloaked) {
+				flag = TRUE;
+				break;
+			}
+		}
+		if (flag) {
+			optr->cloaked = FALSE;
+			if (cnt & 1) {
+				optr->x = SYS_BORDERSIZE;
+				optr->rotation = 45;
+			} else {
+				optr->x = WORLD_WIDTH - SYS_BORDERSIZE;
+				optr->rotation = -45;
+			}
+			if (cnt & 2)
+				optr->y = SYS_BORDERSIZE;
+			else {
+				optr->y = WORLD_DEPTH - SYS_BORDERSIZE;
+				optr->rotation = 180 - (optr->rotation);
+			}
+			if (optr->rotation < 0)
+				optr->rotation += 360;
+			optr->z = INT2FRAC(1);
+		}
+	}
+}
+
+

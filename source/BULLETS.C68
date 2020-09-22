@@ -1,0 +1,879 @@
+/***
+ *			Bullet movement routines for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+#include "gems.h"
+
+#define	DEBUG	FALSE
+
+extern WORD		SYS_LAZER;			/* Lazer frame counter, set to 4 to start */
+extern PLAYER	Player;
+extern void Debug(char *fmt, ...);
+extern VISABLE3D	Visable_Objs[100];
+extern int			Num_Visable_Objs;	/* Number of visable Objects */
+extern WORD	WorldNum;
+extern FRAC			Mx, My, Mz;			/* Camera World Position */
+extern WORD	UI_Control;
+
+extern UWORD		STATS_SHOTS;
+extern UWORD		STATS_HITS;
+
+WORD		Bullet_Cnt;							/* Current Bullet index (wraps 0-7) */
+WORD		Bullet_Obj[NUMBULTS];			/* Player bullets object index */
+WORD		Bullet_Orig_Rotation[NUMBULTS];		/* Player bullets original rotation */
+WORD		Bullet_Rotation[NUMBULTS];		/* Player bullets rotation */
+OBJECT3D	*Bullet_Target[NUMBULTS];		/* Player bullets target */
+WORD		Bullet_HitOrMiss[NUMBULTS];	/* Player bullets hit or miss value */
+WORD		Bullet_TrackCnt[NUMBULTS];		/* counter which decides how often we track */
+WORD		Bullet_Decay[NUMBULTS];			/* Player bullets frame time Decay */
+BYTE		Bullet_Enemy[NUMBULTS];			/* Is this an enemy bullet? */
+int		aflag;								/* A button de-bounce */
+int		bflag;								/* B button de-bounce */
+int		cflag;								/* C button de-bounce */
+int		bullet_left;
+
+extern WORD			UI_DemoMode;
+
+#define	MISSLE_ANM		26
+#define	FAR		INT2FRAC(350)
+#define	SOUNDS		TRUE
+
+/***
+ *		Obj_Dist3D:		Calculate the Distance from one object to another
+ ***/
+
+FRAC
+Obj_Dist3D(OBJECT3D *src, OBJECT3D *dst)
+{
+	register FRAC	tmp;
+	register FRAC	maxc,medc,minc;
+	register FRAC	x,y,z;
+
+	x = dst->x - src->x;
+	y = dst->y - src->y;
+	z = dst->z - src->z;
+
+	maxc = (x < 0 ? -x : x);
+	medc = (y < 0 ? -y : y);
+	minc = (z < 0 ? -z : z);
+	/* Sort */
+	if (maxc < medc) {
+		tmp = maxc;
+		maxc = medc;
+		medc = tmp;
+	}
+	if (maxc < minc) {
+		tmp = maxc;
+		maxc = minc;
+		minc = tmp;
+	}
+	/* Compute 1/4 of medium & min in 1 step */
+	medc += minc;
+	maxc += (medc >> 2);
+	return (maxc);
+}
+
+/***
+ *		A Fast Approximation to the Hypotenuse
+ *		by Alan Paeth
+ *		from "Graphics Gems", Academic Press, 1990
+ ***/
+
+/*
+ * gives approximate distance from (x1,y1) to (x2,y2)
+ * with only overestimations, and then never by more
+ * than (9/8) + one bit uncertainty.
+ */
+
+FRAC
+Obj_Dist2D(OBJECT3D *src, OBJECT3D *dst)
+{
+	FRAC	x1,x2;
+	FRAC	y1,y2;
+
+	x1 = src->x;
+	x2 = dst->x;
+	y1 = src->y;
+	y2 = dst->y;
+	if ((x2 -= x1) < 0)
+		x2 = -x2;
+	if ((y2 -= y1) < 0)
+		y2 = -y2;
+	return (x2 + y2 - (((x2>y2) ? y2 : x2) >> 1) );
+}
+
+void
+Init_Bullets()
+{
+	int					cnt;
+	OBJECT3D				*optr;
+	extern int			Num_World_Objs;				/* Number of world Objects */
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+
+	aflag = FALSE;
+	bflag = FALSE;
+
+	/* this is now in Do_UI */
+	/* Player.Missiles = 50;
+	Player.Items[1] = TRUE; */
+
+	bullet_left = FALSE;
+	for (cnt=0; cnt<NUMBULTS; cnt++) {
+		Bullet_Obj[cnt] = Num_World_Objs;
+		Bullet_Target[cnt] = 0;
+		optr = Add3DObject(&missle32_fpb,Player.X,Player.Y,Player.Z);
+		optr->cloaked = TRUE;
+		optr->flag32 = TRUE;
+	}
+}
+
+static const struct frags {
+	FRAC				x;				/* X, Y and Z offsets */
+	FRAC				y;
+	FRAC				z;
+} frag_offs[12*6] = {
+	0l, 0l, (0x00070000l * 0x1l) - (0x00008000l * 0x01l),				/* Fragment 1 Straight Up */
+	0l, 0l, (0x00070000l * 0x2l) - (0x00008000l * 0x04l),		
+	0l, 0l, (0x00070000l * 0x3l) - (0x00008000l * 0x09l),		
+	0l, 0l, (0x00070000l * 0x4l) - (0x00008000l * 0x10l),		
+	0l, 0l, (0x00070000l * 0x5l) - (0x00008000l * 0x19l),		
+	0l, 0l, (0x00070000l * 0x6l) - (0x00008000l * 0x24l),		
+	0l, 0l, (0x00070000l * 0x7l) - (0x00008000l * 0x31l),		
+	0l, 0l, (0x00070000l * 0x8l) - (0x00008000l * 0x40l),		
+	0l, 0l, (0x00070000l * 0x9l) - (0x00008000l * 0x51l),		
+	0l, 0l, (0x00070000l * 0xAl) - (0x00008000l * 0x64l),		
+	0l, 0l, (0x00070000l * 0xBl) - (0x00008000l * 0x79l),		
+	0l, 0l, (0x00070000l * 0xCl) - (0x00008000l * 0x90l),		
+
+	0l, 0l, (0x00010000l* 0x1l) - (0x00008000l * 0x01l),		/* Fragment 2 Straight Down */
+	0l, 0l, (0x00010000l* 0x2l) - (0x00008000l * 0x04l),
+	0l, 0l, (0x00010000l* 0x3l) - (0x00008000l * 0x09l),
+	0l, 0l, (0x00010000l* 0x4l) - (0x00008000l * 0x10l),
+	0l, 0l, (0x00010000l* 0x5l) - (0x00008000l * 0x19l),
+	0l, 0l, (0x00010000l* 0x6l) - (0x00008000l * 0x24l),
+	0l, 0l, (0x00010000l* 0x7l) - (0x00008000l * 0x31l),
+	0l, 0l, (0x00010000l* 0x8l) - (0x00008000l * 0x40l),
+	0l, 0l, (0x00010000l* 0x9l) - (0x00008000l * 0x51l),
+	0l, 0l, (0x00010000l* 0xAl) - (0x00008000l * 0x64l),
+	0l, 0l, (0x00010000l* 0xBl) - (0x00008000l * 0x79l),
+	0l, 0l, (0x00010000l* 0xCl) - (0x00008000l * 0x90l),
+
+	0x0006DB6Dl * 0x1l, 0x00036DB6l * 0x1l, (0x00049249l * 0x1l) - (0x00008000l * 0x01l),		/* Fragment 3 Up */
+	0x0006DB6Dl * 0x2l, 0x00036DB6l * 0x2l, (0x00049249l * 0x2l) - (0x00008000l * 0x04l),		
+	0x0006DB6Dl * 0x3l, 0x00036DB6l * 0x3l, (0x00049249l * 0x3l) - (0x00008000l * 0x09l),		
+	0x0006DB6Dl * 0x4l, 0x00036DB6l * 0x4l, (0x00049249l * 0x4l) - (0x00008000l * 0x10l),		
+	0x0006DB6Dl * 0x5l, 0x00036DB6l * 0x5l, (0x00049249l * 0x5l) - (0x00008000l * 0x19l),		
+	0x0006DB6Dl * 0x6l, 0x00036DB6l * 0x6l, (0x00049249l * 0x6l) - (0x00008000l * 0x24l),		
+	0x0006DB6Dl * 0x7l, 0x00036DB6l * 0x7l, (0x00049249l * 0x7l) - (0x00008000l * 0x31l),		
+	0x0006DB6Dl * 0x8l, 0x00036DB6l * 0x8l, (0x00049249l * 0x8l) - (0x00008000l * 0x40l),		
+	0x0006DB6Dl * 0x9l, 0x00036DB6l * 0x9l, (0x00049249l * 0x9l) - (0x00008000l * 0x51l),		
+	0x0006DB6Dl * 0xAl, 0x00036DB6l * 0xAl, (0x00049249l * 0xAl) - (0x00008000l * 0x64l),		
+	0x0006DB6Dl * 0xBl, 0x00036DB6l * 0xBl, (0x00049249l * 0xBl) - (0x00008000l * 0x79l),		
+	0x0006DB6Dl * 0xCl, 0x00036DB6l * 0xCl, (0x00049249l * 0xCl) - (0x00008000l * 0x90l),		
+
+	0x00036DB6l * 0x1l, 0x0006DB6Dl * 0x1l, (0x00049249l* 0xFFFFFFFFl) - (0x00008000l * 0x01l),		/* Fragment 4 Down */
+	0x00036DB6l * 0x2l, 0x0006DB6Dl * 0x2l, (0x00049249l* 0xFFFFFFFEl) - (0x00008000l * 0x04l),		
+	0x00036DB6l * 0x3l, 0x0006DB6Dl * 0x3l, (0x00049249l* 0xFFFFFFFDl) - (0x00008000l * 0x09l),		
+	0x00036DB6l * 0x4l, 0x0006DB6Dl * 0x4l, (0x00049249l* 0xFFFFFFFCl) - (0x00008000l * 0x10l),		
+	0x00036DB6l * 0x5l, 0x0006DB6Dl * 0x5l, (0x00049249l* 0xFFFFFFFBl) - (0x00008000l * 0x19l),		
+	0x00036DB6l * 0x6l, 0x0006DB6Dl * 0x6l, (0x00049249l* 0xFFFFFFFAl) - (0x00008000l * 0x24l),		
+	0x00036DB6l * 0x7l, 0x0006DB6Dl * 0x7l, (0x00049249l* 0xFFFFFFF9l) - (0x00008000l * 0x31l),		
+	0x00036DB6l * 0x8l, 0x0006DB6Dl * 0x8l, (0x00049249l* 0xFFFFFFF8l) - (0x00008000l * 0x40l),		
+	0x00036DB6l * 0x9l, 0x0006DB6Dl * 0x9l, (0x00049249l* 0xFFFFFFF7l) - (0x00008000l * 0x51l),		
+	0x00036DB6l * 0xAl, 0x0006DB6Dl * 0xAl, (0x00049249l* 0xFFFFFFF6l) - (0x00008000l * 0x64l),		
+	0x00036DB6l * 0xBl, 0x0006DB6Dl * 0xBl, (0x00049249l* 0xFFFFFFF5l) - (0x00008000l * 0x79l),		
+	0x00036DB6l * 0xCl, 0x0006DB6Dl * 0xCl, (0x00049249l* 0xFFFFFFF4l) - (0x00008000l * 0x90l),		
+
+	0x0006DB6Dl * 0xFFFFFFFFl, 0x00036DB6l * 0xFFFFFFFFl, (0x00049249l * 0x1l) - (0x00008000l * 0x01l),		/* Fragment 5 Up */
+	0x0006DB6Dl * 0xFFFFFFFEl, 0x00036DB6l * 0xFFFFFFFEl, (0x00049249l * 0x2l) - (0x00008000l * 0x04l),		
+	0x0006DB6Dl * 0xFFFFFFFDl, 0x00036DB6l * 0xFFFFFFFDl, (0x00049249l * 0x3l) - (0x00008000l * 0x09l),		
+	0x0006DB6Dl * 0xFFFFFFFCl, 0x00036DB6l * 0xFFFFFFFCl, (0x00049249l * 0x4l) - (0x00008000l * 0x10l),		
+	0x0006DB6Dl * 0xFFFFFFFBl, 0x00036DB6l * 0xFFFFFFFBl, (0x00049249l * 0x5l) - (0x00008000l * 0x19l),		
+	0x0006DB6Dl * 0xFFFFFFFAl, 0x00036DB6l * 0xFFFFFFFAl, (0x00049249l * 0x6l) - (0x00008000l * 0x24l),		
+	0x0006DB6Dl * 0xFFFFFFF9l, 0x00036DB6l * 0xFFFFFFF9l, (0x00049249l * 0x7l) - (0x00008000l * 0x31l),		
+	0x0006DB6Dl * 0xFFFFFFF8l, 0x00036DB6l * 0xFFFFFFF8l, (0x00049249l * 0x8l) - (0x00008000l * 0x40l),		
+	0x0006DB6Dl * 0xFFFFFFF7l, 0x00036DB6l * 0xFFFFFFF7l, (0x00049249l * 0x9l) - (0x00008000l * 0x51l),		
+	0x0006DB6Dl * 0xFFFFFFF6l, 0x00036DB6l * 0xFFFFFFF6l, (0x00049249l * 0xAl) - (0x00008000l * 0x64l),		
+	0x0006DB6Dl * 0xFFFFFFF5l, 0x00036DB6l * 0xFFFFFFF5l, (0x00049249l * 0xBl) - (0x00008000l * 0x79l),		
+	0x0006DB6Dl * 0xFFFFFFF4l, 0x00036DB6l * 0xFFFFFFF4l, (0x00049249l * 0xCl) - (0x00008000l * 0x90l),		
+
+	0x00036DB6l * 0xFFFFFFFFl, 0x0006DB6Dl * 0xFFFFFFFFl, (0x00049249l* 0xFFFFFFFFl) - (0x00008000l * 0x01l),		/* Fragment 6 Down */
+	0x00036DB6l * 0xFFFFFFFEl, 0x0006DB6Dl * 0xFFFFFFFEl, (0x00049249l* 0xFFFFFFFEl) - (0x00008000l * 0x04l),		
+	0x00036DB6l * 0xFFFFFFFDl, 0x0006DB6Dl * 0xFFFFFFFDl, (0x00049249l* 0xFFFFFFFDl) - (0x00008000l * 0x09l),		
+	0x00036DB6l * 0xFFFFFFFCl, 0x0006DB6Dl * 0xFFFFFFFCl, (0x00049249l* 0xFFFFFFFCl) - (0x00008000l * 0x10l),		
+	0x00036DB6l * 0xFFFFFFFBl, 0x0006DB6Dl * 0xFFFFFFFBl, (0x00049249l* 0xFFFFFFFBl) - (0x00008000l * 0x19l),		
+	0x00036DB6l * 0xFFFFFFFAl, 0x0006DB6Dl * 0xFFFFFFFAl, (0x00049249l* 0xFFFFFFFAl) - (0x00008000l * 0x24l),		
+	0x00036DB6l * 0xFFFFFFF9l, 0x0006DB6Dl * 0xFFFFFFF9l, (0x00049249l* 0xFFFFFFF9l) - (0x00008000l * 0x31l),		
+	0x00036DB6l * 0xFFFFFFF8l, 0x0006DB6Dl * 0xFFFFFFF8l, (0x00049249l* 0xFFFFFFF8l) - (0x00008000l * 0x40l),		
+	0x00036DB6l * 0xFFFFFFF7l, 0x0006DB6Dl * 0xFFFFFFF7l, (0x00049249l* 0xFFFFFFF7l) - (0x00008000l * 0x51l),		
+	0x00036DB6l * 0xFFFFFFF6l, 0x0006DB6Dl * 0xFFFFFFF6l, (0x00049249l* 0xFFFFFFF6l) - (0x00008000l * 0x64l),		
+	0x00036DB6l * 0xFFFFFFF5l, 0x0006DB6Dl * 0xFFFFFFF5l, (0x00049249l* 0xFFFFFFF5l) - (0x00008000l * 0x79l),		
+	0x00036DB6l * 0xFFFFFFF4l, 0x0006DB6Dl * 0xFFFFFFF4l, (0x00049249l* 0xFFFFFFF4l) - (0x00008000l * 0x90l)		
+																											 
+
+
+};
+
+/***
+ *		Drone_Explosion:		This is a "special" routine for the 3D package
+ ***/
+
+
+WORD
+Drone_Explosion(OBJECT3D *optr)
+{
+	register WORD				state;					/* Animation state */
+	register WORD				frame;					/* Frame state */
+	register WORD				ret;
+	register BYTE				no_image;				/* No image set yet */
+	register struct frags	*ptr;
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern OBJECT3D	Special_Object;				/* For Special calls */
+	extern WORD		DroneHitPoints[4];
+	DRONE				*dptr;
+
+	ret = 1;
+	no_image = TRUE;
+	frame = optr->variable & 0xF;		/* Up to 16 frames */
+	state = optr->variable >> 4;
+	if (state == 0) {
+		if (frame == 12) {
+			if (optr->file == &mine32_fpb) {
+				/* Reset mine */
+				optr->cloaked = TRUE;
+				optr->noscale = FALSE;
+				optr->special = FALSE;
+				optr->frame = 0;
+				dptr = optr->parent;
+				dptr->HitPoints = 1;
+				dptr->GotzAGoal = FALSE;
+				dptr->AtakPlyr = FALSE;
+				dptr->explode= FALSE;
+			} else {
+				/* Done showing explosion, now move drone to another location */
+				optr->x = INT2FRAC(Random() & (FRAC2INT(WORLD_WIDTH)-1));
+				optr->y = INT2FRAC(Random() & (FRAC2INT(WORLD_DEPTH)-1));
+				optr->z = INT2FRAC((Random() & 0x7F) + 60);
+				optr->noscale = FALSE;
+				optr->special = FALSE;
+				optr->frame = 0;
+				optr->rotation = Random() % 360;
+				dptr = optr->parent;
+				dptr->HitPoints = DroneHitPoints[dptr->DroneType];
+				dptr->GotzAGoal = FALSE;
+				dptr->AtakPlyr = FALSE;
+				dptr->Loiter = FALSE;
+				dptr->explode= FALSE;
+				dptr->Target = dptr->Map1 = dptr->Map2 = 0;
+			}
+			ret = 0;
+		} else {
+			/* Show 3D lazer explosion, if any */
+			SYS_Copy3DObj(&Special_Object,optr);
+			if (Player.Items[1] == TRUE) {
+/*				Special_Object.file = &zzap_fpb; */
+				Special_Object.file = &piece1_fpb;
+				Special_Object.frame = frame;
+				/* Are we done showing all the lazer zap frames? */
+#if 0
+				if (optr->variable < 5)
+					/* Don't draw explosion during this state */
+					no_image = FALSE;
+#endif
+			}
+			state++;
+			Special_Object.anim = 0;
+			Special_Object.norot = TRUE;
+			Special_Object.notilt = TRUE;
+		}
+	}
+	if (state == 1 && no_image) {
+		/* Show 3D explosion */
+		Special_Object.file = &explode_fpb;
+		Special_Object.frame = frame;
+		state++;
+	} else
+		if (state == 8) {
+			state = 0;
+			frame++;
+			ret = 0;
+		} else {
+			/* Draw 6 fragments */
+			/* No memcpy needed since it's still there from STATE 0 */
+			ptr = &frag_offs[(state-1) * 12 + frame];
+			Special_Object.x = optr->x + ptr->x;
+			Special_Object.y = optr->y + ptr->y;
+			Special_Object.z = optr->z + ptr->z;
+			/* Blue or Grey fragments? */
+			if (optr->file == &mine32_fpb || optr->file == &zoomer32_fpb) {
+				switch ((state-1) & 1) {
+					case 0:
+						Special_Object.file = &piece5_fpb;
+						break;
+					case 1:
+						Special_Object.file = &piece6_fpb;
+						break;
+				}
+			} else {
+				switch ((state-2) & 3) {
+					case 0:
+						Special_Object.file = &piece1_fpb;
+						break;
+					case 1:
+						Special_Object.file = &piece2_fpb;
+						break;
+					case 2:
+						Special_Object.file = &piece3_fpb;
+						break;
+					case 3:
+						Special_Object.file = &piece4_fpb;
+						break;
+				}
+			}
+			Special_Object.anim = 0;
+			Special_Object.frame = (frame * ((state % 3) + 1)) % 12;
+			state++;
+		}
+	optr->variable = (state << 4) | frame;
+	return (ret);
+}
+
+/***
+ *		Canister_Explosion:		This is a "special" routine for the 3D package
+ ***/
+
+WORD
+Canister_Explosion(OBJECT3D *optr)
+{
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern OBJECT3D	Special_Object;	/* For Special calls */
+	extern NUKE_POOL	NukePools[30];		/* Nuke pool information */
+	extern int			NumNukes;			/* Number of nuclear pools in the world */
+	int					cnt;
+	NUKE_POOL			*nptr;
+
+	if (optr->variable == 12) {
+		/* Done showing explosion, now remove the canister from the pool */
+		nptr = &NukePools[0];
+		for (cnt=0; cnt < NumNukes; cnt++, nptr++)
+			if (optr == nptr->can_obj) {
+				nptr->ready = FALSE;
+				nptr->rcr_level = 0;
+				nptr->can_obj->cloaked = TRUE;
+				break;
+			}
+		optr->special = FALSE;
+		optr->frame = 0;
+		optr->rotation = Random() % 360;
+	} else {
+		/* Show 3D explosion */
+		SYS_Copy3DObj(&Special_Object,optr);
+		Special_Object.file = &explode_fpb;
+		Special_Object.anim = 0;
+		Special_Object.frame = optr->variable;
+		Special_Object.norot = TRUE;
+		Special_Object.notilt = TRUE;
+		optr->variable++;
+	}
+	/* Only one 3D frame to render at a time */
+	return (0);
+}
+
+/***
+ *		Small_Explosion:		This is a "special" routine for the 3D package
+ ***/
+
+WORD
+Small_Explosion(OBJECT3D *optr)
+{
+	register WORD				state;					/* Animation state */
+	register WORD				frame;					/* Frame state */
+	register WORD				ret;
+	extern OBJECT3D			Special_Object;		/* For Special calls */
+
+	ret = 1;
+	frame = optr->variable & 0xF;		/* Up to 16 frames */
+	state = optr->variable >> 4;
+	switch (state) {
+		case 0:
+			if (frame == 12) {
+				/* Done showing explosion */
+				optr->special = FALSE;
+				ret = 0;
+			} else {
+				/* Show 3D explosion */
+				SYS_Copy3DObj(&Special_Object,optr);
+				Special_Object.file = &explode_fpb;
+				Special_Object.anim = 0;
+				Special_Object.frame = frame;
+				Special_Object.norot = TRUE;
+				Special_Object.notilt = TRUE;
+			}
+			state++;
+			break;
+		case 1:
+			/* Show object */
+			SYS_Copy3DObj(&Special_Object,optr);
+			state++;
+			break;
+		case 2:
+			state = 0;
+			frame++;
+			ret = 0;
+			break;
+	}
+	/* Only one 3D frame to render at a time */
+	optr->variable = (state << 4) | frame;
+	return (ret);
+}
+
+/***
+ *		Nuke_Explosion:		This is a "special" routine for the 3D package
+ ***/
+
+WORD
+Nuke_Explosion(OBJECT3D *optr)
+{
+	register WORD				state;					/* Animation state */
+	register WORD				frame;					/* Frame state */
+	register WORD				ret;
+	extern OBJECT3D			Special_Object;		/* For Special calls */
+
+	ret = 1;
+	frame = optr->variable & 0xF;		/* Up to 16 frames */
+	state = optr->variable >> 4;
+	switch (state) {
+		case 0:
+			if (frame == 7) {
+				/* Done showing explosion */
+				optr->special = FALSE;
+				ret = 0;
+			} else {
+				/* Show 3D explosion */
+				SYS_Copy3DObj(&Special_Object,optr);
+				Special_Object.file = &nukebomb_fpb;
+				Special_Object.anim = 0;
+				Special_Object.frame = frame;
+				Special_Object.norot = TRUE;
+				Special_Object.notilt = TRUE;
+			}
+			state++;
+			break;
+		case 1:
+			/* Show object */
+			SYS_Copy3DObj(&Special_Object,optr);
+			state++;
+			break;
+		case 2:
+			state = 0;
+			frame++;
+			ret = 0;
+			break;
+	}
+	/* Only one 3D frame to render at a time */
+	optr->variable = (state << 4) | frame;
+	return (ret);
+}
+
+/***
+ *		Hit_Object:		Blow flying object up!  REAL GOOOOD
+ ***/
+
+void
+Hit_Object(OBJECT3D *tptr,int cnt)
+{
+	DRONE					*optr;
+	extern int			EXPLODE_IT;
+	extern int			EXPLODE_SCALE;
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern int			DronesAttacking;	/* Number of drones attacking player */
+	
+	optr = tptr->parent;
+	if (!(tptr->type == PT_DRONE || tptr->type == PT_MINE ||
+		tptr->type == PT_TANK))
+		return;
+	(optr->HitPoints) -= 1;
+	if ((optr->HitPoints) <= 0) {
+		/* If already exploding this object, don't do it again */
+		if (tptr->special)
+			return;
+		STATS_HITS++;
+		if (tptr->file == &can32_fpb)
+			tptr->spc_func = &Canister_Explosion;
+		else {
+			tptr->spc_func = &Drone_Explosion;
+			if (optr->AtakPlyr) {
+				optr->AtakPlyr = FALSE;
+				DronesAttacking--;
+			}
+		}
+		tptr->variable = 0;
+		tptr->special = TRUE;
+
+	} else {
+		/* Just a small dent... */
+		if (tptr->special)
+			return;
+		STATS_HITS++;
+		if (tptr->type == PT_TANK)
+			tptr->spc_func = &Nuke_Explosion;
+		else
+			tptr->spc_func = &Small_Explosion;
+		tptr->variable = 0;
+		tptr->special = TRUE;
+	}
+
+	if (cnt != -1) {
+		/* Kill the bullet too */
+		World_Objs[Bullet_Obj[cnt]].cloaked = TRUE;
+		Bullet_Target[cnt] = 0;
+	}
+#if SOUNDS
+	gemsstartsong(SFX_EXPLOSION);		/* Do explosion */
+#endif
+}
+
+/***
+ *		Update all of the bullets positions in the world.
+ ***/
+
+int
+Update_Bullets()
+{
+	OBJECT3D				*optr, *tptr;
+	register VISABLE3D	*vptr;
+	int					cnt, cnt2, cnt3;
+	int					targetflag;
+	FRAC					tmpx, tmpy, tmpz;
+	int					x,y;
+	extern const short deg2slice[90];
+	extern WORD	UI_GameLevel;
+	extern VISABLE3D			*v_targetptr;
+	
+	extern WORD NextRotation(FRAC srcX,FRAC srcY,FRAC srcZ, FRAC dstX,
+		FRAC dstY,FRAC dstZ, WORD srcRotation);
+
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern WORD			SYS_DOHEADSET;
+
+	if (Player.Items[1] == TRUE && SYS_LAZER == 1) {
+		OBJECT3D		*zap_obj;
+
+		/* Update lazer zap */
+		targetflag = FALSE;
+		if (v_targetptr != NULL) {
+			tptr = v_targetptr->object;
+			x = Hypot(128,112, v_targetptr->xs,v_targetptr->ys);
+			if (x < 20 && v_targetptr->dist < INT2FRAC(250)) {
+				zap_obj = tptr;
+				targetflag = TRUE;
+			}
+		}
+		if (targetflag)
+			Hit_Object(zap_obj,-1);
+	}
+	for (cnt=0; cnt<NUMBULTS; cnt++) {
+		optr = &World_Objs[Bullet_Obj[cnt]];
+		/* If bullet is not fired or decayed, don't update it */
+		if (optr->cloaked)
+			continue;
+		Bullet_TrackCnt[cnt]--;
+		if (Bullet_TrackCnt[cnt] == 0)
+			Bullet_TrackCnt[cnt] = 4;
+		
+		if (Bullet_TrackCnt[cnt] > Bullet_HitOrMiss[cnt])	{	/* on a mission from God */
+			tptr = Bullet_Target[cnt];
+			if (!(tptr->special)) {		/*already blowing up */
+				Bullet_Rotation[cnt] = NextRotation(optr->x,optr->y,optr->z,
+																tptr->x,tptr->y,tptr->z,
+																 Bullet_Rotation[cnt]);
+				targetflag = Bullet_Rotation[cnt] - Bullet_Orig_Rotation[cnt];
+				if (targetflag > 180)
+					targetflag -= 360;
+				if (targetflag > 60)
+					Bullet_Rotation[cnt] = (Bullet_Orig_Rotation[cnt] + 60) % 360;
+				if (targetflag < -60)
+					Bullet_Rotation[cnt] = (Bullet_Orig_Rotation[cnt] - 60);
+				while (Bullet_Rotation[cnt] < 0)
+					Bullet_Rotation[cnt] += 360;
+				optr->rotation = Bullet_Rotation[cnt];
+				optr->z = NextTrackZ(optr->z,tptr->z);
+			}
+		}
+
+		tmpz = Obj_Dist3D(optr,tptr);
+		if ((tmpz < BULTS_MOV3D * 128) && !(tptr->special)) {
+			if (tmpz > BULTS_MOV3D * 64) {
+				optr->x += fmul(tmpz,fsind(Bullet_Rotation[cnt]));
+				optr->y += fmul(tmpz,fcosd(Bullet_Rotation[cnt]));
+			}
+		} else {
+			optr->x += fmul(BULTS_MOV3D * 64,fsind(Bullet_Rotation[cnt]));
+			optr->y += fmul(BULTS_MOV3D * 64,fcosd(Bullet_Rotation[cnt]));
+		}
+		Update3DObject(optr);
+		/* if the bullet has passed the target, never aim again */
+		if (Obj_Dist3D(optr,tptr) > tmpz)
+			Bullet_HitOrMiss[cnt] = 4;
+
+
+		/* Are we with-in a few units from the target object? */
+		
+		if (Obj_Dist3D(optr,tptr) < BULTS_MOV3D * 64)
+			/* Did we hit the player, or a drone? */
+			if (Bullet_Target[cnt] == &World_Objs[0] && !World_Objs[0].cloaked) {
+				/* Kill the bullet */
+				World_Objs[Bullet_Obj[cnt]].cloaked = TRUE;
+				Bullet_Target[cnt] = 0;
+#if SOUNDS
+				gemsstartsong(SFX_SHIP_HIT);
+#endif
+				Hit_Player(5 + UI_GameLevel);
+			} else
+				Hit_Object(tptr,cnt);
+
+#if 0
+		/* vanish at edge of world */
+		if (optr->x < 0)
+			Bullet_Decay[cnt] = 0;
+		if (optr->y < 0)
+			Bullet_Decay[cnt] = 0;
+		if (optr->x > WORLD_WIDTH)
+			Bullet_Decay[cnt] = 0;
+		if (optr->y > WORLD_DEPTH)
+			Bullet_Decay[cnt] = 0;
+#endif
+
+		/* Decay bullet */
+		if (Bullet_Decay[cnt]-- <= 0) {
+			optr->cloaked = TRUE;
+		}
+	}
+}
+
+/***
+ *		Fire_Bullet:	See if we should fire one round off for the player
+ ***/
+
+Fire_Bullet()
+{
+	OBJECT3D				*optr, *tptr;
+	register VISABLE3D	*vptr;
+	int					cnt, cnt2, cnt3;
+	int					targetflag;
+	FRAC					tmpx, tmpy, tmpz;
+	FRAC					target_dist;
+	int					target_screen_dist;
+	int					x,y;
+	extern const short deg2slice[90];
+
+	extern VISABLE3D			*v_targetptr;
+	extern VISABLE3D			*demo_targetptr;
+
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern WORD			SYS_DOHEADSET;
+
+	/* Turn player cloaking on, if needed */
+	World_Objs[0].cloaked = FALSE;
+	cflag = FALSE;
+	if (!UI_DemoMode) {
+		if (SYS_DOHEADSET) {
+			if (SYS_JoyTable[(UI_Control ? JOY_A : JOY_C)])
+				cflag = TRUE;
+		} else
+			if (SYS_JoyTable[(UI_Control ? JOY_A : JOY_C)] ||
+				SYS_Joy2Table[(UI_Control ? JOY_A : JOY_C)])
+				cflag = TRUE;
+	}
+
+	if (cflag)
+		if (Player.Items[5] == TRUE)
+			World_Objs[0].cloaked = TRUE;
+
+	if (aflag == TRUE) {
+		if (!UI_DemoMode) {
+			if (SYS_DOHEADSET) {
+				if (!SYS_JoyTable[(UI_Control ? JOY_C : JOY_A)])
+					aflag = FALSE;
+			} else {
+				if (!SYS_JoyTable[(UI_Control ? JOY_C : JOY_A)] &&
+					!SYS_Joy2Table[(UI_Control ? JOY_C : JOY_A)])
+					aflag = FALSE;
+			}
+		} else
+			aflag = FALSE;
+	} else {
+		if (!UI_DemoMode) {
+			if (SYS_DOHEADSET) {
+				if (SYS_JoyTable[(UI_Control ? JOY_C : JOY_A)])
+					aflag = TRUE;
+			} else {
+				if (SYS_JoyTable[(UI_Control ? JOY_C : JOY_A)] ||
+					SYS_Joy2Table[(UI_Control ? JOY_C : JOY_A)])
+					aflag = TRUE;
+			}
+		} else {
+			/* Any new target for demo lazer blast? */
+			if (v_targetptr)
+				aflag = TRUE;
+		}
+		if (aflag && Player.Items[1] && (SYS_LAZER == 0)) {
+			/* Fire lazer shot */
+			SYS_LAZER = 4;
+			STATS_SHOTS++;
+			return 0;
+		}
+		if (aflag && !(Player.Items[1]))
+			gemsstartsong(VOICE_LASERS_D);
+	}
+
+	if (bflag == TRUE) {
+		if (SYS_DOHEADSET) {
+			if (!SYS_JoyTable[JOY_B])
+				bflag = FALSE;
+		} else {
+			if (!SYS_JoyTable[JOY_B] && !SYS_Joy2Table[JOY_B])
+				bflag = FALSE;
+		}
+	}
+
+	if (bflag == FALSE) {
+		if (SYS_DOHEADSET) {
+			if (SYS_JoyTable[JOY_B])
+				bflag = TRUE;
+		} else {
+			if (SYS_JoyTable[JOY_B] || SYS_Joy2Table[JOY_B])
+				bflag = TRUE;
+		}
+		if (bflag && (Player.Missiles > 0)) {
+
+			/* Fire one round off */
+			optr = &World_Objs[Bullet_Obj[Bullet_Cnt]];
+			optr->cloaked = FALSE;
+			STATS_SHOTS++;
+			Player.Missiles--;
+
+			bullet_left ^= TRUE;
+			if (bullet_left) {
+#if SOUNDS
+				gemsstartsong(SFX_L_MISSLE);
+#endif
+				optr->x = Player.X + (fsind(Player.Rotation-120) << 2);
+				optr->y = Player.Y + (fcosd(Player.Rotation-120) << 2);
+			} else {
+#if SOUNDS
+				gemsstartsong(SFX_R_MISSLE);
+#endif
+				optr->x = Player.X + (fsind(Player.Rotation+120) << 2);
+				optr->y = Player.Y + (fcosd(Player.Rotation+120) << 2);
+			}
+			optr->z = Player.Z;
+			Update3DObject(optr);
+			optr->rotation = Player.Rotation;
+			optr->frame = 16;			/* heading away */
+			Bullet_Rotation[Bullet_Cnt] = 
+			Bullet_Orig_Rotation[Bullet_Cnt] = Player.Rotation;
+
+				/* anything hittable? */
+
+			Bullet_HitOrMiss[Bullet_Cnt] = 4;
+			Bullet_TrackCnt[Bullet_Cnt] = 4;
+
+			if (v_targetptr != NULL) {
+				/* Always hit our target */
+				Bullet_Target[Bullet_Cnt] = v_targetptr->object;
+				Bullet_HitOrMiss[Bullet_Cnt] = 0;
+			} else
+				if (demo_targetptr != NULL) {
+					/* Sometimes hit our target */
+					Bullet_Target[Bullet_Cnt] = demo_targetptr->object;
+					Bullet_HitOrMiss[Bullet_Cnt] = 2;
+				} else
+					Bullet_Target[Bullet_Cnt] = 0;
+
+
+			Bullet_Rotation[Bullet_Cnt] = 
+			Bullet_Orig_Rotation[Bullet_Cnt] = Player.Rotation;
+			Bullet_Decay[Bullet_Cnt] = 60;
+			Bullet_Cnt = (Bullet_Cnt + 1) & 15;
+		}
+		if (bflag && (Player.Missiles == 0)) 
+			gemsstartsong(VOICE_MISSLESD);
+	}
+}
+
+/***
+ *		Fire_At_Player:	Fire one round off towards the player
+ ***/
+
+#define	ONLY_VISIBLE	4
+#define	ONLY_INVISIBLE	15
+
+int Fire_At_Player(OBJECT3D *drone)
+{
+	OBJECT3D				*optr;
+	void					*tptr;
+	int					cnt, cnt2, cnt3;
+	int					targetflag;
+	FRAC					tmpx, tmpy, tmpz;
+	extern const short deg2slice[90];
+
+	extern OBJECT3D	World_Objs[MAX3DOBJS];		/* Total object list */
+	extern WORD			SYS_DOHEADSET;
+
+
+	if (World_Objs[0].cloaked)
+		return 0;
+
+	tptr = drone->parent;
+
+	if ((WorldNum <= ONLY_VISIBLE) && !(tptr->Visable)) {
+		return 0;
+	}
+
+	if ((WorldNum >= ONLY_INVISIBLE) && (tptr->Visable))
+		return 0;
+
+
+	/* Fire one round off */
+	optr = &World_Objs[Bullet_Obj[Bullet_Cnt]];
+	optr->cloaked = FALSE;
+	optr->x = drone->x;
+	optr->y = drone->y;
+	optr->z = drone->z;
+	Update3DObject(optr);
+	optr->rotation = drone->rotation;
+	optr->frame = 0;			/* heading toward */
+	
+	/* Is player hittable? */
+#if 1
+	Bullet_HitOrMiss[Bullet_Cnt] = 0;
+#else
+	tmpz = Obj_Dist3D(optr,&World_Objs[0]);
+
+	tmpz = drone->z - Mz;
+	if (tmpz < 0) tmpz= -tmpz;
+	tmpx = drone->x - Mx;
+	if (tmpx < 0) tmpx= -tmpx;
+	tmpy = drone->y - My;
+	if (tmpy < 0) tmpy= -tmpy;
+	tmpz += tmpx + tmpy;
+	if (tmpz > INT2FRAC(256))
+		cnt3 = 1;
+	else
+		cnt3 = 0;
+	Bullet_HitOrMiss[Bullet_Cnt] = cnt3;
+#endif
+	Bullet_TrackCnt[Bullet_Cnt] = 4;
+	Bullet_Target[Bullet_Cnt] = &World_Objs[0];
+	Bullet_Rotation[Bullet_Cnt] = 
+		Bullet_Orig_Rotation[Bullet_Cnt] = drone->rotation;
+	Bullet_Decay[Bullet_Cnt] = 60;
+	Bullet_Cnt = (Bullet_Cnt + 1) & 15;
+	return 1;
+}

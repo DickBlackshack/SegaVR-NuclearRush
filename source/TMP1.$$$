@@ -1,0 +1,2755 @@
+
+ FRAC 0 a 0
+ FRAC 0 14
+ a 0 14 19 23
+ FRACSIZE 0 21
+ ULONG 0 16 17
+ tmp 0 16 21 22 24 25
+ ua 0 17 19 20 21
+
+ FRAC2INT 0 INT2FRAC 0
+ FRAC 0 x 0
+ FRAC 0 29
+ x 0 29 31
+
+ fdiv 0
+ FRAC 0 x 0 y 0
+ FRAC 0 138 141 142
+ i 1 140 155 158
+ x 0 138 146 153
+ y 0 138 148 150 153
+ ptr 0 142 154 156
+ sign 0 143 149 152 158
+ tantab 0 154
+ val 0 141 153 156
+
+
+ Angle 1
+ Angle 1 164 168 169 170 171 173 174 176 177 179
+ FRAC 0 166
+ FRACSIZE 0 180
+ ret 0 166 171 174 177 179 180
+ sintab 0 171 174 177 179
+
+
+ Angle 1
+ Angle 1 184 188 189 190 191 193 194 196 197 199
+ FRAC 0 186
+ FRACSIZE 0 200
+ ret 0 186 191 194 197 199 200
+ sintab 0 191 194 197 199
+
+
+ Angle 1
+ Angle 1 204 208 209 210 211 213 214 216 217 219
+ FRAC 0 206
+ FRACSIZE 0 220
+ ret 0 206 211 214 217 219 220
+ tantab 0 211 214 217 219
+
+
+ FRAC 0 x 0 y 0 z 0
+ FRAC 0 228 230 231
+ x 0 228 233
+ y 0 228 234
+ z 0 228 235
+ maxc 0 231 233 237 238 239 242 243 244 249 250
+ medc 0 231 234 237 239 240 248 249
+ minc 0 231 235 242 244 245 248
+ tmp 0 230 238 240 243 245
+
+
+ x1 0 x2 0 y1 0 y2 0
+ x1 0 266 268
+ x2 0 266 268 269 272
+ y1 0 266 270
+ y2 0 266 270 271 272
+
+ dist2d 0
+ r 0 xc 0 xp 0 yc 0 yp 0
+ r 0 290 294 296 302 304 305
+ xc 0 290 292 299
+ xp 0 290 292 299 301
+ yc 0 290 292 300
+ yp 0 290 292 300 301
+ d 0 292 294 296 301 302 305
+
+
+ dheight 0 dwidth 0 sheight 0 swidth 0
+ d 14 155 184 225 234 235 252 261
+ dheight 0 152 224 225 231
+ dwidth 0 152 182 184 191 252
+ e 14 154 182 189 191 193 224 228 231 239
+ sd 14 156
+ sheight 0 152 222 224 239
+ swidth 0 152 180 182 193 223 230
+ y 14 157 181 187 190
+ DAddr 0 161 176 177 236 238 242 248 249 264
+ DBlockSize 0 236
+ DEnd 0 261
+ DExtra 0 196 252
+ DestOffs 13 183 251
+ PDQS_DestAddr 0 177
+ PDQS_SourceAddr 0 172
+ SAddr 0 160 171 172 230
+ ScaleCode 13 165 243
+ UWORD 9 158 159
+ code_ptr 0 158 165 167 168 170 171 173 175 176 178 186 187 188 199 200 204 205 209 210 212 213 217 218 220 243 245 247 248 250 254 255 258 260
+ offs_ptr 0 159 183 188 200 205 210 213 251 255
+ sav_ptr 0 162 242 249
+
+ UI_ClearScreen 5 DisableInts 5 get_exception_sp 5 SYS_WaitForDMA 5 UI_InitVDP 5 UI_KillSprList 5 SYS_SetVAddr 5 itoh 5 dmp_regs 5 EnableInts 5
+ dheight 0 dwidth 0 sheight 0 sig 3 size 0 swidth 0
+ Addr 1 43
+ LogoChars 13 42 96
+ UWORD 13 42 43
+ buf 2 39 124 126 134 136 138 140
+ err_msg 2 37 48 51 54 57 60 63 66 69 72 75 82 105
+ oldstack 2 35 87 124 126 128 134 136 138 140 142 145
+ sig 3 33 45
+ sig_nbr 3 36 45 46 108 111
+ status 14 38
+ SIGADDR 8 68 132
+ SIGBUS 8 47 131
+ SIGCHK 8 53 113
+ SIGPRIV 8 65 117
+ SIGSPUR 8 71 118
+ SIGTRAP 8 62 116
+ SIGZDIV 8 74 119
+ ScreenCol 14 101
+ ScreenRow 14 102
+ UWORD 9 41
+ VDATA 0 100
+ i 0 40 99
+ ptr 2 41 96 97 100
+
+ itoh 5
+ oldstack 2
+ buf 2 163 177
+ c 1 161 170 171
+ i 1 160 172 173 177 179
+ old_stack 3 164 166 170 177
+ oldstack 2 158 166
+ reg 2 162 168 171 173 175
+
+
+ buf 2 length 1
+ buf 2 188 192
+ length 1 188 195
+ ptr 2 190 192 193 196 199
+
+ _f_fltstr 5
+ buf 2 value 2
+ buf 2 209 214 215
+ length 1 211 214 215 216
+ ptr 2 212 215 217 218
+ value 2 209 214
+
+ DisableInts 8 EnableInts 8
+	 i 14 191 195 198
+ WVCTRL 0 194 197 200
+
+ DisableInts 8 EnableInts 8
+	 i 14 210 214 217
+ WVCTRL 0 213 216 219
+
+ DisableInts 8 SYS_SetVAddr 8 EnableInts 8
+	 i 14 226 233 237
+ GLEDAddr 8 236
+ GREEN_LEDFont 0 235
+ RED_LEDFont 0 231
+ RLEDAddr 13 232
+ ULONG 13 225 227 229
+ ptr 2 225 231 234 235 238
+ vdata 0 227 229 234 238
+
+ SYS_DCListHold 8 SYS_DCAddVAddr 8 SYS_DCAddData 8 SYS_DCListGo 8
+ UWORD 2 color 2 str 2
+ UWORD 2 242 245 247 248
+ color 2 242 252
+ ptr 2 244 251 253 254 278
+ str 2 242 251
+ ASCII2LED 0 260
+ Addr 0 247 259 261 264
+ GLEDIndex 8 252
+ RLEDIndex 8 252
+ ScreenCol 14 259 268 270 274
+ ScreenRow 14 259 275
+ chr 0 246 254 255 257 260 267 273
+ mask 0 248 252 262 263 265 266
+ wptr 0 245 260 262 263 265 266
+
+ DisableInts 8 SYS_SetVAddr 8 EnableInts 8
+ Addr 0 UWORD 0
+ Addr 0 284 289
+ UWORD 0 284
+ i 1 286 290
+ ScreenCol 14 292
+ ScreenRow 14 292
+ VDATA 0 291
+
+ SYS_WaitFrame 8 SYS_SendPalette 8
+	 PalBuffer 13 300 303 305 308
+ index 1 298 304 305
+ TmpBuffer 0 299 303 308
+
+ SYS_WaitFrame 8 SYS_SendPalette 8
+	 PalBuffer 13 318 321 323 326
+ index 1 316 322 323
+ TmpBuffer 0 317 321 326
+
+ SYS_WaitFrame 8 SYS_SendPalette 8
+	 PalBuffer 13 336 339 341 344
+ index 1 334 340 341
+ TmpBuffer 0 335 339 344
+
+ DisableInts 8 SYS_SetVAddr 8 EnableInts 8
+	 CHR_1length 13 357 368
+ CHR_2length 13 358 369
+ CHR_3length 13 359 370
+ NEW_HORZLEN 13 360 374
+ SPR_Llength 13 353 364
+ SPR_NLlength 13 355 366
+ SPR_NRlength 13 356 367
+ SPR_Rlength 13 354 365
+ SYS_HORZLEN 13 361 374
+ UWORD 13 353 354 355 356 357 358 359 360 361
+ i 14 352 372
+ VDATA 0 373
+
+ DisableInts 8 SYS_SetVAddr 8 EnableInts 8
+	 SYS_NEWXA 13 386 389
+ SYS_NEWXB 13 387 389
+ SYS_VSCROLL 13 385 395
+ SYS_SCROLLX 13 389
+ VCTRL 0 391
+ VDATA 0 393 397 398 402
+ i 0 384 392 394 395 401
+
+ UI_PrintLED 8
+ fmt 2
+ fmt 2 407 412 413
+ str 2 410 413 414 415
+ ScreenCol 14 414
+ args 0 409 412 413 416
+
+ UI_PrintLED 8
+ fmt 2
+ fmt 2 420 425 426
+ str 2 423 426 427
+ args 0 422 425 426 428
+
+ DisableInts 8 UI_PrintLED 8 EnableInts 8
+ UWORD 0 str 2 x 0 y 0
+ UWORD 0 431
+ str 2 431 436
+ x 0 431 434
+ y 0 431 435
+ ScreenCol 14 434
+ ScreenRow 14 435
+
+ DisableInts 8 UI_PrintLED 8 EnableInts 8
+ UWORD 0 str 2 x 0 y 0
+ UWORD 0 440
+ str 2 440 445
+ x 0 440 443
+ y 0 440 444
+ ScreenCol 14 443
+ ScreenRow 14 444
+
+ DisableInts 8 UI_PrintLED 8 EnableInts 8
+ UWORD 0 erase 0 width 0 x 0 y 0
+ UWORD 0 449
+ erase 0 449 454 459
+ width 0 449 453 458
+ x 0 449 453
+ y 0 449 452
+ ScreenCol 14 453 458
+ ScreenRow 14 452
+
+ EnableInts 8 SYS_WaitFrame 8
+ timeout 1
+ timeout 1 466 471
+ SYS_JoyHit 0 468 471
+
+ SYS_WaitFrame 8
+ UWORD 0 frames 0
+ UWORD 0 476 478
+ done 1 479 481 482 484 487
+ frames 0 476 482
+ JOY_START 0 483
+ SYS_JoyTable 0 483
+ i 0 478 482
+
+ HMD_INIT_RDY 8 DisableInts 8 SYS_ClrPalette 8 UI_Do32 8 UI_LoadLED 8 SetMapPal 8 UI_ClearScreen 8 UI_CenterString 8 SYS_FadeIn 8 EnableInts 8 UI_WaitPress 8 SYS_FadeOut 8
+	 PalBuffer 13 496 505
+ SYS_DOHEADSET 13 492 498 520
+ SYS_HMD_ERROR 13 494 519
+ SYS_READHEAD 13 493 520
+ ULONG 13 494
+ FADETIME 8 516 539
+ HEADTRACK 8 499
+ SYS_FLICKER 0 498
+ ScreenRow 14 508 510 512 514 524 526 533 535
+ cockpit_map 0 504
+
+ DisableInts 8 DispMap 8 EnableInts 8 SYS_FadeIn 8
+ UWORD 0 map 0
+ PalBuffer 13 632 642 643 644 645
+ UWORD 0 630
+ map 0 630 640
+ FADETIME 8 647
+ NOASCII 0 634
+ SYS_LASTCHR 13 635 637
+
+ SYS_WaitFrame 8
+		 JOY_START 0 653
+ SYS_JoyTable 0 653
+
+ UI_PrintLED 8 UI_WaitPress 8
+ fmt 2
+ buf 2 661 669 671 673 679
+ chr 2 662 671 672 675
+ done 1 660 668 670 674 684
+ fmt 2 658 666 667
+ i 1 660 670 671
+ str 2 664 667 670 671
+ ScreenCol 14 676 678 681
+ args 0 663 666 667 683
+
+ UI_PrintLED 8 UI_WaitPress 8
+	 done 1 690 692 693 695 699 702
+ i 1 690 693
+ ScreenCol 14 697 700
+
+ RandomRange 8 UI_InitVDP 8 gemsstopall 8 SYS_ClrPalette 8 UI_ClearScreen 8 UI_Do40 8 SegaLogo 8 UI_CheckIO 8 EnableInts 8 SYS_WaitFrame 8 DisableInts 8 DispMap 8 DispBMap 8 InitSprites 8 PDQS_New 8 SendAnimPal 8 SYS_SetPalette 8 SYS_FadeIn 8 gemsstartsong 8 UI_WaitPress 8 PDQS_Scale 8 SetupDMA 8 PDQS_Init 8 UI_KillSprList 8 SYS_FadeOut 8 UI_Do32 8 UI_LoadLED 8 UI_ShowScreen 8 MainGameLoop 8 UI_SlowPrint 8 UI_FlashCursor 8
+	 PalBuffer 13 714 754 755 756 757
+ SYS_DOCYCLE 13 717 828
+ SYS_NEWXA 13 719 830
+ SYS_NEWXB 13 720 830
+ SYS_SCROLLX 13 718 830
+ UWORD 13 716 752 832 881
+ WorldNum 13 716 809 811 814 817 822
+ buf 2 712 791
+ button 1 708
+ done 1 708 763 765 768 774 787 790 792 849 854 860 875 880
+ i 1 708 789 846 849 852 871 872
+ j 1 708 789 794 842 861 870
+ k 1 708 811 812 814 815 817 821 822
+ ptr 2 710
+ sx 1 709
+ sy 1 709 843 845 847 851 858
+ FADETIME 8 759 783 826 836 855 867 876
+ MUSIC_TITLE 0 767 834
+ NOASCII 0 740
+ SEND_LEFT 13 769
+ SYS_CHRATTR 13 731
+ SYS_LASTCHR 13 741 743
+ ScreenCol 14 848 859
+ ScreenRow 14 847 858
+ Title_Pal 0 752
+ UI_DemoMode 0 724 823 835
+ UI_Pal 0 832 881
+ UI_StopDemo 0 824
+ ULONG 13 713
+ UWORD 9 711
+ VOICE_NUKERUSH 0 762
+ backgrnd_map 0 747
+ demo_levels 0 713 722 812 815 819 821
+ droncrsh_map 0 802
+ fp_logo_map 0 839
+ frame 0 711 760 770 771 772 776 778
+ nukebomb_fpb 0 751 771
+ nukelogo_map 0 748
+ nukeruin_map 0 796
+ punk1_map 0 799
+ punk2_map 0 805
+ restart 0 723 837 877 883
+ skip 0 766 782
+ title_story 2 846 849 872
+
+ UI_EncodePassword 8
+	 UWORD 13 893
+ WorldNum 13 893 901
+ Player.Credits 9 900
+ Player.Items 9 896 898
+ Player.Missiles 9 897
+ i 0 892 895 896
+
+ UI_InitVDP 8 UI_KillSprList 8 UI_ClearScreen 8 SYS_SetPalette 8 DisableInts 8 DispMap 8 EnableInts 8 InitSprites 8 PDQS_New 8 PDQS_Scale 8 SetupDMA 8 PDQS_Init 8 SYS_FadeIn 8 UI_SlowPrint 8 UI_FlashCursor 8 SYS_FadeOut 8
+	 PalBuffer 13 950 965 966 967 968
+ SYS_DOCYCLE 13 951 985 1058
+ UWORD 13 947 948 949 956
+ WorldNum 13 947 973 975 978 990
+ World_Background 13 948 1002 1010
+ World_Time 13 949 1040
+ done 1 946 987 1012 1015 1018 1021 1024 1027 1030 1033 1036 1042 1045 1048 1051
+ i 1 946 974 975 976 978 979 981
+ FADETIME 8 986 1057
+ NOASCII 0 957
+ SEND_LEFT 13 972
+ SYS_LASTCHR 13 958 960
+ ScreenCol 14 988 992 996 1000 1008 1038 1053
+ ScreenRow 14 989 993 997 1001 1009 1039 1054
+ UI_Pal 0 956
+ map_map 0 963
+ nsym_locs 0 973 976 979 981
+ nukesym_fpb 0 973 976 979 981
+ x 9 973 976 979 981
+ y 9 973 976 979 981
+
+ SYS_FadeOut 8 UI_InitVDP 8 UI_KillSprList 8 gemsstopall 8 UI_ClearScreen 8 SYS_SetPalette 8 UI_ShowScreen 8 UI_SlowPrint 8 UI_FlashCursor 8
+	 PalBuffer 13 1100
+ SYS_DOCYCLE 13 1101 1110
+ SYS_NEWXA 13 1103 1112
+ SYS_NEWXB 13 1104 1112
+ SYS_SCROLLX 13 1102 1112
+ buf 2 1099 1116
+ button 1 1095
+ done 1 1095 1115 1117 1131 1136 1142
+ i 1 1095 1114 1128 1131 1134 1146 1147
+ j 1 1095 1114 1119 1143 1145
+ k 1 1095
+ ptr 2 1097
+ sx 1 1096
+ sy 1 1096 1127 1129 1133 1140
+ FADETIME 8 1106 1137 1144 1150
+ ScreenCol 14 1130 1141
+ ScreenRow 14 1129 1140
+ UI_Pal 0 1113
+ UWORD 9 1098 1113
+ frame 0 1098
+ gooderth_map 0 1124
+ uglyerth_map 0 1121
+ won_story 2 1128 1131 1147
+
+ SYS_FadeOut 8 UI_InitVDP 8 gemsstopall 8 UI_KillSprList 8 SYS_SetPalette 8 UI_ClearScreen 8 DisableInts 8 DispMap 8 EnableInts 8 UI_EncodePassword 8 UI_CenterString 8 UI_NewGame 8 SYS_FadeIn 8 gemsstartsong 8 UI_WaitPress 8 UI_Debounce 8 SYS_WaitFrame 8
+	 OutBuf 2 1167
+ Player_Fuel 13 1172 1184 1196
+ SYS_DOCYCLE 13 1168 1178
+ SYS_NEWXA 13 1170 1180
+ SYS_NEWXB 13 1171 1180
+ SYS_SCROLLX 13 1169 1180
+ UWORD 13 1173 1181
+ WorldNum 13 1173 1192 1195 1207 1208 1210 1212 1213 1215
+ buf 2 1253 1265 1267 1268
+ FADETIME 8 1175 1242 1272
+ JOY_DOWN 0 1211
+ JOY_START 0 1256
+ JOY_UP 0 1206
+ MUSIC_LOOSE 0 1240
+ MUSIC_WIN 0 1218
+ Player.Credits 9 1192 1193 1194
+ Player.Damage 9 1184 1221 1232
+ Player.Won 9 1190
+ STATS_HITS 0 1263
+ STATS_SHOTS 0 1263
+ SYS_JoyTable 0 1206 1211 1256
+ ScreenRow 14 1199 1201 1203 1228 1233 1236 1260 1262
+ UI_AccessCode 2 1204
+ UI_Continue 0 1226 1227
+ UI_NumContinues 0 1227
+ UI_Pal 0 1181
+ VOICE_GAME_OVR 0 1239
+ VOICE_MISSIONS 0 1217
+ credits_earned 0 1192
+ done 0 1164 1244 1245
+ droncrsh_map 0 1224
+ i 0 1163 1263 1264 1265
+ music 0 1166 1218 1240 1248
+ punk1_map 0 1222
+ punk2_map 0 1188
+ voice 0 1166 1217 1239 1243
+ wait 0 1165 1183 1198 1249 1252
+
+ UI_DecodePassword 8 SYS_FadeIn 8 Bomb 8 DisableInts 8 DispMap 8 EnableInts 8 UI_ClearScreen 8 UI_CenterString 8 UI_EraseIndicator 8 UI_PrintIndicator 8 gemsstartsong 8 SYS_WaitFrame 8 SYS_FadeOut 8
+	 UWORD 13 1306
+ button 1 1305 1343 1381 1386
+ cur_item 1 1305 1329 1330 1333 1335 1337 1341 1345 1347 1350 1354 1355 1362 1364 1366 1370 1373 1376 1391 1395
+ done 1 1305 1342 1349 1384
+ last_move 1 1305 1340 1352 1353 1359 1360 1369
+ nukescrn_map 13 1306 1322
+ old_item 1 1305 1350 1370 1372 1375
+ FADETIME 8 1310 1348 1389
+ FOCUS 2 1332 1361
+ JOY_DOWN 0 1358 1359 1360
+ JOY_START 0 1380
+ JOY_UP 0 1351 1352 1353
+ NOASCII 0 1316
+ SFX_BUTTON_HIT 0 1378
+ SFX_BUTTON_ON 0 1383
+ SYS_JoyTable 0 1351 1358 1380
+ SYS_LASTCHR 13 1317 1319
+ ScreenRow 14 1326
+ UI_AccessCode 2 1311
+ UI_Continue 0 1314 1315 1328 1344 1362 1364 1371 1391 1392
+ UI_NumContinues 0 1314
+ restart 0 1313 1393
+ start_items 2 1337 1347 1375 1376
+ start_items2 2 1330 1345 1372 1373
+
+ DisableInts 8 DispMap 8 EnableInts 8 UI_ClearScreen 8 UI_CenterString 8 UI_EraseIndicator 8 UI_PrintString 8 UI_PrintIndicator 8 SYS_FadeIn 8 gemsstartsong 8 SYS_WaitFrame 8 gemsstopall 8 SYS_FadeOut 8
+	 SYS_DOHEADSET 13 1441
+ UWORD 13 1440
+ buf 2 1439 1463 1464 1465 1564 1565 1566
+ cur_item 1 1435 1456 1457 1480 1483 1486 1490 1491 1497 1498 1501 1525 1531 1532 1534 1537 1548 1576 1596
+ done 1 1435 1482 1485 1550
+ gridscrn_map 13 1440 1450
+ last_button 1 1437 1481 1544 1546 1592
+ last_move 1 1435 1479 1488 1489 1495 1496 1503 1504 1513 1514 1522 1524
+ level 1 1436
+ old_item 1 1435 1486 1525 1527 1528 1530 1536
+ FADETIME 8 1484 1594
+ JOY_DOWN 0 1494 1495 1496
+ JOY_LEFT 0 1502 1503 1504
+ JOY_RIGHT 0 1512 1513 1514
+ JOY_START 0 1542
+ JOY_UP 0 1487 1488 1489
+ MAX_SONGS 8 1515
+ NOASCII 0 1444
+ SFX_BUTTON_HIT 0 1539
+ SFX_BUTTON_ON 0 1547
+ SYS_FLICKER 0 1578 1580
+ SYS_JoyTable 0 1487 1494 1502 1512 1542
+ SYS_LASTCHR 13 1445 1447
+ SYS_VR_MODE 0 1470 1528 1532 1574 1575 1576 1577
+ ScreenCol 14 1458 1461 1466 1507 1517 1554 1561
+ ScreenRow 14 1454 1459 1462 1467 1472 1508 1518 1553 1560 1582
+ UI_Control 0 1473 1583 1584
+ UI_GameLevel 0 1460 1555 1556 1557
+ UI_NumContinues 0 1463 1562 1563 1564
+ WCES94 2 1469 1526 1573
+ levels 2 1460 1557
+ opt_items 2 1457 1483 1530 1534 1536 1537
+ song 0 1438 1443 1468 1505 1506 1509 1515 1516 1519 1570
+ songs 0 1570
+ vr_modes 2 1470 1528 1532 1576
+
+
+	 UWORD 13 1661
+ WorldNum 13 1661 1663
+ Player.Credits 9 1664
+ Player.Items 9 1666 1667 1668 1669 1670 1671
+ Player.Missiles 9 1665
+ UI_AccessCode 2 1685 1687
+ UI_Password 24 1673
+ UI_Password.Cloak 24 1670
+ UI_Password.Credits 24 1664
+ UI_Password.Engine 24 1667
+ UI_Password.Gieger 24 1668
+ UI_Password.Infrared 24 1669
+ UI_Password.Lasers 24 1671
+ UI_Password.Missiles 24 1665
+ UI_Password.Protect 24 1680
+ UI_Password.Shields 24 1666
+ UI_Password.World 24 1663
+ ULONG 13 1659 1660 1673
+ a_items 23 1685
+ chksum 0 1658 1675 1678 1680
+ i 0 1657 1676 1682 1685
+ j 0 1657 1683 1685
+ name 2 1685
+ ptr 2 1660 1673 1674 1681
+ tmp 0 1659 1674 1677 1678 1681 1683 1684
+
+ Bomb 8
+	 UWORD 13 1701
+ WorldNum 13 1701 1724
+ ASCII2CODE 2 1707
+ Player.Credits 9 1725
+ Player.Items 9 1728 1730 1732 1734 1736 1738 1740 1742 1744 1746 1748 1750
+ Player.Missiles 9 1726
+ UI_AccessCode 2 1707 1711
+ UI_Password 24 1723
+ UI_Password.Cloak 24 1743
+ UI_Password.Credits 24 1725
+ UI_Password.Engine 24 1731
+ UI_Password.Gieger 24 1735
+ UI_Password.Infrared 24 1739
+ UI_Password.Lasers 24 1747
+ UI_Password.Missiles 24 1726
+ UI_Password.Shields 24 1727
+ UI_Password.World 24 1724
+ ULONG 13 1699 1700 1723
+ chksum 0 1698 1715 1718 1720 1721
+ decoded 0 1700 1714 1723
+ i 0 1697 1704 1707 1716
+ j 0 1697
+ k 0 1697 1706 1707 1709 1712 1721
+ tmp 0 1699 1703 1705 1712 1714 1717 1718
+
+ DisableInts 8 DispMap 8 EnableInts 8 UI_ClearScreen 8 UI_CenterString 8 UI_PrintString 8 UI_EraseIndicator 8 UI_PrintIndicator 8 SYS_FadeIn 8 gemsstartsong 8 SYS_WaitFrame 8 UI_DecodePassword 8 UI_Debounce 8 UI_WaitPress 8 SYS_FadeOut 8
+	 UWORD 13 1761
+ buf 2 1758 1780
+ button 1 1757 1787 1829 1832 1851
+ code_len 1 1760 1785 1835 1836 1838 1841 1842 1843
+ cur_item 1 1757 1788 1789 1790 1794 1798 1804 1810 1816 1820 1823 1824 1833 1836 1838 1840 1845
+ done 1 1757 1791 1846 1853
+ gridscrn_map 13 1761 1770
+ i 1 1759 1781 1782
+ last_move 1 1757 1786 1796 1797 1802 1803 1808 1809 1814 1815 1819
+ old_item 1 1757 1794 1820 1821 1822
+ x 1 1759 1782 1789 1821 1823
+ y 1 1759 1782 1789 1821 1823
+ FADETIME 8 1792 1864
+ JOY_DOWN 0 1801 1802 1803
+ JOY_LEFT 0 1807 1808 1809
+ JOY_RIGHT 0 1813 1814 1815
+ JOY_START 0 1828
+ JOY_UP 0 1795 1796 1797
+ NOASCII 0 1764
+ SFX_BUTTON_HIT 0 1825
+ SFX_BUTTON_ON 0 1831
+ SYS_JoyTable 0 1795 1801 1807 1813 1828
+ SYS_LASTCHR 13 1765 1767
+ ScreenCol 14 1777 1848
+ ScreenRow 14 1774 1776 1847 1856 1858
+ UI_AccessCode 2 1784 1836 1838 1843 1849 1854 1866
+ a_items 23 1782 1789 1790 1798 1804 1810 1816 1821 1822 1823 1824 1836 1838
+ down 0 1804
+ left 0 1810
+ name 2 1782 1790 1822 1824 1836 1838
+ restart 0 1763 1862
+ right 0 1816
+ up 0 1798
+
+
+		
+ UI_ClearScreen 8 DisableInts 8 DispMap 8 EnableInts 8 InitSprites 8 PDQS_New 8 SendAnimPal 8 UI_PrintString 8 Debug 8 SYS_FadeIn 8 PDQS_Scale 8 SetSendRight 8 SetupDMA 8 PDQS_Init 8 SYS_WaitFrame 8 UI_KillSprList 8 SYS_FadeOut 8
+	 PalBuffer 13 1892
+ UWORD 13 1887 1888 1889 1890
+ button 1 1886
+ done 1 1886 1916 1933 1981
+ focus_map 13 1887 1901
+ FADETIME 8 1931 1996
+ JOY_A 0 1963 1965
+ JOY_B 0 1963
+ JOY_C 0 1964 1973
+ JOY_DOWN 0 1969 1977 1988
+ JOY_START 0 1964
+ JOY_UP 0 1966 1974 1985
+ MAXSCALE 8 1942 1945 1946 1948 1986
+ NOASCII 0 1894
+ SEND_LEFT 13 1951 1956
+ SYS_AVGFDIST 0 1983
+ SYS_BASECHR 13 1908
+ SYS_BASECHR1 13 1907 1908
+ SYS_DISTDIV 0 1948 1949
+ SYS_FLICKER 0 1918 1955
+ SYS_JoyTable 0 1963 1964 1965 1966 1969 1973 1974 1977 1985 1988
+ SYS_LASTCHR 13 1895 1897 1907
+ SYS_MAXFDIST 0 1937 1948 1970 1975 1976 1979 1983
+ SYS_MINFDIST 0 1937 1948 1949 1967 1968 1970 1971 1975 1978 1983
+ ScreenCol 14 1913 1923 1935 1953
+ ScreenRow 14 1914 1922 1936 1952
+ dist 0 1889 1920 1941 1986 1987 1989 1990
+ house32_fpb 0 1911 1954 1958
+ scale 0 1888 1932 1937 1941 1942 1943 1944 1945 1946 1949 1954 1958
+ x 9 1890 1949 1954 1958
+
+ DisableInts 8 SYS_SetVAddr 8 EnableInts 8
+ chr_inc 0 chr_index 0 flip 0 x 0 y 0
+ chr_inc 0 2005 2030
+ chr_index 0 2005 2014 2016 2029 2030
+ flip 0 2005 2021 2029 2031
+ i 14 2010 2020
+ j 14 2010 2025
+ x 0 2005 2022 2024
+ y 0 2005 2018
+ Addr 0 2008 2027 2028
+ NOASCII 0 2013
+ UWORD 9 2007 2008 2009 2012
+ scrn_x 0 2009 2022 2024 2027 2032 2034
+ scrn_y 0 2009 2018 2027 2036
+ vdata 0 2007 2012 2029
+
+ UI_KillSprList 8 gemsstopall 8 gemsstartsong 8 UI_InitVDP 8 DisableInts 8 DispMap 8 EnableInts 8 UI_ClearScreen 8 InitSprites 8 SendAnimPal 8 SYS_FadeIn 8 DispFrame 8 UI_PrintString 8 UI_CenterString 8 SetupDMA 8 SYS_WaitFrame 8 DrawArrow 8 UI_Debounce 8 SYS_FadeOut 8
+	 after 14 2057 2085 2088 2091 2092 2159 2162 2163 2221 2227 2229 2230 2231 2249 2255 2257 2258 2272
+ before 14 2056 2237 2243 2245 2246 2264
+ button 1 2052
+ done 1 2052 2094 2095 2208
+ i 1 2054 2084 2087 2088 2090 2160 2161 2200 2220 2223 2224 2225 2226 2227 2229 2236 2239 2240 2241 2242 2243 2245 2248 2251 2252 2253 2254 2255 2257
+ item 1 2054 2092 2120 2130 2135 2137 2140 2143 2146 2149 2152 2155 2172 2207 2212 2217 2218 2220 2231 2236 2248 2264 2272
+ last_item 1 2054 2093 2120 2121 2130
+ last_move 1 2053 2093 2261 2262 2269 2271 2276
+ FADETIME 8 2081 2280
+ Item_Costs 0 2087 2137 2140 2143 2146 2149 2152 2155 2218 2224 2240 2252
+ JOY_LEFT 0 2260 2261 2262
+ JOY_RIGHT 0 2268 2269 2271
+ JOY_START 0 2205
+ MUSIC_EXTRA 0 2062
+ NOASCII 0 2064
+ Player.Credits 9 2087 2111 2112 2118 2218 2224 2240 2252
+ Player.Items 9 2087 2098 2100 2102 2104 2106 2108 2161 2217 2226 2242 2254
+ Player.Missiles 9 2213 2214 2215
+ SEND_LEFT 13 2096
+ SFX_BUTTON_HIT 0 2265 2273
+ SFX_BUTTON_ON 0 2211
+ SYS_JoyTable 0 2205 2260 2268
+ SYS_LASTCHR 13 2065 2067
+ ScreenCol 14 2113 2116 2124 2127 2132
+ ScreenRow 14 2114 2117 2123 2126 2131 2134 2165 2167
+ UWORD 9 2055
+ cloak_anm 0 2189
+ disolve_anm 0 2099
+ engine_anm 0 2186
+ enhance_map 0 2070
+ forcefld_anm 0 2101
+ frame 0 2055 2082 2099 2101 2174 2177 2180 2183 2186 2189 2192 2198
+ infrared_anm 0 2174
+ lasergun_anm 0 2177
+ missles_anm 0 2192
+ old_credits 0 2058 2093 2111 2112
+ oozemap_anm 0 2180
+ player_anm 0 2077 2103 2105 2107 2109
+ shield_anm 0 2183
+
+ UI_DecodePassword 8 SYS_FadeIn 8 Bomb 8 DisableInts 8 DispMap 8 EnableInts 8 UI_ClearScreen 8 UI_CenterString 8 UI_EraseIndicator 8 UI_PrintString 8 UI_PrintIndicator 8 gemsstartsong 8 SYS_WaitFrame 8 SYS_FadeOut 8 UI_DroneEnhance 8
+	 SYS_DOHEADSET 13 2301
+ UWORD 13 2300 2302
+ WorldNum 13 2302 2325 2369 2370 2371
+ buf 2 2299
+ cur_item 1 2296 2321 2322 2328 2331 2334 2338 2339 2345 2346 2350 2352 2362 2385
+ done 1 2296 2330 2333 2364
+ gridscrn_map 13 2300 2315
+ last_button 1 2298 2329 2358 2360 2381
+ last_move 1 2296 2327 2336 2337 2343 2344 2349
+ level 1 2297
+ old_item 1 2296 2334 2350 2351
+ FADETIME 8 2305 2332 2375 2383
+ JOY_DOWN 0 2342 2343 2344
+ JOY_START 0 2356
+ JOY_UP 0 2335 2336 2337
+ NOASCII 0 2309
+ Player.Credits 9 2374
+ SFX_BUTTON_HIT 0 2353
+ SFX_BUTTON_ON 0 2361
+ SYS_JoyTable 0 2335 2342 2356
+ SYS_LASTCHR 13 2310 2312
+ ScreenCol 14 2323 2368
+ ScreenRow 14 2319 2324 2367
+ UI_AccessCode 2 2306
+ cheat_items 2 2322 2331 2351 2352
+ restart 0 2308 2377
+
+
+ UWORD 0 anm_file 0
+ UWORD 0 2447 2449 2450 2455
+ anm_file 0 2447 2452 2455
+ anim_ptr 0 2449 2455 2456
+ wptr 0 2450 2452 2453 2455
+
+ UI_ClearScreen 8 InitSprites 8 PDQS_New 8 UI_CenterString 8 EnableInts 8 SYS_FadeIn 8 SYS_WaitFrame 8 SendAnimPal 8 SYS_SendPalette 8 Get_NumFrames 8 PDQS_Scale 8 SetupDMA 8 PDQS_Init 8 UI_KillSprList 8 SYS_FadeOut 8
+	 PalBuffer 13 2463 2489
+ FADETIME 8 2484 2500
+ NOASCII 0 2465
+ SEND_LEFT 13 2485
+ SYS_BASECHR 13 2477
+ SYS_BASECHR1 13 2476 2477
+ SYS_LASTCHR 13 2466 2468 2476
+ ScreenRow 14 2480
+ UWORD 9 2461
+ anims 0 2486 2488 2491 2493
+ i 0 2461 2486 2488 2491 2493
+ j 0 2461 2492 2493
+ k 0 2461 2491 2492
+
+ gemsstopall 8 gemsstartsong 8 UI_StartScreen 8 UI_PasswordScreen 8 UI_OptionScreen 8 UI_AdjustFocus 8 UI_TestAnms 8 UI_Cheat 8 UI_EncodePassword 8
+	 SYS_CHRATTR 13 2511 2515
+ SYS_SCRLXB 13 2512 2514
+ UWORD 13 2511
+ done 1 2510 2516 2522 2525 2546
+ FOCUS 2 2530
+ MUSIC_OPENING 0 2518
+ TEST_ANM 2 2538
+
+ gemsinit 8 UI_NewGame 8 UI_TitleScreen 8 SendAnimPal 8
+		 UI_Control 0 2552
+ envbank 0 2551
+ fed32_fpb 0 2555
+ patchbank 0 2551
+ sampbank 0 2551
+ seqbank 0 2551
+
+ Debug 12 fmul 12 INT2FRAC 12 FRAC2INT 12 Transform3D 12
+	 CosA 13 443 475
+ FRAC 13 442 443
+ SYS_HARDWARE 13 447 469
+ SYS_SCRLXB 13 444 459
+ ScreenCol 13 445 457
+ ScreenRow 13 446 456
+ SinA 13 442 474
+ color 14 433 511 519 521 522 523
+ nexty 14 432 513 519 524
+ scrolly 14 434 484 496
+ y 14 431 450 451 491 493 495 496 498 499 500 514 515 519
+ Cvt360To512 0 451 455
+ DEBUG 8 458
+ FRAC 0 437
+ Headset_Rotation 13 455
+ MOVECPIT 8 453
+ NEW_HORZLEN 13 527
+ Player.Rotation 13 450 459
+ Player.X 13 474
+ Player.Y 13 475
+ SYS_HORIZON 13 508
+ SYS_NEWXA 13 451 470
+ SYS_NEWXB 13 455 472
+ SYS_VADJ 0 493 495 496 499
+ SYS_VSCROLL 0 496 500
+ SYS_VTILT 0 487 488 489 490 492 493 495
+ ULONG 13 435 436 438
+ bptr 0 439 512 513 524
+ fill1 0 435 509 516 522
+ fill2 0 436 510 518 523
+ hcolors 0 509 510 522 523
+ hoffsets 0 512
+ horz_adj 0 493 495
+ lptr 0 438 508 516 518
+ old_yp 14 504 506
+ xf 0 437 474 476 478
+ xp 0 440 476 478
+ yf 0 437 475 477 478
+ yp 0 440 477 478 480 481 482 483 484 504 506 512
+
+ Set_HScroll 12
+		 NEW_HORZLEN 13 535
+ SYS_HORZLEN 0 535
+ old_yp 14 533
+
+
+		 CHR_1length 0 137
+ CHR_2length 0 138
+ CHR_3length 0 139
+ SPR_Llength 0 143
+ SPR_NLlength 0 141
+ SPR_NRlength 0 142
+ SPR_Rlength 0 144
+ SPR_Video_Addr 0 140
+ SYS_BASECHR 13 133
+ SYS_BASECHR1 13 133 134
+ SYS_BASECHR2 0 134
+ SYS_LASTCHR 13 133
+ SYS_LASTSPR 13 131
+ SYS_NODMA 13 136
+ SYS_PAGE 13 130
+ SYS_SAFEDMA 13 135
+ SpriteAttr 0 140
+
+ SYS_WaitFrame 13 Debug 13
+	 LONG 13 150
+ SYS_VCNT 13 150
+ ScreenCol 13 151 240
+ ScreenRow 13 152 241
+ CHR_1length 0 168 169 170 171 173 175 177 181 186 242
+ CHR_1src_addr 0 161
+ CHR_1video_addr 0 160 170
+ CHR_2length 0 172 173 174 175 177 182 187 243
+ CHR_2src_addr 0 169
+ CHR_2video_addr 0 170 174
+ CHR_3length 0 175 178 183 188 244
+ CHR_3src_addr 0 173
+ CHR_3video_addr 0 174
+ LEFT_SLIST1 21 209 218
+ LEFT_SLIST2 21 207 214
+ MAXDMALEN 8 167 168 171 172
+ NEW_HORZLEN 13 236
+ RIGHT_SLIST1 21 201 219
+ RIGHT_SLIST2 21 199 215
+ SPR_NLlength 0 197 199 201 204 207 209 223 245
+ SPR_NLsrc_addr 21 214 218
+ SPR_NRlength 0 197 205 224
+ SPR_NRsrc_addr 21 215 219
+ SYS_BASECHR 13 159 160 164 229 230 232 233
+ SYS_BASECHR1 13 229 232 246
+ SYS_BASECHR2 0 230
+ SYS_FLICKER 13 195
+ SYS_HORZLEN 13 236
+ SYS_LASTCHR 13 159 164 233
+ SYS_LASTSPR 13 192 193 197 204 226
+ SYS_NODMA 13 156 249
+ SYS_PAGE 13 198 206 213 216 220
+ SYS_SAFEDMA 13 154 235
+ UWORD 9 149
+ WORK_CHRLIST 13 161 169 173
+ WORK_SPRLIST 21 193 199 201 207 209
+ chrWorkLength 0 149 164 167 171 175 177 181
+ link 0 193
+
+
+ UWORD 0 anim_file 0 charOffset 0 charSize 0
+ UWORD 0 252 254 255 257 267
+ anim_file 0 252 264 267
+ charOffset 0 252 262
+ charSize 0 252 259 260
+ counter 1 256
+ i 1 256
+ SYS_BASECHR 13 271
+ SYS_LASTCHR 13 271 273
+ WORK_CHRLIST 13 277
+ actualOffset 0 257 262 275
+ actualSize 0 257 259 273 277
+ workIndex 0 255 271 277
+ wptr 0 254 264 267 269 275 277
+
+ AddCharToDMA 13
+ ROMloc 0 UWORD 0 anim_file 0 spriteCount 1 xPos 1 yPos 1
+ ROMloc 0 282 291 292 298 311
+ UWORD 0 282 285 286
+ anim_file 0 282 303
+ spriteCount 1 282 289
+ xPos 1 283 311
+ yPos 1 283 291
+ LEFT_SLIST1 21 308
+ LEFT_SLIST2 21 306
+ SEND_LEFT 13 300
+ SYS_CHRATTR 13 302
+ SYS_LASTCHR 13 301
+ SYS_LASTSPR 13 291 295 301 306 308 311 313
+ SYS_PAGE 13 305
+ WORK_SPRLIST 21 291 295 301 306 308 311
+ chr 0 301 306 308
+ counter 0 285 289
+ link 0 295
+ offset 3 286 298 302 303
+ size 1 286 292 295 303
+ x 9 311
+ y 9 291
+
+ AddSpriteToDMA 13
+ UWORD 0 anim 0 anim_file 0 frame 0 xp 0 yp 0
+ UWORD 0 317 320 321 331 336 338
+ anim 0 317 332
+ anim_file 0 317 326 331 336 338 343
+ frame 0 317 333 338
+ i 1 322
+ numsprs 1 322 340 343
+ x 1 322
+ xp 0 318 343
+ y 1 322
+ yp 0 318 343
+ anim_ptr 0 320 331 332 333 336
+ wptr 0 321 326 328 331 336 338 340 341 343
+
+ SYS_SetPalette 13
+ UWORD 0 anim_file 0
+ UWORD 0 348 350 355
+ anim_file 0 348 352 355
+ wptr 0 350 352 355
+
+
+		 LEFT_SLIST1 21 368
+ LEFT_SLIST2 21 366
+ SYS_LASTSPR 13 363 364 369
+ SYS_PAGE 13 365
+ UWORD 9 361
+ WORK_SPRLIST 21 363 366 368
+ length 0 361 364 366 368
+ link 0 363
+
+
+ starter 3
+ LONG 13 75
+ SYS_VCNT 13 75 79
+ j 1 73 84 85
+ start 3 74 79 81 82
+ starter 3 71 77 81
+ I 1 86
+ multiplier 8 85
+ w 3 82 83 85 88
+
+
+	 A0 3 95 101 106 108 110 114 119 121 124 127 132 134 136
+ A1 3 95 102 104 107 115 117 120 128 130 133
+ A2 3 95 107 108 120 121 133 134
+ j 1 94 99 101 102 110 111
+ I 1 97 98 140 142
+ w 3 101 102 110 111 114 115 124 125 127 128 136 137 142
+
+ Random 14
+	 mod 3 148 154 155
+ value 3 148 153 155 156
+
+ Random 14
+ Xpoint 1 Ypoint 1 restrict 1
+ Xpoint 1 161 178 183
+ Ypoint 1 161 181 184
+ maxValue 1 163 177 178 180 181
+ rangeXHigh 1 163 168 173 177
+ rangeXLow 1 163 166 171 177
+ rangeYHigh 1 163 169 174 180
+ rangeYLow 1 163 167 172 180
+ restrict 1 161 165 182
+ borderSize 1 166 167 168 169 183 184
+ worldX 1 168 173
+ worldY 1 169 174
+
+
+ OBJECT3D 0 optr1 0 optr2 0
+ OBJECT3D 0 189
+ index 14 192 197 198 200 202 206 207 209 211
+ optr1 0 189
+ optr1->area 9 197
+ optr2 0 189
+ optr2->area 9 206
+ ret 1 191 214 216 219 222 225 226
+ Darea1 0 194 208 211 215 218
+ Darea2 0 194 209 212 221 224
+ Sarea1 0 193 199 202 215 218
+ Sarea2 0 193 200 203 221 224
+ ULONG 13 193 194
+
+
+ UWORD 0 in 0
+ UWORD 0 354 356
+ in 0 354 358 359
+ tmp 0 356 358 359 360
+
+
+ ULONG 0 in 0
+ ULONG 0 364 366 371 375
+ in 0 364 369 370 372 373 374
+ UWORD 9 367 369 370 373 374
+ tmp 0 366 371 375 376
+ tmpw 0 367 369 370 371 373 374 375
+
+ FRAC2INT 14 Randomize 14 Intel2Mot_Long 14 Intel2Mot_Word 14 INT2FRAC 14 GetPoint 14 Add3DObject 14 RandomRange 14 Random 14 Bomb 14 AddNuke 14
+ num 14
+ DRONE 13 432
+ Drones 13 432 530
+ DronesAttacking 1 434 529
+ NumDrones 1 433 531 557
+ NumNukes 1 435
+ Num_World_Objs 1 431
+ OBJECT3D 13 430
+ PLAYER 13 439
+ Player 13 439
+ World_Objs 13 430
+ Xpoint 1 426 453 460 518 522 534 537
+ Ypoint 1 426 453 460 519 522 535 538
+ counter 1 424 450 451 457 515 516 528 532
+ high 3 437 474 476
+ item 1 425 456 457 458 459 462 471 474 475 478
+ itemCounter 1 424 452 458 517 518 519 533 534 535 536 544 545 548
+ low 3 437 475 476
+ num 14 422 445 446 448 449 451 516 518 519 532 534 535 553
+ value 3 436 468 469 476 477 479
+ AnmFiles 0 459
+ DRONE 0 429
+ DroneFiles 0 536
+ DroneHitPoints 0 545
+ DroneLocs 25 534 535
+ DroneSpeeds 0 548
+ FRAC 0 438
+ MOV3D 0 548
+ NUMDRONS 0 432
+ NukeLocs 25 518 519
+ OBJECT3D 0 428
+ PT_DRONE 0 546
+ SYS_BORDERSIZE 0 447 485 487 493 494 499 500 505 506
+ ScaleMax 3 474 478
+ ScaleMin 3 475 478
+ ULONG 13 440
+ UWORD 9 427 459
+ WORLD_DEPTH 0 444
+ WORLD_WIDTH 0 443 485 493 499 500 506
+ World_Background 0 448 456
+ World_Time 0 449
+ background 0 448
+ borderSize 1 446 447
+ border_size 0 446
+ cnt 1 427 451 452 453 516 517 532 533
+ cnt0 0 438 485 486 487 494 499 506
+ dptr 0 429 530 547 556
+ dptr->AtakPlyr 9 550
+ dptr->DroneType 9 544
+ dptr->GotzAGoal 9 549
+ dptr->HitPoints 9 545
+ dptr->Map1 9 551
+ dptr->Map2 9 551
+ dptr->Obj 9 541
+ dptr->Stealth 9 554
+ dptr->Target 9 551
+ dptr->Thrust 9 548
+ fence_fpb 0 487 493 499 505
+ items 0 451 516 532
+ mask1 0 440
+ mask2 0 440
+ optr 0 428 459 487 493 499 505 522 524 536 541
+ optr->flag32 9 473 490 496 502 508 540 542
+ optr->frame 9 466
+ optr->norot 9 465 523
+ optr->notilt 9 464 491 497 503 509
+ optr->parent 9 547
+ optr->rotation 9 469 489 495 501 507 543
+ optr->scaler 9 479 492 498 504 510
+ optr->type 9 546
+ pool_fpb 0 522
+ randitems 0 458
+ randpicker 0 457
+ seed 1 445
+ worldX 1 443
+ worldY 1 444
+ worlds 26 445 446 448 449 451 516 518 519 532 534 535
+ x 9 518 534
+ y 9 519 535
+
+ gemsstopall 14 DisableInts 14 DispMap 14 gemsstartsong 14 SYS_SetPalette 14 EnableInts 14
+	 PLAYER 13 566
+ Player 13 566
+ Player.Items 13 618 630
+ item 1 564 621 622 623
+ All_Palettes 0 623 625 627
+ Drone_Palettes 0 633
+ MUSIC_DESERT 0 592 601 609
+ MUSIC_FOREST 0 597 613
+ MUSIC_GLACIAL 0 580 585 605
+ MUSIC_PLAINS 0 578 590
+ SYS_HORZCHRS 13 572
+ SYS_LASTCHR 13 572
+ UWORD 9 565 623 625 627 633
+ World_Background 0 573 621 632
+ World_Time 0 616 629
+ cnt 1 565 616 618 619 620 622 624 625 626 627 629 630 631 632 633
+ desert_map 13 588
+ flatcity_map 0 600
+ forest_map 0 596
+ froznlab_map 0 604
+ ice_map 0 584
+ midwest_map 13 575
+ ocean_map 0 612
+ vegas_map 0 608
+
+ FRAC2INT 14 Randomize 14 Intel2Mot_Long 14 Intel2Mot_Word 14 INT2FRAC 14
+ num 14
+ num 14 638 642 643 645 646 647
+ SYS_BORDERSIZE 0 644
+ WORLD_DEPTH 0 641
+ WORLD_WIDTH 0 640
+ World_Background 0 645
+ World_Num 0 647
+ World_Time 0 646
+ background 0 645
+ borderSize 1 643 644
+ border_size 0 643
+ seed 1 642
+ worldX 1 640
+ worldY 1 641
+ worlds 26 642 643 645 646
+
+ Bomb 15
+ FRAC 0 dstX 0 dstY 0 dstZ 0 srcRotation 0 srcX 0 srcY 0 srcZ 0
+ FRAC 0 29 38 39 42
+ dstX 0 29 49
+ dstY 0 29 50
+ dstZ 0 29 65
+ k 14 34 70 72 76 83 87 88 91 94 97 101 102
+ octant 14 33 87
+ srcRotation 0 30 45 46 104 105 113 115 116 128
+ srcX 0 29 49
+ srcY 0 29 50
+ srcZ 0 29 65
+ CLOSE 8 122
+ WORLD_DEPTH 0 59 60 61 62
+ WORLD_WIDTH 0 54 55 56 57
+ greater 0 42 81 85 90 93 96
+ lesser 0 43 80 84 89 92
+ object_direction 0 36 104 105 109 115 123
+ rotation 0 35 87 100 102 103 104 115 116 120 126
+ temp_direction 0 37 105 106 107 108 116 117 118 119
+ tmp 0 38 89 90 92 93 95 96 110 112 122 125
+ tmpx 0 39 49 54 55 56 57 69 73 80 82 85 110
+ tmpy 0 40 50 59 60 61 62 75 78 81 82 84 110
+ tmpz 0 41 65 66 67 112
+
+ fatan2 15
+ FRAC 0 dstX 0 dstY 0 dstZ 0 srcRotation 0 srcX 0 srcY 0 srcZ 0
+ FRAC 0 136 143 144
+ dstX 0 136 149
+ dstY 0 136 150
+ dstZ 0 136
+ srcRotation 0 137 152 153 161 163 164 176
+ srcX 0 136 149
+ srcY 0 136 150
+ srcZ 0 136
+ CLOSE 8 170
+ object_direction 0 141 152 153 157 163 171
+ rotation 0 140 151 152 163 164 168 174
+ temp_direction 0 142 153 154 155 156 164 165 166 167
+ tmp 0 143 158 160 170 173
+ tmpx 0 144 149 151 158
+ tmpy 0 145 150 151 158
+ tmpz 0 146 160
+
+ INT2FRAC 15
+ FRAC 0 dstZ 0 srcZ 0
+ FRAC 0 189 191 192
+ dstZ 0 189 195 207 214 216
+ srcZ 0 189 195 200
+ tmp 0 192 204 205 207 209 210 212 214 216 218
+ tmpz 0 191 195 196 197 198 199 200 201 204 213
+
+ Add3DObject 15 Random 15
+	 cnt 1 239 245
+ DRONE 13 241
+ MOV3D 0 255
+ Mines 13 243
+ NUMMINES 0 245
+ NumMines 1 244
+ OBJECT3D 0 240
+ PT_MINE 0 250
+ Player.X 13 246
+ Player.Y 13 246
+ Player.Z 13 246
+ UI_GameLevel 13 255
+ dptr 0 241 243 251 260
+ dptr->AtakPlyr 9 258
+ dptr->GotzAGoal 9 257
+ dptr->HitPoints 9 256
+ dptr->Map1 9 259
+ dptr->Map2 9 259
+ dptr->Obj 9 252
+ dptr->Target 9 259
+ dptr->Thrust 9 255
+ mine32_fpb 0 246
+ optr 0 240 246 252
+ optr->cloaked 9 247
+ optr->flag32 9 248 253
+ optr->parent 9 251
+ optr->rotation 9 254
+ optr->type 9 250
+
+ Add3DObject 15 INT2FRAC 15 Random 15
+	 cnt 1 267 273
+ DRONE 13 269
+ MOV3D 0 283
+ NUMTANKS 0 273
+ NumTanks 1 272
+ OBJECT3D 0 268
+ PT_TANK 0 278
+ Player.X 13 274
+ Player.Y 13 274
+ Tanks 13 271
+ UI_GameLevel 13 283
+ dptr 0 269 271 279 288
+ dptr->AtakPlyr 9 286
+ dptr->GotzAGoal 9 285
+ dptr->HitPoints 9 284
+ dptr->Map1 9 287
+ dptr->Map2 9 287
+ dptr->Obj 9 280
+ dptr->Target 9 287
+ dptr->Thrust 9 283
+ optr 0 268 274 280
+ optr->cloaked 9 275
+ optr->flag32 9 276 281
+ optr->parent 9 279
+ optr->rotation 9 282
+ optr->type 9 278
+ tank32_fpb 0 274
+
+ fdist3d 15 INT2FRAC 15 NextRotation 15 NextTrackZ 15 Hit_Player 15 fmul 15 fsind 15 fcosd 15 Update3DObject 15
+	 FRAC 13 323
+ Mx 13 323 337 341 343
+ My 13 323 337 341 343
+ Mz 13 323 337 341 342 343
+ Num_Visable_Objs 1 322
+ OBJECT3D 13 320
+ UI_GameLevel 13 324 345
+ VISABLE3D 13 321
+ Visable_Objs 13 321
+ World_Objs 13 320
+ bflag 1 314
+ cnt 1 313 328
+ cnt2 1 313
+ index 1 315
+ DRONE 13 312
+ FRAC 13 317 319
+ MAX3DOBJS 0 320
+ MinePower 0 345
+ Mines 13 327
+ NumMines 1 328
+ OBJECT3D 0 309 310
+ Player.Rest 13 349
+ VISABLE3D 0 311
+ WORLD_DEPTH 0 377 378
+ WORLD_WIDTH 0 373 374
+ WorldNum 13 345
+ dist 0 319 337 338 343 344
+ dptr 0 312 327 328
+ dptr->AtakPlyr 9 336 347 356
+ dptr->GotzAGoal 9 335 346 355
+ dptr->Obj 9 329
+ dptr->Thrust 9 359 360
+ flag 0 318
+ optr 0 309 329 384
+ optr->cloaked 9 332 348
+ optr->rotation 9 340 341 359 360 365 369 370 371 375 379 380 381
+ optr->special 9 332
+ optr->x 9 337 340 343 359 363 364 373 374
+ optr->y 9 337 340 343 360 367 368 377 378
+ optr->z 9 337 340 342 343
+ rot_check1 0 316
+ rot_check2 0 316
+ tptr 0 310
+ vptr 0 311
+ x_check 0 317
+ y_check 0 317
+
+
+ OBJECT3D 0 sptr 0
+ DRONE 13 395
+ Mines 13 395 399 408
+ NumMines 1 394 397 399 405
+ OBJECT3D 0 388 392
+ cnt 1 390 410
+ sptr 0 388
+ sptr->x 9 402 419
+ sptr->y 9 403 420
+ sptr->z 9 404 421
+ DRONE 13 393
+ NUMMINES 0 395 397 410
+ dptr 0 393 399 408 410
+ dptr->Obj 9 400 411
+ flag 0 391 409 413 417
+ optr 0 392 400 411
+ optr->cloaked 9 401 412 418
+ optr->x 9 402 419
+ optr->y 9 403 420
+ optr->z 9 404 421
+
+ Add_Tank 15 fdist3d 15 fatan2 15 INT2FRAC 15 NextRotation 15 FRAC2INT 15 Fire_At_Player 15 Obj_Dist2D 15 fmul 15 fsind 15 fcosd 15 Update3DObject 15
+	 FRAC 13 448
+ Game_Frame 13 450 488 515
+ LONG 13 449
+ Mx 13 448 469 470 481
+ My 13 448 469 471 481
+ Mz 13 448 469 481
+ NUKE_POOL 13 442 444
+ NukePools 13 442 500 518 520 523
+ NumNukes 1 443 501 516
+ Num_Visable_Objs 1 447
+ OBJECT3D 13 445
+ SYS_VCNT 13 449 452
+ UWORD 13 450
+ VISABLE3D 13 446
+ Visable_Objs 13 446
+ World_Objs 13 445
+ bflag 1 436
+ cnt 1 435 455 462 515
+ cnt1 1 435 501
+ cnt2 1 435 516 518 520 523
+ index 1 437
+ DRONE 13 434
+ FRAC 13 439 441
+ MAX3DOBJS 0 445
+ NumTanks 1 453 462
+ OBJECT3D 0 431 432
+ Player.Rest 13 492
+ SYS_BORDERSIZE 13 536 537 540 541 546 547 550 551
+ Tanks 13 454 461
+ VISABLE3D 0 433
+ WORLD_DEPTH 0 550 551
+ WORLD_WIDTH 0 546 547
+ can_obj 0 523
+ dist 0 441 469 478 483
+ dptr 0 434 454 455 461 462
+ dptr->AtakPlyr 9 494
+ dptr->GotzAGoal 9 493 497 508 522
+ dptr->Obj 9 456 463
+ dptr->Target 9 498 523
+ dptr->Thrust 9 531 532
+ flag 0 440
+ nptr 0 444 500 501
+ nptr->can_obj 9 502
+ nptr->rcr_level 9 504
+ nptr->ready 9 503
+ optr 0 431 456 457 463 490 499 557
+ optr->area 9 518
+ optr->cloaked 9 466
+ optr->rotation 9 473 480 481 510 511 531 532 538 542 543 544 548 552 553 554
+ optr->special 9 466
+ optr->x 9 469 470 480 510 531 536 537 546 547
+ optr->y 9 469 471 480 510 532 540 541 550 551
+ optr->z 9 469 480 510 533
+ ready 0 520
+ rot_check1 0 438 473 474 475 476 477 478 488
+ rot_check2 0 438 483 484 485 488
+ tptr 0 432 498 499 502
+ tptr->cloaked 9 505
+ tptr->x 9 511
+ tptr->y 9 511
+ tptr->z 9 511
+ vptr 0 433
+ world_obj->area 9 518
+ x_check 0 439 470 473
+ y_check 0 439 471 473
+
+ gemsstartsong 15 INT2FRAC 15
+ OBJECT3D 0 sptr 0
+ DRONE 13 571
+ NumTanks 1 570 574 576 579 586 595
+ OBJECT3D 0 564 568
+ Tanks 13 571 576 598
+ cnt 1 566 600 609 616
+ sptr 0 564
+ DRONE 13 569
+ NUMTANKS 0 571 574 600
+ SYS_BORDERSIZE 13 580 583 587 589 610 613 617 619
+ VOICE_TANKIN_Z 0 573
+ WORLD_DEPTH 0 589 619
+ WORLD_WIDTH 0 583 613
+ dptr 0 569 576 598 600
+ dptr->Obj 9 577 601
+ flag 0 567 599 603 607
+ optr 0 568 577 601
+ optr->cloaked 9 578 602 608
+ optr->rotation 9 581 584 590 592 593 611 614 620 622 623
+ optr->x 9 580 583 610 613
+ optr->y 9 587 589 617 619
+ optr->z 9 594 624
+
+
+ OBJECT3D 0 dst 0 src 0
+ OBJECT3D 0 51
+ dst 0 51
+ dst->x 9 57
+ dst->y 9 58
+ dst->z 9 59
+ src 0 51
+ src->x 9 57
+ src->y 9 58
+ src->z 9 59
+ FRAC 13 53 54 55
+ maxc 0 54 61 65 66 67 70 71 72 77 78
+ medc 0 54 62 65 67 68 76 77
+ minc 0 54 63 70 72 73 76
+ tmp 0 53 66 68 71 73
+ x 9 55 57 61
+ y 9 55 58 62
+ z 0 55 59 63
+
+
+ OBJECT3D 0 dst 0 src 0
+ OBJECT3D 0 94
+ dst 0 94
+ dst->x 9 100
+ dst->y 9 102
+ src 0 94
+ src->x 9 99
+ src->y 9 101
+ FRAC 13 96 97
+ x1 0 96 99 103
+ x2 0 96 100 103 104 107
+ y1 0 97 101 105
+ y2 0 97 102 105 106 107
+
+ Add3DObject 16
+	 Num_World_Objs 1 115 127
+ OBJECT3D 13 116
+ World_Objs 13 116
+ cnt 1 113 126 127 128
+ Bullet_Obj 0 127
+ Bullet_Target 0 128
+ MAX3DOBJS 0 116
+ NUMBULTS 0 126
+ OBJECT3D 0 114
+ Player.X 13 129
+ Player.Y 13 129
+ Player.Z 13 129
+ aflag 1 118
+ bflag 1 119
+ bullet_left 1 125
+ missle32_fpb 0 129
+ optr 0 114 129
+ optr->cloaked 9 130
+ optr->flag32 9 131
+
+ INT2FRAC 16 Random 16 FRAC2INT 16 SYS_Copy3DObj 16
+ OBJECT3D 0 optr 0
+ DroneHitPoints 13 237 267
+ OBJECT3D 13 228 235 236
+ Special_Object 13 236 277
+ Special_Object.anim 13 290 338
+ Special_Object.file 13 280 297 316 319 325 328 331 334
+ Special_Object.frame 13 281 298 339
+ Special_Object.norot 13 291
+ Special_Object.notilt 13 292
+ Special_Object.x 13 309
+ Special_Object.y 13 310
+ Special_Object.z 13 311
+ World_Objs 13 235
+ optr 0 228 277
+ optr->cloaked 9 248
+ optr->file 9 246 313
+ optr->frame 9 251 264
+ optr->noscale 9 249 262
+ optr->parent 9 252 266
+ optr->rotation 9 265
+ optr->special 9 250 263
+ optr->variable 9 242 243 284 342
+ optr->x 9 259 309
+ optr->y 9 260 310
+ optr->z 9 261 311
+ ptr 27 234 308
+ ptr->x 27 309
+ ptr->y 27 310
+ ptr->z 27 311
+ DRONE 13 238
+ MAX3DOBJS 0 235
+ Player.Items 13 278
+ WORLD_DEPTH 0 260
+ WORLD_WIDTH 0 259
+ dptr 0 238 252 266
+ dptr->AtakPlyr 9 255 269
+ dptr->DroneType 9 267
+ dptr->GotzAGoal 9 254 268
+ dptr->HitPoints 9 253 267
+ dptr->Loiter 9 270
+ dptr->Map1 9 272
+ dptr->Map2 9 272
+ dptr->Target 9 272
+ dptr->explode 9 256 271
+ explode_fpb 0 297
+ frag_offs 27 308
+ frame 0 231 242 245 281 298 303 308 339 342
+ mine32_fpb 0 246 313
+ no_image 0 233 241 286 295
+ piece1_fpb 0 280 325
+ piece2_fpb 0 328
+ piece3_fpb 0 331
+ piece4_fpb 0 334
+ piece5_fpb 0 316
+ piece6_fpb 0 319
+ ret 0 232 240 274 304 343
+ state 0 230 243 244 289 295 299 301 302 308 314 323 339 340 342
+ zoomer32_fpb 0 313
+
+ Random 16 SYS_Copy3DObj 16
+ OBJECT3D 0 optr 0
+ NUKE_POOL 13 355 358
+ NukePools 13 355 362
+ NumNukes 1 356 363
+ OBJECT3D 13 351 353 354
+ Special_Object 13 354 375
+ Special_Object.anim 13 377
+ Special_Object.file 13 376
+ Special_Object.frame 13 378
+ Special_Object.norot 13 379
+ Special_Object.notilt 13 380
+ World_Objs 13 353
+ cnt 1 357 363
+ optr 0 351 364 375
+ optr->frame 9 371
+ optr->rotation 9 372
+ optr->special 9 370
+ optr->variable 9 360 378 381
+ MAX3DOBJS 0 353
+ explode_fpb 0 376
+ nptr 0 358 362 363
+ nptr->can_obj 9 364
+ nptr->can_obj->cloaked 9 367
+ nptr->rcr_level 9 366
+ nptr->ready 9 365
+
+ SYS_Copy3DObj 16
+ OBJECT3D 0 optr 0
+ OBJECT3D 13 392 397
+ Special_Object 13 397 410 421
+ Special_Object.anim 13 412
+ Special_Object.file 13 411
+ Special_Object.frame 13 413
+ Special_Object.norot 13 414
+ Special_Object.notilt 13 415
+ optr 0 392 410 421
+ optr->special 9 406
+ optr->variable 9 400 401 431
+ explode_fpb 0 411
+ frame 0 395 400 404 413 426 431
+ ret 0 396 399 407 427 432
+ state 0 394 401 402 417 422 425 431
+
+ SYS_Copy3DObj 16
+ OBJECT3D 0 optr 0
+ OBJECT3D 13 440 445
+ Special_Object 13 445 458 469
+ Special_Object.anim 13 460
+ Special_Object.file 13 459
+ Special_Object.frame 13 461
+ Special_Object.norot 13 462
+ Special_Object.notilt 13 463
+ optr 0 440 458 469
+ optr->special 9 454
+ optr->variable 9 448 449 479
+ frame 0 443 448 452 461 474 479
+ nukebomb_fpb 0 459
+ ret 0 444 447 455 475 480
+ state 0 442 449 450 465 470 473 479
+
+ gemsstartsong 16
+ OBJECT3D 0 cnt 1 tptr 0
+ DronesAttacking 1 494 512
+ EXPLODE_IT 1 491
+ EXPLODE_SCALE 1 492
+ OBJECT3D 13 488 493
+ World_Objs 13 493 533
+ cnt 1 488 531 533 534
+ tptr 0 488
+ tptr->file 9 506
+ tptr->parent 9 496
+ tptr->spc_func 9 507 509 524 526
+ tptr->special 9 503 516 520 528
+ tptr->type 9 497 498 523
+ tptr->variable 9 515 527
+ Bullet_Obj 0 533
+ Bullet_Target 0 534
+ Canister_Explosion 0 507
+ DRONE 13 490
+ Drone_Explosion 0 509
+ MAX3DOBJS 0 493
+ Nuke_Explosion 0 524
+ PT_DRONE 0 497
+ PT_MINE 0 497
+ PT_TANK 0 498 523
+ SFX_EXPLOSION 0 537
+ SOUNDS 8 536
+ STATS_HITS 13 505 522
+ Small_Explosion 0 526
+ can32_fpb 0 506
+ cloaked 0 533
+ optr 0 490 496
+ optr->AtakPlyr 9 510 511
+ optr->HitPoints 9 500 501
+
+ NextRotation 16 Hypot 16 INT2FRAC 16 Hit_Object 16 NextTrackZ 16 Obj_Dist3D 16 fmul 16 fsind 16 fcosd 16 Update3DObject 16 gemsstartsong 16 Hit_Player 16
+	 FRAC 13 558 559
+ OBJECT3D 13 561 565
+ SYS_DOHEADSET 13 562
+ UI_GameLevel 13 555 636
+ VISABLE3D 13 556
+ World_Objs 13 561 581 629 631
+ cnt 1 550 580 581 585 586 587 589 590 592 594 595 599 601 602 603 604 612 613 616 617 622 629 631 632 638 643 645 647 649 653
+ cnt2 1 550
+ cnt3 1 550
+ deg2slice 14 554
+ dstX 13 558
+ dstY 13 559
+ dstZ 13 559
+ srcRotation 13 559
+ srcX 13 558
+ srcY 13 558
+ srcZ 13 558
+ targetflag 1 551 568 574 577 595 596 597 598 600
+ v_targetptr 13 556 569
+ v_targetptr->dist 13 572
+ v_targetptr->object 13 570
+ v_targetptr->xs 13 571
+ v_targetptr->ys 13 571
+ x 1 553 571 572
+ y 1 553
+ BULTS_MOV3D 0 610 611 616 617 627
+ Bullet_Decay 0 643 645 647 649 653
+ Bullet_HitOrMiss 0 589 622
+ Bullet_Obj 0 581 631
+ Bullet_Orig_Rotation 0 595 599 601
+ Bullet_Rotation 0 592 594 595 599 601 602 603 604 612 613 616 617
+ Bullet_Target 0 590 629 632
+ Bullet_TrackCnt 0 585 586 587 589
+ FRAC 13 552
+ MAX3DOBJS 0 561
+ NUMBULTS 0 580
+ OBJECT3D 0 548
+ Player.Items 13 564
+ SFX_SHIP_HIT 0 634
+ SOUNDS 8 633
+ SYS_LAZER 13 564
+ VISABLE3D 13 549
+ WORLD_DEPTH 0 648
+ WORLD_WIDTH 0 646
+ cloaked 0 629 631
+ optr 0 548 581 609 619 621 627
+ optr->cloaked 9 583 654
+ optr->rotation 9 604
+ optr->x 9 592 612 616 642 646
+ optr->y 9 592 613 617 644 648
+ optr->z 9 592 605
+ tmpx 0 552
+ tmpy 0 552
+ tmpz 0 552 609 610 611 612 613 621
+ tptr 0 548 570 573 590 609 621 627 638
+ tptr->special 9 591 610
+ tptr->x 9 593
+ tptr->y 9 593
+ tptr->z 9 593 605
+ vptr 0 549
+ zap_obj 0 565 573 578
+
+ gemsstartsong 16 fsind 16 fcosd 16 Update3DObject 16
+	 OBJECT3D 13 678
+ SYS_DOHEADSET 13 679 685 700 712 736 746
+ VISABLE3D 13 675 676
+ World_Objs 13 678 682 696 756
+ cnt 1 667
+ cnt2 1 667
+ cnt3 1 667
+ deg2slice 14 673
+ demo_targetptr 13 676 792
+ demo_targetptr->object 13 794
+ target_screen_dist 1 671
+ targetflag 1 668
+ v_targetptr 13 675 722 787
+ v_targetptr->object 13 789
+ x 1 672
+ y 1 672
+ Bullet_Cnt 0 756 779 780 784 785 789 790 794 795 797 800 801 802 803
+ Bullet_Decay 0 802
+ Bullet_HitOrMiss 0 784 790 795
+ Bullet_Obj 0 756
+ Bullet_Orig_Rotation 0 780 801
+ Bullet_Rotation 0 779 800
+ Bullet_Target 0 789 794 797
+ Bullet_TrackCnt 0 785
+ FRAC 13 669 670
+ JOY_A 0 686 689 690 701 704 705 713 716 717
+ JOY_B 0 737 740 747 750
+ JOY_C 0 686 689 690 701 704 705 713 716 717
+ MAX3DOBJS 0 678
+ OBJECT3D 0 665
+ Player.Items 13 695 725 731
+ Player.Missiles 13 753 759 805
+ Player.Rotation 13 766 767 772 773 777 780 801
+ Player.X 13 766 772
+ Player.Y 13 767 773
+ Player.Z 13 775
+ SFX_L_MISSLE 0 764
+ SFX_R_MISSLE 0 770
+ SOUNDS 8 763 769
+ STATS_SHOTS 13 728 758
+ SYS_Joy2Table 0 690 705 717 740 750
+ SYS_JoyTable 0 686 689 701 704 713 716 737 740 747 750
+ SYS_LAZER 13 725 727
+ UI_Control 13 686 689 690 701 704 705 713 716 717
+ UI_DemoMode 13 684 699 711
+ VISABLE3D 13 666
+ VOICE_LASERS_D 0 732
+ VOICE_MISSLESD 0 806
+ aflag 1 698 702 706 709 714 718 723 725 731
+ bflag 1 735 738 741 745 748 751 753 805
+ bullet_left 1 761 762
+ cflag 1 683 687 691 694
+ cloaked 0 682 696
+ optr 0 665 756 776
+ optr->cloaked 9 757
+ optr->frame 9 778
+ optr->rotation 9 777
+ optr->x 9 766 772
+ optr->y 9 767 773
+ optr->z 9 775
+ target_dist 0 670
+ tmpx 0 669
+ tmpy 0 669
+ tmpz 0 669
+ tptr 0 665
+ vptr 0 666
+
+ Update3DObject 16 Obj_Dist3D 16 INT2FRAC 16
+ OBJECT3D 0 drone 0
+ OBJECT3D 13 817 819 826
+ SYS_DOHEADSET 13 827
+ World_Objs 13 826 830 844 857 873
+ cnt 1 821
+ cnt2 1 821
+ cnt3 1 821 867 869 870
+ deg2slice 14 824
+ drone 0 817
+ drone->parent 9 833
+ drone->rotation 9 850 875
+ drone->x 9 846 861
+ drone->y 9 847 863
+ drone->z 9 848 859
+ targetflag 1 822
+ tptr 11 820 833
+ tptr->Visable 11 835 839
+ Bullet_Cnt 0 844 855 870 872 873 874 875 876 877
+ Bullet_Decay 0 876
+ Bullet_HitOrMiss 0 855 870
+ Bullet_Obj 0 844
+ Bullet_Orig_Rotation 0 875
+ Bullet_Rotation 0 874
+ Bullet_Target 0 873
+ Bullet_TrackCnt 0 872
+ FRAC 13 823
+ MAX3DOBJS 0 826
+ Mx 13 861
+ My 13 863
+ Mz 13 859
+ ONLY_INVISIBLE 8 839
+ ONLY_VISIBLE 8 835
+ WorldNum 13 835 839
+ cloaked 0 830
+ optr 0 819 844 849 857
+ optr->cloaked 9 845
+ optr->frame 9 851
+ optr->rotation 9 850
+ optr->x 9 846
+ optr->y 9 847
+ optr->z 9 848
+ tmpx 0 823 861 862 865
+ tmpy 0 823 863 864 865
+ tmpz 0 823 857 859 860 865 866
+
+
+	 SYS_HMD_DATA 13 123 127 128 129 132
+ SYS_READHEAD 13 124
+ ULONG 13 123
+ HeadX 0 120 128 132 134
+ HeadY 0 121 127 129 130 131 137
+ Headset_Rotation 13 134
+ Headset_Tilt 1 137
+ ULONG 13 122
+ tmp 0 122
+
+ InitHead 18 IsHeadRdy 18 ReadHead 18 ABS 18
+	 HeadErr 2 152 168
+ HeadID 2 148
+ HeadRSVD 2 149
+ HeadX 2 150 179
+ HeadY 2 151 180
+ BDeg2Deg 1 179 180
+ FILTER 8 181
+ Head_Flag 1 156 159 163 165 168 171
+ Head_OldR 1 182 185 186
+ Head_OldT 1 188 191 192
+ Head_RCnt 1 163 170 173 174
+ Headset_Rotation 13 179 182 185 186
+ Headset_Tilt 1 180 188 191 192
+ OBESYSTEMS 8 155
+ tmp 0 153 182 183 184 188 189 190
+
+ INT2FRAC 18 Init_Mines 18 Init_Tanks 18 Init_Bullets 18
+	 Num_World_Objs 1 213
+ OBJECT3D 13 214
+ World_Objs 13 214
+ cnt 1 210
+ BULLETS 8 237
+ DRONE 13 212
+ DemoTurnCount 1 241
+ DemoTurnMode 1 240
+ Headset_Rotation 13 221
+ MAX3DOBJS 0 214
+ OBJECT3D 0 211
+ Player.Gieger 13 216
+ Player.Rest 13 230
+ Player.Rotation 13 217
+ Player.Thrust 13 229
+ Player.Tilt 13 222
+ Player.X 13 224
+ Player.Y 13 225
+ Player.Z 13 226
+ Ship_Rotation 13 218
+ Ship_Turn_Counter 1 220
+ Ship_Turn_Speed 1 219
+ WORLD_DEPTH 0 225
+ WORLD_WIDTH 0 224
+ Z_Bob_count 1 227
+ Z_Bob_value 0 228
+ dptr 0 212
+ optr 0 211
+
+ Random 18 Add3DObject 18 INT2FRAC 18
+ OBJECT3D 0 src 0
+ OBJECT3D 0 245 248
+ src 0 245 251
+ src->parent 9 252
+ src->type 9 253
+ src->x 9 266
+ src->y 9 266
+ FreeNukes 1 271
+ NUKE_POOL 0 247
+ NukePools 0 250
+ NumNukes 1 250 270
+ PT_POOL 0 253
+ can 0 248 266 269
+ can->cloaked 9 268
+ can->notilt 9 267
+ can32_fpb 0 266
+ dst 0 247 250 252
+ dst->can_dir 9 260
+ dst->can_frm 9 259
+ dst->can_obj 9 269
+ dst->dead 9 263
+ dst->free 9 261
+ dst->level 9 256
+ dst->loiter 9 264
+ dst->owner 9 257
+ dst->rcr_level 9 258
+ dst->ready 9 262
+ dst->world_obj 9 251
+
+ SYS_Copy3DObj 18 INT2FRAC 18
+ OBJECT3D 0 optr 0
+ OBJECT3D 13 280 283
+ Special_Object 13 283 287
+ Special_Object.anim 13 295
+ Special_Object.file 13 294
+ Special_Object.frame 13 296
+ Special_Object.notilt 13 297
+ Special_Object.rotation 13 298 299 300
+ Special_Object.z 13 293
+ optr 0 280 287
+ optr->variable 9 285
+ NUKE_POOL 0 282
+ NukePools 0 285
+ can32_fpb 0 294
+ nptr 0 282 285
+ nptr->anm_state 9 286 289 301
+ nptr->can_frm 9 293
+
+ fdist3d 18 INT2FRAC 18 gemsstartsong 18 UI_FlashGreen 18
+	 FRAC 13 319
+ Mx 13 319 347
+ My 13 319 347
+ Mz 13 319 347
+ cnt 1 317 323 386
+ cnt2 1 317
+ Animate_Can 0 384
+ FRAC 13 318
+ NUKE_POOL 0 316
+ NukePools 0 322
+ NumNukes 1 323
+ OBJECT3D 0 314 315
+ Player.Gieger 13 354 355 356
+ Player.Won 13 357
+ SOUNDS 8 349
+ SYS_GAMEDONE 13 358
+ VOICE_CAN_COL 0 350
+ cptr 0 315 345
+ cptr->cloaked 9 353
+ cptr->rotation 9 369 370 371
+ cptr->z 9 368
+ dist 0 318 347 348
+ nptr 0 316 322 323
+ nptr->anm_state 9 391
+ nptr->can_dir 9 334 336 341 392
+ nptr->can_frm 9 335 338 340 343 368 382 389
+ nptr->can_obj 9 345
+ nptr->can_obj->cloaked 9 388
+ nptr->can_obj->z 9 389
+ nptr->dead 9 326
+ nptr->free 9 326
+ nptr->level 9 376 377
+ nptr->rcr_level 9 365 378 379
+ nptr->ready 9 332 364 393
+ nptr->world_obj 9 330
+ optr 0 314 330
+ optr->spc_func 9 384
+ optr->special 9 362 385
+ optr->variable 9 386
+ optr->x 9 347
+ optr->y 9 347
+ optr->z 9 347
+
+ INT2FRAC 18 Random 18 RandomRange 18 Read_Headset 18 fmul 18 fsind 18 fdiv 18 fcosd 18 gemsstartsong 18 UI_FlashBlue 18 FRAC2INT 18
+	 FRAC 13 419
+ Player_Fuel 13 417 468
+ SYS_BORDERSIZE 13 419 651 652 657 658 663 664 669 670
+ SYS_VTILT 13 418 568
+ UWORD 13 417
+ VISABLE3D 13 420 421
+ demo_targetptr 13 421 510
+ demo_targetptr->xs 13 514
+ tmp_bob 1 415 424 426 428 429 430 433 434 436 439 523 525 526 528
+ v_targetptr 13 420 510 511
+ CHEAT 8 460
+ DemoTurnCount 1 519 520 530 532
+ DemoTurnMode 1 512 515 517 525 526 528 529 536 544
+ FRAC 13 416
+ Headset_Rotation 13 574 587 589 591 592 593 594 600 602
+ Headset_Tilt 1 576 577 578 580 581 582
+ JOY_A 0 462 472 598
+ JOY_B 0 462 598
+ JOY_C 0 462 599 606
+ JOY_DOWN 0 476 488 609 614
+ JOY_LEFT 0 535 586
+ JOY_RIGHT 0 543 588
+ JOY_UP 0 474 486 607 612
+ MOV3D 0 487 489 494
+ Player.Damage 13 441 624
+ Player.Items 13 627 644
+ Player.Rest 13 458 459
+ Player.Rotation 13 574 602
+ Player.Thrust 13 425 427 487 489 490 491 494 503 505 626 628 636 653 659 665 671 688 689 690 692 693 695
+ Player.Tilt 13 582 608 610 613 615 617 618 619 620 626 628
+ Player.Won 13 464
+ Player.X 13 641 645 651 652 663 664 677 678 681 682
+ Player.Y 13 642 646 657 658 669 670 679 680 683 684
+ Player.Z 13 443 444 445 447 449 450 451 452 475 477 478 479 480 481 623 626 628 629 630 631 632 634
+ SYS_DOHEADSET 13 571
+ SYS_GAMEDONE 13 463 469
+ SYS_Joy2Table 0 586 588 598 599 612 614
+ SYS_JoyTable 0 462 472 474 476 486 488 535 543 606 607 609
+ Ship_Rotation 13 562 563 564 565 566 574 602 641 642 645 646
+ Ship_Turn_Counter 1 500 501 504 506
+ Ship_Turn_Speed 1 537 538 539 540 541 545 546 547 548 549 551 552 553 554 555 556 561 562 568
+ UI_DemoMode 13 485 508 535 536 543 544 572 585 605
+ VOICE_ZONE_HIT 0 654 660 666 672
+ WORLD_DEPTH 0 669 670 680 683
+ WORLD_WIDTH 0 663 664 678 681
+ Z_Bob_count 1 424 455
+ Z_Bob_value 0 447 448
+ new_thrust 0 416 634 635 636 641 642 645 646
+ old_z 0 416 431 434 437 439 447 448 623 634
+
+
+	 Num_Visable_Objs 1 713 720
+ VISABLE3D 13 712
+ Visable_Objs 13 712 719
+ cnt 1 711 717
+ cnt2 1 711 720
+ DRONE 13 710
+ Drones 0 716
+ NumDrones 1 717
+ VISABLE3D 13 709
+ dptr 0 710 716 717
+ dptr->Obj 9 721
+ dptr->Visable 9 718 722
+ vptr 0 709 719 720
+ vptr->object 9 721
+
+
+	 Num_Visable_Objs 1 737 744
+ VISABLE3D 13 736
+ Visable_Objs 13 736 743
+ cnt 1 735 741
+ cnt2 1 735 744
+ DRONE 13 734
+ NumTanks 1 741
+ Tanks 13 740
+ VISABLE3D 13 733
+ dptr 0 734 740 741
+ dptr->Obj 9 745
+ dptr->Visable 9 742 746
+ vptr 0 733 743 744
+ vptr->object 9 745
+
+ Small_Explosion 18 fdist3d 18 INT2FRAC 18 Obj_Dist3D 18 NextRotation 18 NextTrackZ 18 fatan2 18 FRAC2INT 18 Fire_At_Player 18 Add_Mine 18 fmul 18 fsind 18 fcosd 18 Update3DObject 18 Update_Player 18 Update_Movement 18 Visable_Drones 18 Update_Drones 18 Update_Mines 18 Visable_Tanks 18 Update_Tanks 18 Update_Bullets 18 Fire_Bullet 18 Update_Nukes 18
+	 FRAC 13 778
+ Mx 13 778 793 827 832 835 913
+ My 13 778 793 827 832 836 913
+ Mz 13 778 793 827 832 833 913
+ Num_Visable_Objs 1 777
+ OBJECT3D 13 775 779
+ VISABLE3D 13 776
+ Visable_Objs 13 776
+ World_Objs 13 775
+ bflag 1 769
+ cnt 1 768 783 873
+ cnt2 1 768 869 870 871 873 898 900 902 905 928 930 932 936 937
+ index 1 770
+ optr 13 779 784 816 853 865 946 976
+ optr->area 13 900 930
+ optr->rotation 13 818 819 831 832 838 887 888 950 951 956 960 961 962 966 970 971 972
+ optr->spc_func 13 787
+ optr->special 13 787
+ optr->x 13 793 818 827 831 835 887 913 950 954 955 964 965
+ optr->y 13 793 818 827 831 836 887 913 951 958 959 968 969
+ optr->z 13 793 818 821 827 831 833 887 890 913
+ pptr 11 767 807
+ pptr->loiter 11 808
+ BULLETS 8 1000
+ DRONE 13 766
+ Drones 0 782
+ DronesAttacking 1 796 809 860 912 923
+ ENEMIES 8 992
+ FRAC 13 772 774
+ FreeNukes 1 872 897 927
+ LONG 13 988
+ MAX3DOBJS 0 775
+ MAX_ATTACKING 8 796 912
+ NukePools 0 870 871 873 900 902 905 930 932 936 937
+ NumDrones 1 783
+ NumNukes 1 869 898 928
+ OBJECT3D 0 763 764
+ ONLY_INVISIBLE 8 798 915
+ ONLY_VISIBLE 8 801 918
+ Player.Damage 13 1008
+ Player.Rest 13 796 855 857 912
+ Player.Z 13 1008
+ SYS_GAMEDONE 13 1009 1012 1015
+ SYS_VCNT 13 988 1011
+ Small_Explosion 0 787
+ UI_DemoMode 13 1011 1014
+ UI_StopDemo 13 1014
+ ULONG 13 867
+ VISABLE3D 13 765
+ WORLD_DEPTH 0 968 969
+ WORLD_WIDTH 0 964 965
+ WorldNum 13 798 801 855 915 918 943 944
+ dist 0 774 793 797 827 830 844 848 850 913 914
+ dptr 0 766 782 783
+ dptr->AtakPlyr 9 806 824 859 916 919 921
+ dptr->GotzAGoal 9 790 805 858 881 884 904 922 934 943
+ dptr->Loiter 9 791 799 802 804 935
+ dptr->Obj 9 784
+ dptr->Target 9 794 863 905 936
+ dptr->Thrust 9 950 951
+ dptr->Visable 9 798 801 915 918
+ flag 0 773
+ loiter 0 932 937
+ optr 0 763
+ owner 0 873
+ rcr32_fpb 0 867 876
+ rot_check1 0 771 838 839 840 841 842 848 850
+ rot_check2 0 771 844 845 846 848
+ tptr 0 764 794 816 863 865 870
+ tptr->anim 9 877
+ tptr->file 9 867 876
+ tptr->flag32 9 878
+ tptr->frame 9 877
+ tptr->norot 9 879
+ tptr->parent 9 807
+ tptr->x 9 819 888
+ tptr->y 9 819 888
+ tptr->z 9 819 888
+ vptr 0 765
+ world_obj 0 870 905 936
+ world_obj->area 9 900 930
+ x_check 0 772 835 838
+ y_check 0 772 836 838
+
+
+	 i 14 74 81 82
+ CentreX 1 79
+ CentreY 1 80
+ Num_World_Objs 1 76
+ O3D_Areas 13 82
+ XRes 1 77 79
+ YRes 1 78 80
+
+ FRAC2INT 19 fcosd 19 fsind 19 fmul 19
+ Ang 1 FRAC 1 Tlt 1 x 1 y 1 z 1
+ Ang 1 86 94 100
+ FRAC 1 86 88 89
+ Tlt 1 86 95 101
+ x 1 86 91 97 106
+ y 1 86 92 98 104
+ z 1 86 93 99 117 118
+ Angl 1 94 108 109
+ CosA 0 108 112 114
+ CosACosT 0 112
+ CosASinT 0 114
+ CosT 0 110 112 115 117
+ GndZCos 0 117
+ GndZSin 0 118
+ Mx 13 91
+ My 13 92
+ Mz 13 93
+ OneOverZt 0 89
+ SinA 0 109 113 115
+ SinACosT 0 115
+ SinASinT 0 113
+ SinT 0 111 113 114 118
+ Tilt 1 95 110 111
+ WORLD_DEPTH 0 104
+ WORLD_WIDTH 0 106
+ World_Objs 13 97 98 99 100 101 104 105 106
+ Xt 0 88
+ Yt 0 88
+ Zt 0 88
+ area 0 104 105 106
+ rotation 0 100
+ tilt 0 101
+
+ fmul 19 ftan 19 frec 19 fround 19
+ FRAC 0 X 0 Xp 0 Y 0 Yp 0 Z 0
+ FRAC 0 129 131 132
+ X 0 129 139 144 154 157 165 169 170 173 177 178
+ Xp 0 129 182
+ Y 0 129 138 143 153 156 165 169 170 173 177 178
+ Yp 0 129 183
+ Z 0 129 163 164 165 169
+ CLIP 8 133 141
+ Cam3Dds 8 182 183
+ CentreX 1 182
+ CentreY 1 183
+ CosA 0 170 178
+ CosACosT 0 165 173
+ CosASinT 0 169 177
+ CosT 0 169
+ GndZCos 0 177
+ GndZSin 0 173
+ Mx 13 139
+ My 13 138
+ Mz 13 164
+ Player.Rotation 13 153 156
+ SinA 0 170 178
+ SinACosT 0 165 173
+ SinASinT 0 169 177
+ SinT 0 165
+ Visable_Quad1 1 148
+ Visable_Quad2 1 148
+ Xt 0 132 170 178 182
+ Yt 0 132 169 177 183
+ Zt 0 132 165 167 173 175 181
+ quad 0 134 143 145 148
+ tmpf 0 131 153 154 156 157 181 182 183
+
+ FRAC2INT 19
+ OBJECT3D 0 ptr 0
+ OBJECT3D 0 192
+ ptr 0 192 228 233 234
+ ptr->area 9 203 204 208 212 225
+ ptr->next 9 206 212 215 220 229 232
+ ptr->next->prev 9 213 221 233
+ ptr->prev 9 206 210 221 229 235
+ ptr->prev->next 9 217 220
+ ptr->x 9 198 201
+ ptr->y 9 197 199
+ O3D_Areas 13 208 212 226 228 232 234
+ WORLD_DEPTH 0 197 199
+ WORLD_WIDTH 0 198 201
+ new_area 0 194 199 200 201 203 225 226 228 232 234
+
+ Update3DObject 19
+ FRAC 0 UWORD 0 file 0 x 0 y 0 z 0
+ FRAC 0 241
+ UWORD 0 241
+ file 0 241 250
+ x 0 241 247
+ y 0 241 248
+ z 0 241 249
+ Num_World_Objs 1 245 269
+ OBJECT3D 13 243 246
+ PT_GRND 0 264
+ Scale3D 8 261
+ World_Objs 13 245
+ ptr 2 243 245 246 268 270
+ ptr->anim 2 251
+ ptr->area 2 266
+ ptr->clipped 2 257
+ ptr->cloaked 2 254
+ ptr->file 2 250
+ ptr->flag32 2 255
+ ptr->frame 2 252
+ ptr->next 2 267
+ ptr->norot 2 258
+ ptr->noscale 2 253
+ ptr->notilt 2 259
+ ptr->parent 2 265
+ ptr->prev 2 267
+ ptr->rotation 2 260
+ ptr->scaler 2 261
+ ptr->spc_func 2 262
+ ptr->special 2 256
+ ptr->tilt 2 260
+ ptr->type 2 264
+ ptr->variable 2 263
+ ptr->x 2 247
+ ptr->y 2 248
+ ptr->z 2 249
+
+
+ OBJECT3D 0 dst 0 src 0
+ OBJECT3D 0 302
+ dst 0 302
+ dst->x 9 314
+ dst->y 9 315
+ k 14 304 331 333 337 344 348 349 352 355 358 362 363
+ src 0 302
+ src->x 9 314
+ src->y 9 315
+ FRAC 13 307 308 310
+ WORLD_DEPTH 0 324 325 326 327
+ WORLD_WIDTH 0 319 320 321 322
+ greater 0 310 342 346 351 354 357
+ lesser 0 311 341 345 350 353
+ object_direction 0 306
+ octant 14 348
+ rotation 0 305 348 361 363 365
+ tmp 0 307 350 351 353 354 356 357
+ tmpx 0 308 314 319 320 321 322 330 334 341 343 346
+ tmpy 0 309 315 324 325 326 327 336 339 342 343 345
+
+
+ OBJECT3D 0 ptr 0
+ OBJECT3D 0 374
+ k 14 376 403 405 409 416 420 421 424 427 430 434 435
+ ptr 0 374
+ ptr->x 9 386
+ ptr->y 9 387
+ FRAC 13 379 380 382
+ Mx 13 386
+ My 13 387
+ WORLD_DEPTH 0 396 397 398 399
+ WORLD_WIDTH 0 391 392 393 394
+ greater 0 382 414 418 423 426 429
+ lesser 0 383 413 417 422 425
+ object_direction 0 378
+ octant 14 420
+ rotation 0 377 420 433 435 437
+ tmp 0 379 422 423 425 426 428 429
+ tmpx 0 380 386 391 392 393 394 402 406 413 415 418
+ tmpy 0 381 387 396 397 398 399 408 411 414 415 417
+
+ spc_ptr->spc_func 19 ptr->spc_func 19 fdist3d 19 INT2FRAC 19 Transform3D 19 GetRotation 19 fatan2 19
+ FRAC 0 OBJECT3D 0 ox 0 oy 0 ptr 0
+ FRAC 0 445 456 457 458
+ OBJECT3D 0 445 447
+ SYS_DISTDIV 13 462 521
+ SYS_FLICKER 13 461 520
+ SYS_MINFDIST 13 463 521
+ UWORD 13 462 463
+ angle 14 455 544 545 546 547 548 549 550 551 576 577 578 579 580 582 583 585 586 587 589 591 593 594
+ i 14 448
+ j 14 448 521 522
+ ox 0 445 489 500
+ oy 0 445 489 500
+ ptr 0 445 481 483 484 531 563 598 621 624 625
+ ptr->anim 9 602
+ ptr->clipped 9 472 491 496 501 506
+ ptr->cloaked 9 495
+ ptr->file 9 601
+ ptr->flag32 9 534 552 566 592
+ ptr->frame 9 535 537 542 553 555 567 569 574 594 605 611
+ ptr->next 9 624
+ ptr->norot 9 530 541 562 573 588
+ ptr->noscale 9 518
+ ptr->notilt 9 540 572
+ ptr->parent 9 613
+ ptr->rotation 9 532 564
+ ptr->scaler 9 511
+ ptr->special 9 479
+ ptr->type 9 612
+ ptr->x 9 489 500 607 608 609
+ ptr->y 9 489 500
+ ptr->z 9 489 500 525 544
+ MaxAngle 14 579 580
+ MinAngle 14 577 578
+ Mx 13 489
+ My 13 489
+ Mz 13 489 544 576
+ Num_Visable_Objs 1 468 617
+ SCALEMAX 8 512 515 516 519
+ Special_Object 0 484
+ UWORD 9 454
+ VISABLE3D 13 460
+ Visable_Objs 13 468
+ call_ret 0 453 470 477 481 618
+ deg2slice 14 532 564
+ dist 0 456 489 490 511 544 576 599
+ frm 0 451 511 512 513 514 515 516 519 521 600
+ in_special 0 459 469 475 482 619 622
+ object_direction 0 450 532 533 564 565
+ rotation 0 449 531 533 563 565
+ spc_ptr 0 447 477 483 621
+ tilt 0 454 551 553 555
+ tmp 0 457 533 535 537 565 567 569 607 609
+ tmpx 0 458
+ tmpy 0 458
+ vptr 0 460 468 616
+ vptr->anim 9 602
+ vptr->dist 9 599
+ vptr->file 9 601 604
+ vptr->frame 9 611
+ vptr->object 9 598
+ vptr->parent 9 613
+ vptr->scale 9 600
+ vptr->type 9 612
+ vptr->xs 9 614
+ vptr->ys 9 615
+ wave_fpb 0 604
+ xs 0 452 500 505 522 614
+ ys 0 452 500 505 615
+
+ FRAC2INT 19 UI_PrintString 19 PDQS_Init 19 INT2FRAC 19 View3DZone 19 SYS_CopyV3DObj 19
+ left 1
+ SYS_DISTDIV 13 679
+ SYS_FLICKER 13 678
+ SYS_MINFDIST 13 680
+ SYS_VCNT 13 681
+ ScreenCol 13 696 699
+ ScreenRow 13 697 700
+ ULONG 13 681
+ UWORD 13 679 680
+ angle 14 669 710 711 712 713 714 717 721 725
+ i 14 667 688 689 690 691 701 703 749 778 779 781
+ j 14 667 702 703 752 753 755 756 760 761 763 764 781 782 783 784 786
+ left 1 664 742
+ Area_Index 0 676 753 761 768
+ CLIP 8 707
+ FRAC 13 670 672
+ Num_Clipped 1 744
+ Num_Objs 0 675
+ Num_Visable_Objs 1 743 778
+ O3D_Areas 13 768
+ OBJECT3D 13 666
+ Player.Rotation 13 710
+ Player.X 13 690 702
+ Player.Y 13 688 701
+ Player_Index 0 677 691 703 746 747
+ QAngle1 14 713
+ QAngle2 14 714 715 716
+ UWORD 9 675 676 677
+ VCopy 0 779 786
+ VCopy.dist 9 780
+ VIEWSPAN 8 710 714
+ VISABLE3D 13 673
+ Visable_Objs 13 779 782 783 786
+ Visable_Quad1 1 718 722 726 729
+ Visable_Quad2 1 719 723 727 730
+ WORLD_DEPTH 0 688 701 765 767
+ WORLD_WIDTH 0 690 702 757 759
+ dist 0 670 780 782
+ ptr 2 666 768 769 770
+ rotation 0 668
+ tmpx 0 672 750 757 759 770
+ tmpy 0 672 751 765 767 770
+ vptr 0 673
+ wptr 0 671 748 752 760
+ xs 0 674 746 752
+ ys 0 674 747 760
+ zone_move 0 748
+
+ DispFrame 19 PDQS_Scale 19
+ left 1
+ SYS_BASECHR 13 802 823
+ SYS_DISTDIV 13 799 811
+ SYS_FLICKER 13 798 810
+ SYS_LASTCHR 13 801 823
+ SYS_MINFDIST 13 800 811
+ SYS_VADJ 13 803 826
+ UWORD 13 799 800 801 802 825
+ i 14 796 809
+ j 14 796 811 812 813 817 818 819 820 823 824
+ left 1 794 810
+ DEBUG 8 815
+ Num_Visable_Objs 1 809
+ VISABLE3D 13 797
+ Visable_Objs 13 808
+ debug_anm 13 819 820
+ vptr 0 797 808 828
+ vptr->anim 9 825
+ vptr->center_y 9 825
+ vptr->file 9 825
+ vptr->frame 9 826
+ vptr->object->flag32 9 817
+ vptr->scale 9 811 827
+ vptr->xs 9 813 819 820 826
+ vptr->ys 9 819 820 826
+
+ INT2FRAC 20 fatan2 20 fmul 20 fcosd 20 FRAC2INT 20 fsind 20 DispFrame 20
+ FRAC 0 frm 0 wx 0 wy 0 x 1
+ FRAC 0 66 71 72 73 74 75
+ frm 0 66 117
+ relative_angle 1 68 109 110 111 112 114
+ wx 0 66 77
+ wy 0 66 78
+ x 1 66 117
+ MAPSHIFT 8 107
+ Player.Rotation 13 109
+ Player.X 13 77
+ Player.Y 13 78
+ WORLD_DEPTH 0 87 88 89 90
+ WORLD_WIDTH 0 82 83 84 85
+ abs_x 0 74 98 100 101 105 112 113
+ abs_y 0 75 99 100 102 104 114 115
+ dist 0 73 101 102 104 105 107 108 112 114
+ dot_x 0 69 113 116 117
+ dot_y 0 70 115 116 117
+ hud_art_anm 0 117
+ relative_x 0 71 77 82 83 84 85 94 95 98 109
+ relative_y 0 72 78 87 88 89 90 99 109
+
+ gemsstartsong 20 UI_FlashBlue 20 UI_FlashRed 20
+ damage 0
+ damage 0 126 131 132
+ Player.Damage 13 130 131 132 133 143 147 154
+ Player.Items 13 140 144 148
+ SFX_BUTTON_HIT 0 134
+ SFX_SHIP_HIT 0 137
+ VOICE_LASERS_D 0 149
+ VOICE_RADAR_D 0 145
+ VOICE_SHIELD_D 0 141
+ old_damage 0 128 130 139 143 147
+
+ RandomRange 20
+	 i 3 160 164 165 166 170
+ j 3 160 163 164 167 168 170
+ CRACKLIST 0 159
+ Cracks 0 169
+ NumCracks 1 162 163 169 171 175
+ cptr 0 159 169
+ cptr->frame 9 170
+ cptr->x 9 172
+ cptr->y 9 173
+
+
+ x1 0 x2 0 y1 0 y2 0
+ x1 0 180 182
+ x2 0 180 182 183 186
+ y1 0 180 184
+ y2 0 180 184 185 186
+
+ DispFrame 20 PutDot 20 INT2FRAC 20 UI_PrintString 20 gemsstartsong 20 SYS_DCListHold 20 SYS_DCAddVAddr 20 SYS_DCAddData 20 SYS_DCListGo 20 Add_Crack 20 Hypot 20
+	 Num_Visable_Objs 1 207 374
+ VISABLE3D 13 206
+ Visable_Objs 13 206 373
+ Addr 0 198 312 314 322 328 329
+ Bullet_Obj 13 255 257 258 260 261
+ Bullet_Target 13 256
+ CRACKLIST 0 203
+ Cracks 0 364
+ DRONE 13 202
+ Drones 13 241
+ FRAC 13 197
+ Game_Frame 13 246 253 264 293
+ HUD 8 228
+ MOVECPIT 8 231
+ Mines 13 265
+ NUMBULTS 0 254
+ NukePools 13 274 276
+ NumCracks 1 357 361
+ NumDrones 1 242
+ NumMines 1 266
+ NumNukes 1 273
+ NumTanks 1 248
+ OBJECT3D 13 205
+ PT_DRONE 0 379
+ PT_MINE 0 380
+ PT_TANK 0 379
+ Player.Damage 13 234 352
+ Player.Gieger 13 326
+ Player.Items 13 272
+ Player.Missiles 13 304
+ Player_Fuel 13 307 309
+ SEND_LEFT 13 211 220 346
+ SYS_AVGFDIST 13 212 214 221 223
+ SYS_BORDERSIZE 13 281 283 284 285 286 287
+ SYS_CHRATTR 13 237 298
+ SYS_FLICKER 13 210 219 345
+ SYS_LAZER 13 342 343 344 347 349
+ SYS_NEWXB 13 232
+ SYS_VCNT 13 307
+ ScreenCol 14 303
+ ScreenRow 14 302
+ Screen_X 0 201 230 343 344
+ Ship_Rotation 13 296
+ Tanks 13 247
+ UWORD 9 198
+ VISABLE3D 13 204
+ VOICE_FUEL_LOW 0 308
+ WCES94 2 209 385
+ WORLD_WIDTH 0 281 284 285 287
+ World_Objs 13 255 256 257 258 260 261
+ ch_x 0 200 212 214 216 386
+ cloaked 0 255
+ compass_anm 0 297
+ count0 0 197 281 282 283 284 285 287
+ cptr 0 203 364 365
+ cptr->frame 9 366
+ cptr->x 9 366
+ cptr->y 9 366
+ cracks_anm 0 366
+ demo_targetptr 0 391 398
+ dptr 0 202 241 242 247 248 265 266
+ dptr->Obj->cloaked 9 267
+ dptr->Obj->x 9 243 249 268
+ dptr->Obj->y 9 243 249 268
+ hud_art_anm 0 238 293 301 390 407
+ i 0 196 242 248 254 255 256 257 258 260 261 266 273 274 276 296 297 309 315 316 317 320 326 331 332 333 336 352 354 355 357 365 372 381 392 396 399 407
+ j 0 196 313 330 361 362 363 365 374 381 386 388 390 407
+ llazer_anm 0 343
+ ready 0 274
+ rlazer_anm 0 344
+ tptr 0 205 375
+ tptr->cloaked 9 377
+ v_targetptr 0 391 395
+ vptr 0 204 373 374 395 398
+ vptr->object 9 375
+ vptr->scale 9 403 406
+ vptr->type 9 379 380
+ vptr->xs 9 380 394 401
+ vptr->ys 9 380 394 406
+ world_obj->x 9 276
+ world_obj->y 9 276
+ x 9 199 217 221 223 225 230 232 238 243 249 257 258 260 261 268 276 283 284 286 287 293 297 301 366 388 401 407
+ y 9 199 258 261 403 404 405 406 407
+
+ DisnableInts 21 EHInts 21 DisableInts 21 EnableInts 21
+ fmt 2
+ OutBuf 2 75 85 86
+ ScreenCol 13 78 82
+ ScreenRow 13 79 81
+ fmt 2 72 83 85
+ args 0 74 83 85 88
+
+
+		 SYS_DCLISTAVL 0 109
+
+
+		 SYS_DCLISTAVL 0 115
+
+
+ UWORD 0 Value 0
+ UWORD 0 119
+ Value 0 119 122
+ SYS_DCDATA 13 122
+ SYS_DCLIST 13 121
+ SYS_DCLISTLEN 0 121 122 123
+
+ SYS_WaitFrame 21
+		 UWORD 9 133
+ VCNTR 0 135
+ cnt 1 133 135 136
+
+ SYS_DCListHold 21 SYS_DCAddVAddr 21 SYS_DCAddData 21 SYS_DCListGo 21
+	 ScreenCol 13 148 152 158
+ ScreenRow 13 149 152 157
+ ptr 2 146 154 155
+ Addr 0 147 152 153
+ UWORD 9 147
+
+ DisableInts 21 EnableInts 21 VDP_puts 21
+ fmt 2
+ OutBuf 2 169 174 177 180
+ ScreenCol 13 170
+ ScreenRow 13 171
+ fmt 2 166 173 174
+ args 0 168 173 174 182
+
+ LZ_Open 21 LZ_Read 21 SYS_SetPalette 21 SYS_SetVAddr 21
+ UWORD 0 map_file 0
+ OBJECT3D 13 234
+ UWORD 0 224 226 227 228 229 239 241 242 243
+ World_Objs 13 234 238 239 241 242 243
+ h 1 232 254 255 256 258
+ i 1 231 248 257 259 262
+ map_file 0 224 236
+ numchrs 1 233 247 248 264
+ w 1 232 253 260
+ x 1 231 260
+ y 1 231 249 258
+ SYS_LASTCHR 13 246 252 261 264
+ ULONG 13 230 237
+ VDATA 0 250 261
+ chrs 0 228 243 247 250
+ map 0 227 242 253 254 261
+ num_bytes 0 230 237 240
+ pal 0 226 241 244
+ wptr 0 229 236 237 238 239 240 241 242 243
+
+ LZ_Open 21 LZ_Read 21 SYS_SetPalette 21
+ UWORD 0 map_file 0
+ OBJECT3D 13 273
+ UWORD 0 268 270 271 278 280
+ World_Objs 13 273 277 278 280
+ map_file 0 268 275
+ ULONG 13 272 276
+ num_bytes 0 272 276 279
+ pal 0 270 280 281
+ wptr 0 271 275 276 277 278 279 280
+
+ LZ_Open 21 LZ_Read 21 SYS_SetPalette 21 SYS_SetVAddr 21
+ UWORD 0 map_file 0
+ OBJECT3D 13 299
+ UWORD 0 289 291 292 293 294 304 306 307 308
+ World_Objs 13 299 303 304 306 307 308
+ h 1 296 319 320 321 323
+ i 1 295 313 322 324 327
+ map_file 0 289 301
+ numchrs 1 297 312 313 329
+ w 1 296 318 325
+ x 1 295 325
+ y 1 295 314 323
+ SYS_LASTCHR 13 311 317 326 329
+ ULONG 13 298 302
+ VDATA 0 315 326
+ chrs 0 293 308 312 315
+ map 0 292 307 318 319 326
+ num_bytes 0 298 302 305
+ pal 0 291 306 309
+ wptr 0 294 301 302 303 304 305 306 307 308
+
+
+		 FPS_LPtr 0 344 348 349 351
+ FPS_List 0 344 347
+ LONG 13 342
+ SYS_OLDVCNT 0 344
+ SYS_VCNT 13 344
+ avg 0 342 345 347 352
+ i 0 341 346 347
+
+ Do_UI 21 Generate_World 21 Get_World_Info 21 UI_ClearScreen 21 UI_WorldIntro 21 DisableInts 21 DispBMap 21 EnableInts 21 View_World 21 InitSprites 21 Init3D 21 Move3D 21 Init_Player 21 Init_Horizon 21 Set_HScroll 21 SYS_FadeIn 21 PDQS_New 21 Debug 21 FRAC2INT 21 Compute_FPS 21 UI_PrintString 21 Update_Player 21 gemspauseall 21 gemsresumeall 21 View3DObjects 21 Update_Cockpit 21 Send3DObjects 21 SetSendRight 21 SYS_WaitFrame 21 SetupDMA 21 UI_GameWon 21 UI_NextLevel 21 UI_DroneEnhance 21
+	 Cx 13 378
+ Cy 13 378
+ Cz 13 378
+ FRAC 13 378
+ HeadX 13 481 485
+ HeadY 13 482 485
+ Headset_Tilt 1 379
+ Num_Clipped 1 387 472
+ Num_Visable_Objs 1 386 472
+ OBJECT3D 13 392
+ PalBuffer 13 391 443 444 445 446
+ SYS_SAFEDMA 13 394
+ UWORD 13 481
+ World_Objs 13 392
+ i 1 376
+ j 1 376
+ k 1 376
+ num 14 389 390
+ x 1 376
+ y 1 376
+ DEBUG 8 454
+ FPS 8 491
+ FreeNukes 1 434
+ Fuel_Save 0 512 518 532
+ Game_Frame 13 405 563
+ HUD 8 421
+ JOY_START 0 507 511 523 524 526 535
+ MAX3DOBJS 0 392
+ NOASCII 8 413
+ NumCracks 1 412
+ NumNukes 1 433
+ Player.Damage 13 409 411 571
+ Player.Items 13 408
+ Player.Rotation 13 472 539 553
+ Player.Thrust 13 459
+ Player.Tilt 13 459 539 553
+ Player.Won 13 407 566
+ Player.X 13 539 553
+ Player.Y 13 539 553
+ Player.Z 13 459 539 553
+ Player_Fuel 13 396 518 532 571
+ SEND_LEFT 13 538 545 552
+ STATS_HITS 13 427
+ STATS_SHOTS 13 427
+ SYS_DOCYCLE 13 447
+ SYS_FLICKER 13 508 536
+ SYS_GAMEDONE 13 450 453
+ SYS_JoyTable 0 507 511 523 524 526 535
+ SYS_LASTCHR 13 414 416
+ SYS_OLDVCNT 0 406 485 502 560
+ SYS_VCNT 13 406 449 485 502 560
+ ScreenCol 14 437 455 495 520 528
+ ScreenRow 14 437 456 496 521 529
+ UI_DemoMode 13 514 515 565
+ UWORD 9 381 382
+ WorldNum 13 403 435 566
+ chrtmp 0 382
+ cockpit_map 0 422
+ fps 0 465 467 470 471 475 476 493 497 498 499
+ moved 0 384
+ oldjoy 0 385 507 511 535
+ uwptr 0 381
+ wptr 0 380
+
+ Do_UI 21 Main_UI 21 MainGameLoop 21
+	 RLEScaleCode 13 587 591
+ SYS_SAFEDMA 13 586 589
+ UWORD 13 587
+ SYS_AVGFDIST 13 604
+ SYS_DISTDIV 13 603
+ SYS_MAXFDIST 13 598 601 603 604
+ SYS_MINFDIST 13 597 600 603 604
+ SYS_NEWXA 13

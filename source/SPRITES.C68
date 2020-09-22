@@ -1,0 +1,374 @@
+/***
+ *			Sprite Driver for Nuclear Rush
+ *				Copyright 1993, Futurescape Productions
+ *				All Rights Reserved
+ ***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "game.h"
+
+extern	BYTE				SYS_FLICKER;
+extern	BYTE				SEND_LEFT;
+
+struct SPRLIST {
+	WORD	y;
+	UWORD	link;
+	UWORD	chr;
+	WORD	x;
+};
+
+extern struct SPRLIST WORK_SPRLIST[80];
+extern struct SPRLIST RIGHT_SLIST1[80],LEFT_SLIST1[80];
+extern struct SPRLIST RIGHT_SLIST2[80],LEFT_SLIST2[80];
+
+WORD		SYS_LASTSPR;
+UWORD		SYS_LASTCHR;
+UWORD		SYS_BASECHR;
+UWORD		SYS_BASECHR1;
+UWORD		SYS_BASECHR2;
+UWORD		SYS_CHRATTR;			/* Character Attributes */
+
+/*	Maximum number of characters at a time	*/
+extern UWORD		WORK_CHRLIST[8192];
+
+WORD		SYS_PAGE;
+
+UWORD		CHR_1video_addr;
+UWORD		CHR_1length = 0;
+UWORD		*CHR_1src_addr;
+
+UWORD		CHR_2video_addr;
+UWORD		CHR_2length = 0;
+UWORD		*CHR_2src_addr;
+
+UWORD		CHR_3video_addr;
+UWORD		CHR_3length = 0;
+UWORD		*CHR_3src_addr;
+
+UWORD		SPR_Video_Addr = SpriteAttr;
+UWORD		SPR_NLlength = 0;
+struct SPRLIST	*SPR_NLsrc_addr;
+
+UWORD		SPR_NRlength = 0;
+struct SPRLIST	*SPR_NRsrc_addr;
+
+UWORD		SPR_Llength = 0;
+struct SPRLIST	*SPR_Lsrc_addr;
+
+UWORD		SPR_Rlength = 0;
+struct SPRLIST	*SPR_Rsrc_addr;
+
+/******************************************************
+	Animation Files:
+		UWORD	Offset to Palette
+		UWORD	Offset to Animation list
+		UWORD	Offset to Animation to Frame catalog
+		UWORD	Offset to Frame to Sprite catalog
+		UWORD	Offset to Hotspot catalog
+		UWORD	Offset to Character Definitions
+		???
+		Palette:
+			WORD	Color Register index
+			UWORD	Number of colors
+				UWORD	RGB Value (Sega format)
+				...
+			...Repeat...
+			-1		End of list
+		Animation list:
+			UWORD	Number of frames
+			UWORD	Offset to first Animation to Frame offset
+			...
+		Animation to Frame catalog:
+			UWORD	Offset to first Frame to Sprite structure
+			...
+		Frame to Sprite catalog:
+			UWORD	Number of sprites in frame
+			UWORD	Hotspot catalog offset
+				WORD	Y Position on screen (0..n)
+				WORD	H size, V Size, Link
+				UWORD	Priority, Palette, VFlip, HFlip, Char number
+				WORD	X Position on screen (0..n)
+			...
+		Hotspot catalog:
+			UWORD	Number of X,Y pairs
+				WORD	X Position
+				WORD	Y Position
+				...
+			...
+		???	Insert new blocks here.
+		Character Definitions:
+			BYTE	32 Bytes per character
+ ******************************************************/
+
+UWORD					NEW_HORZLEN;
+extern UWORD		SYS_HORZLEN;			/* Flag to send the horizon */
+extern UWORD		SYS_NODMA;				/* Flag to stop and start DMA */
+extern UWORD		SYS_VLINE;				/* VCounter after VBlank */
+extern volatile WORD		SYS_SAFEDMA;
+
+/***
+			Current VRAM Memory Map:
+
+			Logo & ASCII Font		$0000 -
+			Background Maps		      - $6400
+			Sprite Data				
+			Sprite List				$B400
+			Horizontal Scroll		$B800
+			LED Font					$BC00
+			Screen A					$C000 - $DFFF
+			Screen B					$E000 - $FFFF
+
+ ***/
+
+/* #define	MAXDMALEN	4132 */
+#define	MAXDMALEN	4800
+
+void
+InitSprites()
+{
+	SYS_PAGE = 0;
+	SYS_LASTSPR = 0;
+	/*	Get base character address for spites	*/
+	SYS_BASECHR = SYS_BASECHR1 = SYS_LASTCHR;
+	SYS_BASECHR2 = SYS_BASECHR1 + ((1440 - SYS_BASECHR1) / 2);
+	SYS_SAFEDMA = 0xFFFF;
+	SYS_NODMA = FALSE;
+	CHR_1length = 0;
+	CHR_2length = 0;
+	CHR_3length = 0;
+	SPR_Video_Addr = SpriteAttr;
+	SPR_NLlength = 0;
+	SPR_NRlength = 0;
+	SPR_Llength = 0;
+	SPR_Rlength = 0;
+}
+
+void	SetupDMA(void)
+{
+	UWORD	chrWorkLength;
+	extern volatile	LONG				SYS_VCNT;
+	extern WORD ScreenCol;
+	extern WORD ScreenRow;
+
+	while (!SYS_SAFEDMA)
+	 	SYS_WaitFrame();
+	SYS_NODMA = TRUE;
+
+	/*	Setup to DMA the character definitions */
+	if (SYS_LASTCHR > SYS_BASECHR) {
+		CHR_1video_addr = SYS_BASECHR * 32;			/*	Video address to DMA to	*/
+		CHR_1src_addr = WORK_CHRLIST;
+
+		/*	Number of bytes to send	*/
+		chrWorkLength = (SYS_LASTCHR - SYS_BASECHR) * 32;
+
+		/*	We limit MAXDMALEN bytes max per VBlank for both sprite and char data */
+		if (chrWorkLength > MAXDMALEN) {
+			CHR_1length = MAXDMALEN;
+			CHR_2src_addr = WORK_CHRLIST + (CHR_1length / 2);
+			CHR_2video_addr = CHR_1video_addr + CHR_1length;
+			if ((chrWorkLength - CHR_1length) > MAXDMALEN) {
+				CHR_2length = MAXDMALEN;
+				CHR_3src_addr = WORK_CHRLIST + ((CHR_1length + CHR_2length) / 2);
+				CHR_3video_addr = CHR_2video_addr + CHR_2length;
+				CHR_3length = chrWorkLength - (CHR_1length + CHR_2length);
+			} else {
+				CHR_2length = chrWorkLength - CHR_1length;
+				CHR_3length = 0;
+			}
+		} else {
+			CHR_1length = chrWorkLength;
+			CHR_2length = 0;
+			CHR_3length = 0;
+		}
+	} else {
+		CHR_1length = 0;
+		CHR_2length = 0;
+		CHR_3length = 0;
+	}
+
+	/*	Setup to DMA the sprite data */
+	if (SYS_LASTSPR > 0) {
+		WORK_SPRLIST[SYS_LASTSPR - 1].link &= 0x0F00;	/*	End the sprite list	*/
+		/*	If flicker on, preserve right	*/
+		if (SYS_FLICKER) {
+			/*	Number of bytes to send	*/
+			SPR_NLlength = SPR_NRlength = SYS_LASTSPR * 8;
+			if (SYS_PAGE)
+				memcpy(RIGHT_SLIST2,WORK_SPRLIST,SPR_NLlength);
+			else
+				memcpy(RIGHT_SLIST1,WORK_SPRLIST,SPR_NLlength);
+		} else {
+			/*	Preserve left	*/
+			SPR_NLlength = SYS_LASTSPR * 8;			/*	Number of bytes to send	*/
+			SPR_NRlength = 0;
+			if (SYS_PAGE)
+				memcpy(LEFT_SLIST2,WORK_SPRLIST,SPR_NLlength);
+			else
+				memcpy(LEFT_SLIST1,WORK_SPRLIST,SPR_NLlength);
+		}
+
+		/* Do a page flip */
+		if (SYS_PAGE) {
+			SPR_NLsrc_addr = LEFT_SLIST2;
+			SPR_NRsrc_addr = RIGHT_SLIST2;
+			SYS_PAGE = 0;
+		} else {
+			SPR_NLsrc_addr = LEFT_SLIST1;
+			SPR_NRsrc_addr = RIGHT_SLIST1;
+			SYS_PAGE = 1;
+		}
+	} else {
+		SPR_NLlength = 0;
+		SPR_NRlength = 0;
+	}
+	SYS_LASTSPR = 0;
+
+	/* Do a page flip */
+	if (SYS_BASECHR == SYS_BASECHR1)
+		SYS_BASECHR = SYS_BASECHR2;
+	else
+		SYS_BASECHR = SYS_BASECHR1;
+	SYS_LASTCHR = SYS_BASECHR;
+
+	SYS_SAFEDMA = 0;
+	SYS_HORZLEN = NEW_HORZLEN;
+
+#if 0
+	/* Display info... */
+	ScreenCol = 0;
+	ScreenRow = 3;
+	Debug(" LEN1=%4d",CHR_1length);
+	Debug(" LEN2=%4d",CHR_2length);
+	Debug(" LEN3=%4d",CHR_3length);
+	Debug(" SPRS=%4d",SPR_NLlength/8);
+	Debug(" BASE=$%4X",SYS_BASECHR1);
+#endif
+
+	SYS_NODMA = FALSE;
+}
+
+UWORD	AddCharToDMA(UWORD *anim_file, UWORD charSize, UWORD charOffset)
+{
+UWORD		*wptr;
+UWORD		workIndex;
+int		i,counter;
+UWORD		actualOffset,actualSize;
+
+	actualSize = (((charSize >> 10) & 0x03) + 1) *
+							(((charSize >> 8) & 0x03) + 1);	/*	Character count	*/
+
+	actualOffset = 16 * (charOffset & 0x07FF);	/*	Word offset to char	*/
+
+	wptr = anim_file;							/*	Base of animation file	*/
+
+	/*	Get address of Character definitions	*/
+	wptr = (UWORD *) ((BYTE *)anim_file + *(wptr + 5));
+
+	wptr++;										/*	Catalog count, don't need	*/
+
+	workIndex = 16 * (SYS_LASTCHR - SYS_BASECHR);/*	Gives character number	*/
+
+	SYS_LASTCHR += actualSize;				/* New last character value	*/
+
+	wptr += actualOffset;					/*	Point to the first character	*/
+
+	memcpy(&WORK_CHRLIST[workIndex],wptr,(actualSize * 32));
+
+	return;										/*	Done	*/
+}
+
+void	AddSpriteToDMA(UWORD *anim_file, UWORD *ROMloc, int spriteCount,
+								WORD xPos, WORD yPos)
+{
+	UWORD counter;						/*	Counting variable	*/
+	UWORD	size,offset;
+
+	/*	Loop through all sprites	*/
+	for (counter = 0; counter < spriteCount; counter++) {
+		/*	Sprite Y position	*/
+		WORK_SPRLIST[SYS_LASTSPR].y = *ROMloc++ + yPos + 0x80;
+		size = *ROMloc++;
+
+		/*	Next sprite to link	*/
+		WORK_SPRLIST[SYS_LASTSPR].link = (size & 0x0F00) + (SYS_LASTSPR + 1);
+
+		/*	Sprite's first catalog character : Add base character value	*/
+		offset = *ROMloc++;
+		/*	Only get the character data for left display	*/
+		if (SEND_LEFT)	{
+			WORK_SPRLIST[SYS_LASTSPR].chr = SYS_LASTCHR +
+				(offset & 0xF800) + SYS_CHRATTR;
+			AddCharToDMA(anim_file,size,offset);
+		} else
+			if (SYS_PAGE)
+				WORK_SPRLIST[SYS_LASTSPR].chr = LEFT_SLIST2[SYS_LASTSPR].chr;
+			else
+				WORK_SPRLIST[SYS_LASTSPR].chr = LEFT_SLIST1[SYS_LASTSPR].chr;
+
+		/*	Sprite X position	*/
+		WORK_SPRLIST[SYS_LASTSPR].x = *ROMloc++ + xPos + 0x80;
+		/*	Increment last sprite number	*/
+		SYS_LASTSPR++;
+	}
+}
+
+void	DispFrame(UWORD *anim_file, WORD anim, WORD frame,
+						WORD xp, WORD yp)
+{
+UWORD		*anim_ptr;
+UWORD		*wptr;
+int		i,x,y,numsprs;
+
+	/*	GetFrameChrs(anim_file);	*/		/*	Send the characters	*/
+
+	wptr = anim_file;							/*	Base of animation file	*/
+
+	wptr++;										/*	Skip palette offset	*/
+
+	/*	Add animation list offset	*/
+	anim_ptr = (UWORD *)((BYTE *)anim_file + *wptr);
+	anim_ptr += anim * 2;					/*	Point to requested animation	*/
+	if (frame < *anim_ptr++)				/*	If valid frame number requested	*/
+		{
+		/*	Add animation frame pointer offset	*/
+		wptr = (UWORD *)((BYTE *)anim_file + *anim_ptr);
+		/*	Add animation frame data offset	*/
+		wptr = (UWORD *)((BYTE *)anim_file + *(wptr + frame));
+		
+		numsprs = *wptr++;					/*	Get number of sprites in frame	*/
+		wptr++;									/*	Skip hotspot offset	*/
+
+		wptr++;									/* Skip width and height */
+		wptr++;
+
+		AddSpriteToDMA(anim_file,wptr,numsprs,xp,yp);	/*	Add to list to DMA	*/
+		}
+	return;
+}
+
+void	SendAnimPal(UWORD *anim_file)
+{
+UWORD		*wptr;
+
+	wptr = anim_file;							/*	Base of animation file	*/
+
+	/*	Set the palette	*/
+	SYS_SetPalette((UWORD *)((BYTE *)anim_file + *wptr));
+}
+
+/*	Reset stuff for sending right side data */
+void	SetSendRight(void)
+{
+UWORD		length;
+
+	WORK_SPRLIST[SYS_LASTSPR - 1].link &= 0x0F00;	/*	End the sprite list	*/
+	length = SYS_LASTSPR * 8;			/*	Number of bytes to send	*/
+	if (SYS_PAGE)
+		memcpy(LEFT_SLIST2,WORK_SPRLIST,length);
+	else
+		memcpy(LEFT_SLIST1,WORK_SPRLIST,length);
+	SYS_LASTSPR = 0;
+}
+
