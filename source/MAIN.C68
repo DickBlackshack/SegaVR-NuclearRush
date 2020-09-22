@@ -65,7 +65,7 @@ char			OutBuf[80];
  ***/
 
 #include <stdarg.h>
-#include	<ctype.h>
+#include <ctype.h>
 #include <errno.h>
 
 void
@@ -241,6 +241,7 @@ DispMap(UWORD *map_file)
 	pal = (UWORD *)((BYTE *)World_Objs + *wptr++);
 	map = (UWORD *)((BYTE *)World_Objs + *wptr++);
 	chrs = (UWORD *)((BYTE *)World_Objs + *wptr);
+	pal[0] = 16;
 	SYS_SetPalette(pal);
 	/* Dump characters */
 	SYS_SetVAddr(SYS_LASTCHR*32);
@@ -369,6 +370,24 @@ extern short		MaxAngle;
 
 WORD		Player_Fuel;
 
+int gWantVCellScrollEnabled = 3;
+int gVCellScrollEnabled = 1; //starts out enabled due to "InitialVDP"
+
+//rww - vertical cell scroll causes issues on some hardware when used in conjunction with horizontal scroll.
+//see comments in HORIZON.C68.
+void UpdateVCellScrollEnabled()
+{
+	if (gVCellScrollEnabled != gWantVCellScrollEnabled)
+	{
+		const int regVal = 0x8B00 | ((gWantVCellScrollEnabled) ? 4 : 0);
+
+		DisableInts();
+		WVCTRL = regVal;
+		EnableInts();
+
+		gVCellScrollEnabled = gWantVCellScrollEnabled;		
+	}
+}
 
 void
 MainGameLoop(void)
@@ -499,7 +518,9 @@ MainGameLoop(void)
 				UI_PrintString("%2d.%1d",fps / 10,fps % 10);
 		}
 #endif
+
 			SYS_OLDVCNT = SYS_VCNT;
+			
 			/* Move Camera */
 			Update_Player();
 #if 0
@@ -532,6 +553,8 @@ MainGameLoop(void)
 				Player_Fuel = Fuel_Save;
 			}
 #endif
+			UpdateVCellScrollEnabled();
+						
 			oldjoy = SYS_JoyTable[JOY_START];	/* For debouncing */
 			if (SYS_FLICKER) {
 				/* Show left sprites */
@@ -556,9 +579,36 @@ MainGameLoop(void)
 				Update_Cockpit();
 				Send3DObjects(TRUE);
 			}
-			/* Do a maximum of 15 frames per second! */
-			while (SYS_VCNT-SYS_OLDVCNT < 4)
-			 	SYS_WaitFrame();
+#if HMD_SAMPLE_60HZ //rww - explicit eye sync
+			if (SYS_FLICKER)
+			{
+				extern ULONG	SYS_HMD_DATA;
+				
+				//first lock to 15Hz (could go for 30, but even with a lot of extra cycles we still get dragged down by large scaled objects)
+				while (SYS_VCNT-SYS_OLDVCNT < 4)
+				{
+					SYS_WaitFrame();
+				}
+				
+				//wait until sync'd up with the left eye before the next dma kick.
+				//this helps prevent one eye from occasionally trailing behind the other.
+				while ((SYS_HMD_DATA & 0xC0000) != 0x80000)
+				{
+					SYS_WaitFrame();
+				}
+			}
+			else
+#endif
+			{
+#if TARGET_OVERCLOCK
+	#define NON_STEREO_VBLANK_WAIT 2 //shoot for 30 in 2d mode
+#else
+	#define NON_STEREO_VBLANK_WAIT 4
+#endif
+				/* Do a maximum of 15 frames per second! */
+				while (SYS_VCNT-SYS_OLDVCNT < NON_STEREO_VBLANK_WAIT)
+					SYS_WaitFrame();
+			}
 			SetupDMA();								/*	Prepare to DMA sprite data	*/
 			Game_Frame++;
 		}

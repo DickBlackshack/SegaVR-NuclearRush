@@ -461,7 +461,16 @@ Update_Movement()
 	/* Does user want to move to another world? */
 	if (SYS_JoyTable[JOY_A] && SYS_JoyTable[JOY_B] && SYS_JoyTable[JOY_C]) {
 		SYS_GAMEDONE = TRUE;
-		Player.Won = TRUE;
+		//rww - added ability to reset without win condition
+		if (!SYS_JoyTable[JOY_START])
+		{
+			Player.Won = TRUE;
+		}
+		else
+		{
+			Player_Fuel = 0;
+			Player.Won = FALSE;
+		}
 	}
 #endif
 	/* Is the players fuel out? */

@@ -5,6 +5,7 @@
  ***/
 
 #include <stdarg.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 #include "game.h"
@@ -382,7 +383,12 @@ UI_KillSprList()
 UI_InitVDP()
 {
 	WORD				i;
+#if DOUBLE_BUFFER_VSCROLL
+	extern WORD		SYS_VSCROLLA[];
+	extern WORD		SYS_VSCROLLB[];
+#else
 	extern WORD		SYS_VSCROLL[];
+#endif
 	extern WORD		SYS_NEWXA;
 	extern WORD		SYS_NEWXB;
 
@@ -392,7 +398,13 @@ UI_InitVDP()
 	for (i=0; i < 40; i++)
 		VDATA = 0;
 	for (i=0; i < 20; i++)
+	{
+#if DOUBLE_BUFFER_VSCROLL
+		SYS_VSCROLLA[i] = SYS_VSCROLLB[i] = 0;
+#else	
 		SYS_VSCROLL[i] = 0;
+#endif
+	}
 	SYS_SetVAddr(0xB800);
 	VDATA = 0;
 	VDATA = 0;
@@ -518,7 +530,8 @@ UI_CheckIO()
 	HMD_INIT_RDY();
 	if (SYS_HMD_ERROR == 0l) {
 		SYS_READHEAD = SYS_DOHEADSET = 0xFFFF;
-/*		SYS_FLICKER = TRUE; */
+		SYS_FLICKER = TRUE; //rww - this was commented out, probably for testing or demo purposes, but i want to enable by default if the headset's detected
+		SYS_VR_MODE = 1; //rww - also enable standard stereo mode if we've got a headset
 		EnableInts();
 		UI_ClearScreen(0xE000);
 		ScreenRow = 14;
@@ -624,6 +637,10 @@ static const char *title_story[] = {
 	"  DAVORIN KUCHAN",		/* Screen 12 Line 8 */
 	"*",
 
+	"RESTORED 2020:  ",
+	" RICH WHITEHOUSE",
+	"*",
+	
 	"\0"
 };
 
@@ -791,6 +808,8 @@ skip:
 	buf[1] = '\0';
 	while (!done) {
 		UI_ClearScreen(0xE000);
+		//rww fix - font palette gets stomped by some of the intro screens (may be due to the way i'm auto-detecting palettes when converting images, or may be a legacy issue)
+		SYS_SetPalette((UWORD *)&UI_Pal[0]);
 		switch (j) {
 			case 0:
 				UI_ShowScreen(&nukeruin_map);
@@ -863,7 +882,7 @@ skip:
 			case 2:
 			case 4:
 			case 5:
-			case 11:
+			case 12: //11: //rww - snuck myself in there! (sorry, gotta impress the (grand)kids somehow)
 				SYS_FadeOut(FADETIME);
 				break;
 		}
@@ -1260,7 +1279,7 @@ UI_NextLevel()
 		ScreenRow = 10;
 		UI_CenterString("HIT RATIO");
 		ScreenRow = 13;
-		i = (STATS_SHOTS / STATS_HITS);
+		i = (STATS_HITS != 0) ? (STATS_SHOTS / STATS_HITS) : 0; //rww fix - crash when cleared with no hits
 		if (i)
 			sprintf(buf,"%d PERCENT",100 / i);
 		else
@@ -1272,6 +1291,9 @@ UI_NextLevel()
 	SYS_FadeOut(FADETIME);
 	UI_ClearScreen(0xC000);
 	UI_ClearScreen(0xE000);
+	//rww fix - restore palettes since game over screens can stomp pal3 and make the rest of the menus look wrong
+	SYS_SetPalette((UWORD *)&Title_Pal[0]);
+	SYS_SetPalette((UWORD *)&UI_Pal[0]);	
 }
 
 static const char	*start_items[] = {
@@ -1306,7 +1328,7 @@ UI_StartScreen()
 	extern UWORD	nukescrn_map;
 
 /*	SYS_SetPalette(UI_Pal); */
-	if (UI_DecodePassword()) {
+	if (UI_DecodePassword() > 1) { //rww fix - allow -1 result
 		SYS_FadeIn(FADETIME);
 		Bomb("Bad Password in StartScreen()\n %s",UI_AccessCode);
 	}
@@ -1345,6 +1367,7 @@ restart:
 		UI_PrintIndicator(4,cur_item*3+10,start_items2[cur_item]);
 	else
 		UI_PrintIndicator(4,cur_item*3+10,start_items[cur_item]);
+		
 	SYS_FadeIn(FADETIME);						/* Fade new palette in */
 	while (!done) {
 		old_item = cur_item;
@@ -1388,8 +1411,10 @@ restart:
 	}
 	SYS_FadeOut(FADETIME);						/* Fade old palette out */
 	UI_ClearScreen(0xE000);
-	if (UI_Continue & cur_item == 1) {
+	if (UI_Continue && cur_item == 1) { //rww fix - was &, meant to be &&
+		extern UWORD	WorldNum;
 		UI_Continue = 0;
+		WorldNum = 0; //rww fix - start back at world 0 when selecting new game
 		goto restart;
 	}
 	return (cur_item);
@@ -1417,13 +1442,16 @@ const static char	*opt_items[] = {
 	"CONTINUES",
 	"SOUND TEST",
 #if WCES94
-	"MONO"
+	"MONO",
 #else
-	"CONTROL:"
+	"CONTROL:",
 #endif
+	"VSCROLL" //rww
 };
 
 #define	MAX_SONGS	30
+
+extern int gWantVCellScrollEnabled;
 
 const static WORD	songs[] = {
 	0,1,2,4,5,6,7,8,10,16,17,18,19,20,21,22,23,
@@ -1432,6 +1460,7 @@ const static WORD	songs[] = {
 
 UI_OptionScreen()
 {
+	const int itemCount = 6; //rww - changed from 5
 	int	cur_item,old_item,done,last_move;
 	int	level;
 	int	last_button;
@@ -1453,7 +1482,7 @@ UI_OptionScreen()
 	/* Display menu */
 	ScreenRow = 4;
 	UI_CenterString("Game Options");
-	for (cur_item = 0; cur_item < 5; cur_item++)
+	for (cur_item = 0; cur_item < itemCount; cur_item++)
 		UI_EraseIndicator(4,cur_item*3+8,opt_items[cur_item]);
 	ScreenCol = 16;
 	ScreenRow = 11;
@@ -1475,6 +1504,15 @@ UI_OptionScreen()
 	else
 		UI_CenterString("LZR MISL ALT");
 #endif
+
+	//rww - added vscroll option
+	ScreenRow = 23;
+	ScreenCol = 26;
+	buf[0] = gWantVCellScrollEnabled + '0';
+	buf[1] = '\0';
+	UI_PrintString(buf);					
+
+
 	/* Let user select menu item */
 	last_move = -1;
 	cur_item = 0;
@@ -1494,7 +1532,7 @@ UI_OptionScreen()
 			if (SYS_JoyTable[JOY_DOWN]) {
 				if (last_move != JOY_DOWN) {
 					last_move = JOY_DOWN;
-					if (cur_item < 4)
+					if (cur_item < (itemCount - 1))
 						cur_item++;
 				}
 			} else
@@ -1586,6 +1624,14 @@ UI_OptionScreen()
 					else
 						UI_CenterString("LZR MISL ALT");
 #endif
+					break;
+				case 5: //rww - vscroll mode
+					gWantVCellScrollEnabled = (gWantVCellScrollEnabled + 1) % 4;
+					ScreenRow = 23;
+					ScreenCol = 26;
+					buf[0] = gWantVCellScrollEnabled + '0';
+					buf[1] = '\0';
+					UI_PrintString(buf);					
 					break;
 			}
 		} else
@@ -1689,6 +1735,7 @@ UI_EncodePassword()
 
 /***
  *		UI_DecodePassword():  Returns TRUE if password is bad.
+ *		rww fix - changed to return 1 for bad, 0 for good, -1 for invalid characters to avoid special checking for "        "
  ***/
 
 int
@@ -1708,7 +1755,8 @@ UI_DecodePassword()
 				break;
 		if (k == 16)
 			/* We NEVER should be able to get this... */
-			Bomb("Bad Password (%s)!",UI_AccessCode);
+			//Bomb("Bad Password (%s)!",UI_AccessCode);
+			return -1; //rww fix - we can get this, just by leaving some blank characters in the password - space isn't mapped. so, we handle it.
 		tmp |= k;
 	}
 	decoded = tmp;
@@ -1719,7 +1767,7 @@ UI_DecodePassword()
 	}
 	chksum = (chksum ^ 0xA) & 0xF;
 	if (chksum != k)
-		return TRUE;
+		return 1;//TRUE;
 	*(ULONG *)&UI_Password = decoded;
 	WorldNum = UI_Password.World;
 	Player.Credits = UI_Password.Credits;
@@ -1748,7 +1796,7 @@ UI_DecodePassword()
 		Player.Items[1] = TRUE;
 	else
 		Player.Items[1] = FALSE;
-	return FALSE;
+	return 0;//FALSE;
 }
 
 int
@@ -1758,6 +1806,7 @@ UI_PasswordScreen()
 	char	buf[4];
 	int	i,x,y;
 	int	code_len;
+	int decodeResult; //rww fix - recognize invalid entry as just "go back to menu"
 	extern UWORD	gridscrn_map;
 
 restart:
@@ -1851,7 +1900,8 @@ restart:
 			button = FALSE;
 		SYS_WaitFrame();
 	} while (!done);
-	if (UI_DecodePassword() && (strcmp(UI_AccessCode,"        ") != 0)) {
+	decodeResult = UI_DecodePassword();
+	if (decodeResult > 0) { //rww fix - let space be handled naturally (before we were checking for "        ", but after the call to UI_DecodePassword. we probably meant to make the check before the call instead.
 		UI_ClearScreen(0xE000);
 		ScreenRow = 12;
 		UI_CenterString("ILLEGAL CODE");
@@ -1863,7 +1913,7 @@ restart:
 	}
 	SYS_FadeOut(FADETIME);						/* Fade old palette out */
 	UI_ClearScreen(0xE000);
-	if (strcmp(UI_AccessCode,"        ") == 0)
+	if (decodeResult < 0) //rww fix - let space be handled naturally //strcmp(UI_AccessCode,"        ") == 0)
 		return (FALSE);
 	else
 		return (TRUE);
@@ -1940,7 +1990,8 @@ UI_AdjustFocus()
 		/* Simulate the correct scale factor (from 3D.C68) */
 		scale = (((unsigned long)dist) << 16) / (unsigned short)0xDFFF;
 		scale = MAXSCALE - scale;
-		if (scale < 0)
+		//if (scale < 0)
+		if (scale & 0x8000) //rww fix
 			scale = 0;
 		if (scale > MAXSCALE)
 			scale = MAXSCALE;
@@ -2278,6 +2329,9 @@ UI_DroneEnhance()
 	}
 	UI_KillSprList();
 	SYS_FadeOut(FADETIME);						/* Fade old palette out */
+	//rww fix - restore palettes since this screen stomps pal3
+	SYS_SetPalette((UWORD *)&Title_Pal[0]);
+	SYS_SetPalette((UWORD *)&UI_Pal[0]);
 	gemsstopall();
 }
 
@@ -2510,7 +2564,7 @@ Main_UI()
 	int				done;
 	extern UWORD	SYS_CHRATTR;		/* Character Attributes */
 	extern WORD		SYS_SCRLXB;
-
+	
 	SYS_SCRLXB = 0;
 	SYS_CHRATTR = 0;
 	done = FALSE;

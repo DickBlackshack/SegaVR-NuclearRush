@@ -418,8 +418,17 @@ UWORD		SYS_HORZCHRS;			/* Where the Horizon characters are in VRAM */
 extern ULONG		SYS_HORIZON[28*8];	/* The Horizon Bitmap */
 UWORD		SYS_HORZLEN;			/* Flag to send the horizon */
 WORD		SYS_VTILT;				/* From -15 to 15, horizon tilt factor */
+#if DOUBLE_BUFFER_VSCROLL
+WORD		SYS_VSCROLLA[20];
+WORD		SYS_VSCROLLB[20];
+WORD		*SYS_VSCROLL_addr = 0;
+WORD		SYS_VSCROLL_FLIP = 0;
+#else
 WORD		SYS_VSCROLL[20];		/* Vertical scroll array updated in VBlank */
+#endif
 WORD		SYS_VADJ[20];			/* Vertical adjustment for 3D code */
+
+extern int gVCellScrollEnabled;
 
 extern UWORD		NEW_HORZLEN;
 
@@ -445,7 +454,19 @@ Set_HScroll()
 	extern WORD ScreenCol;
 	extern WORD ScreenRow;
 	extern WORD				SYS_HARDWARE;
-
+	
+#if DOUBLE_BUFFER_VSCROLL
+	WORD *SYS_VSCROLL = (SYS_VSCROLL_FLIP) ? SYS_VSCROLLA : SYS_VSCROLLB;
+#endif
+	
+#if TARGET_OVERCLOCK
+	//spinning around and getting here too quickly means we'll overwrite some values prematurely and potentially desync the eyes.
+	//this is a dumb bruteforce solution and wastes a good bit of time, but since it's only for the overclock target it's Good Enough.
+	extern WORD		SYS_SAFEDMA;
+	while (!SYS_SAFEDMA)
+		SYS_WaitFrame();
+#endif
+	
 	/* Set X scroll value */
 	y = Player.Rotation;
 	SYS_NEWXA = -(Cvt360To512[y] * 3);
@@ -466,10 +487,23 @@ Set_HScroll()
 	 *			different versions of the machine.  On machine type 0, scroll
 	 *			plane A has it's leftmost 16 pixels blanked...
 	 ***/
-	if ((SYS_HARDWARE & 0x0F) == 0) {
+	//rww - perhaps not the ideal way to handle this, as it can result in scrolling feeling choppy on random genesis models without explanation.
+	//i happen to have a Model 2 that this check doesn't catch when it wants to, on the other hand, so there's column blanking on the left.
+	//as a cheap workaround to avoid completely reworking the effect, i've added an option where 0=no cell scroll, 1=never truncate, 2=original logic, 3=always truncate
+	if (gVCellScrollEnabled == 3)
+	{
+		//always chop field a (the original test is saying field b needs to be chopped on everything but v0 hardware, but that's also wrong - my Model 2 being another case in point)
 		SYS_NEWXA &= 0xFFF0;
-	} else
-		SYS_NEWXB &= 0xFFF0;
+	}
+	else if (gVCellScrollEnabled == 2)
+	{
+		//todo - even though this isn't a great solution, would be good to update the check with a definitive list of hardware versions where cell vscroll + hscroll works.
+		//googling led to some speculation but no definitive answer.
+		if ((SYS_HARDWARE & 0x0F) == 0) {
+			SYS_NEWXA &= 0xFFF0;
+		} else
+			SYS_NEWXB &= 0xFFF0;
+	}
 	/* Calculate one point at the start of the horizon for a reference */
 	xf = Player.X + fmul(INT2FRAC(400),SinA);	/* 400 is the max distance */
 	yf = Player.Y + fmul(INT2FRAC(400),CosA);
@@ -482,24 +516,34 @@ Set_HScroll()
 	if (yp >= 224)
 		yp = 223;
 	scrolly = 256-yp;
-
+	
 	/* Recompute the VScroll array */
-	if (SYS_VTILT < -15)
-		SYS_VTILT = -15;
-	if (SYS_VTILT > 15)
-		SYS_VTILT = 15;
-	for (y=0; y < 17; y++) {
-		if (SYS_VTILT < 0)
-			SYS_VADJ[y] = -horz_adj[-SYS_VTILT][y];
-		else
-			SYS_VADJ[y] = horz_adj[SYS_VTILT][y];
-		SYS_VSCROLL[y] = scrolly + SYS_VADJ[y];
+	if (!gVCellScrollEnabled)
+	{
+		//SYS_VADJ needs to be fully filled out for objects that reference it
+		memset(SYS_VADJ, 0, sizeof(SYS_VADJ));
+		//only the first entry of VSCROLL needs to be set. they'll all be dma'd over, but won't be used (could optimize that, but might as well stick to the default performance profile)
+		SYS_VSCROLL[0] = scrolly;
 	}
-	for (y=17; y < 20; y++) {
-		SYS_VADJ[y] = SYS_VADJ[16];
-		SYS_VSCROLL[y] = SYS_VSCROLL[16];
+	else
+	{
+		if (SYS_VTILT < -15)
+			SYS_VTILT = -15;
+		if (SYS_VTILT > 15)
+			SYS_VTILT = 15;
+		for (y=0; y < 17; y++) {
+			if (SYS_VTILT < 0)
+				SYS_VADJ[y] = -horz_adj[-SYS_VTILT][y];
+			else
+				SYS_VADJ[y] = horz_adj[SYS_VTILT][y];
+			SYS_VSCROLL[y] = scrolly + SYS_VADJ[y];
+		}
+		for (y=17; y < 20; y++) {
+			SYS_VADJ[y] = SYS_VADJ[16];
+			SYS_VSCROLL[y] = SYS_VSCROLL[16];
+		}
 	}
-
+	
 	/* Don't build a horizon every time */
 	if (yp == old_yp)
 		return;

@@ -288,7 +288,7 @@ Update_Cockpit()
 		}
 #endif
 	}
-
+	
 	/* Show Gadget */
 	DispFrame(&hud_art_anm,0,11 + Game_Frame % 3,x+82,198);
 
@@ -343,7 +343,7 @@ Update_Cockpit()
 		DispFrame(&llazer_anm,0,4-SYS_LAZER,Screen_X+128-60,178);
 		DispFrame(&rlazer_anm,0,4-SYS_LAZER,Screen_X+128+60,178);
 		if (SYS_FLICKER) {
-			if (SEND_LEFT)
+			if (!SEND_LEFT) //rww fix - changed to !left to keep lists lined up (avoids breaking on the last frame)
 				SYS_LAZER--;
 		} else
 			SYS_LAZER--;

@@ -9,6 +9,10 @@
 
 WCES94	equ	1		; Winter '94 CES kludges...
 
+* TARGET_OVERCLOCK equ 1 ;rww - corresponds to #define in GAME.H
+* DOUBLE_BUFFER_VSCROLL equ 1 ;rww - corresponds to #define in GAME.H
+* HMD_SAMPLE_60HZ equ 1 ;rww - make sure this is defined if using TARGET_OVERCLOCK
+
 	OPT	LLBL
 
 
@@ -65,7 +69,9 @@ AUTO_6:		DC.L	Vblank
 	DC.W	0
 	DC.B	'J               '
 	DC.L	$00000000
-	DC.L	$00200000
+*	DC.L	$00200000
+* rww fix - bump to 4MB, necessary even without modification, likely due to both compiler and image processing tool differences
+	DC.L	$00400000
 	DC.L	$FFFF0000
 	DC.L	$FFFFFFFF
 	DC.B	'            '
@@ -452,7 +458,12 @@ _EHInts:
 	XREF	_SYS_DCLISTLEN		; List length
 	XREF	_SYS_DCLIST		; Data or Ctrl flags
 	XREF	_SYS_DCDATA		; WORDs to send
+	
+	.ifdef DOUBLE_BUFFER_VSCROLL
+	XREF	_SYS_VSCROLL_addr
+	.else
 	XREF	_SYS_VSCROLL
+	.endif
 
 	IFNE	WCES94
 	XREF	_SYS_VR_MODE		; For WCES '94
@@ -631,6 +642,22 @@ Vblank:
 	bsr	CopyToVRAM
 	move.w	#0,_SYS_HORZLEN
 .doneDMA
+
+	.ifdef DOUBLE_BUFFER_VSCROLL
+	tst	_DISP_LEFT
+	beq.s	.noVscrollUpdate
+	move.l	_SYS_VSCROLL_addr,a0
+	cmp.l #0,a0
+	beq.s .noVscrollUpdate	
+	move.l #0,_SYS_VSCROLL_addr
+	move.l	#$40000010,VCTRL		; Update Y Scroll values	
+	move	#19,d0
+.adjvs	move	(a0)+,VDATA
+	move	#0,VDATA
+	dbra	d0,.adjvs
+.noVscrollUpdate:
+	.endif
+
 * Copy new pointers after DMA is finished
 	tst	_SYS_SAFEDMA			; Only update once per frame
 	bne.s	.exitDMA
@@ -640,14 +667,16 @@ Vblank:
 	move.l	_SPR_NLsrc_addr,_SPR_Lsrc_addr
 	move	_SYS_NEWXA,_SYS_SCROLLX		; Update scroll values
 	move	_SYS_NEWXB,_SYS_SCRLXB
-
+	
+	.ifndef DOUBLE_BUFFER_VSCROLL
 	move.l	#$40000010,VCTRL		; Update Y Scroll values
 	lea	_SYS_VSCROLL,a0
 	move	#19,d0
 .adjvs	move	(a0)+,VDATA
 	move	#0,VDATA
-	dbra	d0,.adjvs
-
+	dbra	d0,.adjvs	
+	.endif
+	
 	st	_SYS_SAFEDMA
 .exitDMA
 * Do games VDP Data/Ctrl list updating...
@@ -688,8 +717,10 @@ Vblank:
 * Do headset read, if needed
 	tst	_SYS_READHEAD
 	beq.s	.bye
+	.ifndef HMD_SAMPLE_60HZ
 	btst.b	#0,_SYS_VCNT+3		; Only read the headset and 30Hz
 	beq.s	.bye
+	.endif
 	jsr	_HMD_DATA
 	move.l	d0,_SYS_HMD_DATA
 .bye	movem.l	(a7)+,d0-d7/a0-a6 ;get old registers

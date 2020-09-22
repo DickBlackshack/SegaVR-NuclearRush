@@ -109,7 +109,7 @@ ALLFILES=$(INITFILES) $(AFILES) $(COFILES) $(MAPFILES) $(M40FILES) \
 
 .stl.o :
 	echo Converting $*.stl Still Screen file
-	cvtsce /w32 $*.stl $*.tmp
+	cvtsce /a1 /w32 $*.stl $*.tmp
 	lzssc $*.tmp $*.map
 	echoit $*.asm $& map
 	dump /d $*.map >>$*.asm
@@ -120,7 +120,7 @@ ALLFILES=$(INITFILES) $(AFILES) $(COFILES) $(MAPFILES) $(M40FILES) \
 
 .m40.o :
 	echo Converting $*.m40 Still Screen file
-	cvtsce /w40 $*.m40 $*.tmp
+	cvtsce /a1 /w40 $*.m40 $*.tmp
 	lzssc $*.tmp $*.map
 	echoit $*.asm $& map
 	dump /d $*.map >>$*.asm
@@ -172,6 +172,7 @@ X.OUT : $(ALLFILES) temp.lnk
 	cd OBJS
 	link68 -i ..\temp.lnk -o ..\x.out
 	cd ..
+	dumpcoff x.out _NUCRUSH.bin
 #	pc2sega /v x.out
 
 temp.lnk : makefile

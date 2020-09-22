@@ -13,7 +13,7 @@
 #include <string.h>
 #include "game.h"
 
-#define	DEBUG	TRUE
+#define	DEBUG	FALSE //TRUE
 #define	ATTR	TRUE
 
 #if DEBUG
@@ -576,8 +576,9 @@ PDQS_Scale(UWORD *anm_file, WORD anm, WORD frm, WORD xp, WORD yp, UWORD sf)
 	wptr++;			/*	Skip hotspot offset	*/
 
 
-	wptr++;
-	wptr++;
+	//rww fix - format was updated to remove these, based on comments in sprites it seems it was width/height
+	//wptr++;
+	//wptr++;
 
 
 	/*	Add to list to DMA	*/

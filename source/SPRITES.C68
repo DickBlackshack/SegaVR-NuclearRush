@@ -144,17 +144,32 @@ InitSprites()
 	SPR_Rlength = 0;
 }
 
+//rww fix - in cases where the right eye is never set, we can end up leaving garbage in the left list while SYS_FLICKER is enabled. (happens on some UI screens)
+//so when SYS_FLICKER is enabled but the right eye was never set, i'm now copying the work list directly to the left list and leaving the right list empty.
+int gDidSetupRight = 0;
+
 void	SetupDMA(void)
 {
 	UWORD	chrWorkLength;
 	extern volatile	LONG				SYS_VCNT;
 	extern WORD ScreenCol;
 	extern WORD ScreenRow;
+#if DOUBLE_BUFFER_VSCROLL
+	extern WORD		SYS_VSCROLLA[20];
+	extern WORD		SYS_VSCROLLB[20];
+	extern WORD		*SYS_VSCROLL_addr;
+	extern WORD		SYS_VSCROLL_FLIP;
+#endif
 
 	while (!SYS_SAFEDMA)
 	 	SYS_WaitFrame();
 	SYS_NODMA = TRUE;
 
+#if DOUBLE_BUFFER_VSCROLL
+	SYS_VSCROLL_addr = (SYS_VSCROLL_FLIP) ? SYS_VSCROLLA : SYS_VSCROLLB;
+	SYS_VSCROLL_FLIP ^= 1;
+#endif
+	
 	/*	Setup to DMA the character definitions */
 	if (SYS_LASTCHR > SYS_BASECHR) {
 		CHR_1video_addr = SYS_BASECHR * 32;			/*	Video address to DMA to	*/
@@ -192,7 +207,7 @@ void	SetupDMA(void)
 	if (SYS_LASTSPR > 0) {
 		WORK_SPRLIST[SYS_LASTSPR - 1].link &= 0x0F00;	/*	End the sprite list	*/
 		/*	If flicker on, preserve right	*/
-		if (SYS_FLICKER) {
+		if (SYS_FLICKER && gDidSetupRight) {
 			/*	Number of bytes to send	*/
 			SPR_NLlength = SPR_NRlength = SYS_LASTSPR * 8;
 			if (SYS_PAGE)
@@ -247,6 +262,7 @@ void	SetupDMA(void)
 #endif
 
 	SYS_NODMA = FALSE;
+	gDidSetupRight = 0;
 }
 
 UWORD	AddCharToDMA(UWORD *anim_file, UWORD charSize, UWORD charOffset)
@@ -340,8 +356,9 @@ int		i,x,y,numsprs;
 		numsprs = *wptr++;					/*	Get number of sprites in frame	*/
 		wptr++;									/*	Skip hotspot offset	*/
 
-		wptr++;									/* Skip width and height */
-		wptr++;
+		//rww fix - removed from format
+		//wptr++;									/* Skip width and height */
+		//wptr++;
 
 		AddSpriteToDMA(anim_file,wptr,numsprs,xp,yp);	/*	Add to list to DMA	*/
 		}
@@ -370,5 +387,6 @@ UWORD		length;
 	else
 		memcpy(LEFT_SLIST1,WORK_SPRLIST,length);
 	SYS_LASTSPR = 0;
+	gDidSetupRight = 1;
 }
 

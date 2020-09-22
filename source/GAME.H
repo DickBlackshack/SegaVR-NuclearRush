@@ -14,6 +14,10 @@ typedef unsigned short	UWORD;
 typedef long				LONG;
 typedef unsigned long	ULONG;
 
+#define TARGET_OVERCLOCK 0 //rww - should coincide with TARGET_OVERCLOCK in STARTUP.ASM.
+#define DOUBLE_BUFFER_VSCROLL 0 //rww - keeps vscroll synchronized with objects (otherwise objects appear to be a frame behind), prevents eyes getting out of sync. should also coincide with equ in STARTUP.ASM.
+#define HMD_SAMPLE_60HZ 0 //rww - allows sync'ing up with the eyes without spinning for another full vblank, should also coincide with equ in STARTUP.ASM.
+
 #ifndef NULL
 #define	NULL		0
 #endif
