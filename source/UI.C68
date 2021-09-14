@@ -18,6 +18,8 @@
 
 #define	TEST_ANM	FALSE
 
+//#define EXTRA_INIT_FAILURE_DIAG //rww - display error code when there's no head tracker
+
 extern PLAYER		Player;
 
 extern UWORD	SYS_BASECHR;
@@ -499,6 +501,18 @@ UI_WaitPress(UWORD frames)
 	return (done);
 }
 
+#ifdef EXTRA_INIT_FAILURE_DIAG
+extern void EatSomeCycles();
+static void EatABunchOfCycles(const int count)
+{
+	int i;
+	for (i = 0; i < count; ++i)
+	{
+		EatSomeCycles();
+	}
+}
+#endif
+
 UI_CheckIO()
 {
 	extern WORD		SYS_DOHEADSET;
@@ -547,7 +561,74 @@ UI_CheckIO()
 		UI_CenterString("HEAD TRACKER");
 		ScreenRow = 17;
 		UI_CenterString("NOT FOUND");
+#ifdef EXTRA_INIT_FAILURE_DIAG
+		ScreenRow = 20;
+		UI_CenterString("%08X", SYS_HMD_ERROR);
+		
+	#if 0 //let's try doing a data read and see what we get
+		{
+			int i;
+			BYTE data[7];
+			volatile WORD *pZ80BusReq = (volatile WORD *)0xA11100;
+			volatile WORD *pZ80BusReset = (volatile WORD *)0xA11200;
+			volatile BYTE *pP2Port = (volatile BYTE *)0xA10005;
+			volatile BYTE *pP2PortRW = (volatile BYTE *)0xA1000B;
+			
+			*pZ80BusReq = 0x100;
+			*pZ80BusReset = 0x100;
+			while (!((*(volatile BYTE *)pZ80BusReq) & 1));
+
+			*pP2PortRW = 0x60;
+			EatSomeCycles();
+			
+			//try to put it in idle
+			*pP2Port = 0x60;
+			for (i = 0; i < 0x1000; ++i)
+			{
+				if ((*pP2Port) & 0x10)
+				{
+					break;
+				}
+			}
+			data[0] = *pP2Port;
+			
+			#if 0 //reset/id test
+				*pP2Port = 0x40;
+				EatABunchOfCycles(0x1000);
+				data[1] = *pP2Port;
+				*pP2Port = 0x20;
+				EatABunchOfCycles(0x100);
+				data[2] = *pP2Port;
+				*pP2Port = 0x00;
+				EatABunchOfCycles(0x100);
+				data[3] = *pP2Port;
+			#else
+				*pP2Port = 0x20;
+				EatSomeCycles();
+				data[1] = *pP2Port;
+				*pP2Port = 0x00;
+				EatSomeCycles();
+				data[2] = *pP2Port;
+				*pP2Port = 0x20;
+				EatSomeCycles();
+				data[3] = *pP2Port;
+				*pP2Port = 0x00;
+				EatSomeCycles();
+				data[4] = *pP2Port;
+				*pP2Port = 0x20;
+				EatSomeCycles();
+				data[5] = *pP2Port;
+			#endif
+			
+			ScreenRow = 23;
+			UI_CenterString("%02X%02X%02X%02X%02X%02X", data[0], data[1], data[2], data[3], data[4], data[5]);
+		}
+	#endif
+		
+		UI_WaitPress(60*20);
+#else
 		UI_WaitPress(60*3);
+#endif
 	}
 	SYS_FadeOut(FADETIME);
 #endif

@@ -25,6 +25,12 @@
 		xdef	_HMD_INIT_RDY
 		xdef	_HMD_DATA
 		xref	_SYS_HMD_ERROR
+		
+;EXTRA_INIT_FAILURE_DIAG equ 1 ;rww - extra info for init failure in SYS_HMD_ERROR
+
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+		xdef _EatSomeCycles
+	.endif
 
 Z80BusReq	equ	$A11100		; bit 8 (high=BusReq)
 Z80Reset	equ	$A11200		; bit 8 (low=Reset)
@@ -69,29 +75,93 @@ _HMD_INIT_RDY:
 	move.w	#$0fff,d7
 	bsr	HMD_IDLE
 	tst.l	d2
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bne	HMD_FAILED_INIT_exit
+	.else
 	bne	HMD_DATA_exit
+	.endif
 	bsr	HMD_RESET
 	tst.l	d2
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bne	HMD_FAILED_RESET_exit
+	.else
 	bne	HMD_DATA_exit
+	.endif
 	move.b	#$20,(a0)	;1st Id nibble request TR =1
 	moveq	#0,d7
 	move.w	#$0fff,d7
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	moveq	#0,d2
+	.endif
 HMD_init_lp0:
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	move.b	(a0),d1
+	or.b	d1,d2
+	btst	#4,d1
+	.else
 	btst.b	#4,(a0)		;check TL=0
+	.endif
 	beq	HMD_INIT_10
 	dbra	d7,HMD_init_lp0
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_FAILED_INIT0_exit
+	.else
 	bra	HMD_FAIL
+	.endif
 HMD_INIT_10:
 	move.b	(a0),d1
 	and.b	#$0f,d1
 	cmp.b	#$08,d1
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bne	HMD_FAILED_INIT1_exit
+	.else
 	bne	HMD_FAIL
+	.endif
 	move.b	#$00,(a0)	;2nd Id reserve nibble req TR=0
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	moveq	#0,d2
+	.endif
 HMD_init_lp1:
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	move.b	(a0),d1
+	or.b	d1,d2
+	btst	#4,d1
+	.else
 	btst.b	#4,(a0)		;check TL =1
+	.endif
 	bne	HMD_DATA_20
 	dbra	d7,HMD_init_lp1
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_FAILED_INIT2_exit
+	.else
 	bra	HMD_timeout
+	.endif
+	
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+HMD_FAILED_INIT_exit:
+	move.l	#$80000100,_SYS_HMD_ERROR
+	or.l	d2,_SYS_HMD_ERROR
+	bra HMD_DATA_exit_noerrorset
+HMD_FAILED_RESET_exit:
+	or.l	#$80000200,d2
+	move.l	d2,_SYS_HMD_ERROR
+	bra HMD_DATA_exit_noerrorset
+HMD_FAILED_INIT0_exit:
+	or.l	#$80000300,d2
+	move.l	d2,_SYS_HMD_ERROR
+	bra HMD_FAIL_NOERRORSET
+HMD_FAILED_INIT1_exit:
+	and.l	#$ff,d1
+	or.l	#$80000400,d1
+	move.l	d1,_SYS_HMD_ERROR
+	bra HMD_FAIL_NOERRORSET
+HMD_FAILED_INIT2_exit:
+	and.l	#$ff,d1
+	or.l	#$80000500,d1
+	move.l	d1,_SYS_HMD_ERROR
+	bra HMD_FAIL_NOERRORSET
+	.endif
+	
 
 ******************************************************************************
 *	HMD_DATA	Head Tracker Data Routine
@@ -145,7 +215,11 @@ HMD_data_lp2:
 	btst.b	#4,(a0)		;check TL=0
 	beq	HMD_DATA_30
 	dbra	d7,HMD_data_lp2
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_timeout0
+	.else
 	bra	HMD_timeout
+	.endif
 HMD_DATA_30:
 	move.b	(a0),d0		;d0=xxxx|L R X8 Y8
 	move.b	#$00,(a0)	;2nd data req TR=0
@@ -154,7 +228,11 @@ HMD_data_lp3:
 	btst.b	#4,(a0)		;check TL=1
 	bne	HMD_DATA_40
 	dbra	d7,HMD_data_lp3
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_timeout1
+	.else
 	bra	HMD_timeout
+	.endif
 HMD_DATA_40:
 	move.b	(a0),d0		;d0=L R X8 Y8|xxxx|X7 X6 X5 X4
 	move.b	#$20,(a0)	;3rd req XLow
@@ -164,7 +242,11 @@ HMD_data_lp4:
 	btst.b	#4,(a0)
 	beq	HMD_DATA_50
 	dbra	d7,HMD_data_lp4
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_timeout2
+	.else
 	bra	HMD_timeout
+	.endif
 HMD_DATA_50:
 	move.b	(a0),d0		;d0=L R X8 Y8|X7 X6 X5 X4|xxxx|X3 X2 X1 X0
 	move.b	#$00,(a0)	;4th req YHigh
@@ -174,7 +256,11 @@ HMD_data_lp5:
 	btst.b	#4,(a0)
 	bne	HMD_DATA_60
 	dbra	d7,HMD_data_lp5
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_timeout3
+	.else
 	bra	HMD_timeout
+	.endif
 HMD_DATA_60:
 	move.b	(a0),d0		;d0=L R X8 Y8|X7 X6 X5 X4|X3 X2 X1 X0|xxxx|Y7 Y6 Y5 Y4
 	move.b	#$20,(a0)	;5th req YLOW
@@ -184,7 +270,11 @@ HMD_data_lp6:
 	btst.b	#4,(a0)
 	beq	HMD_DATA_70
 	dbra	d7,HMD_data_lp6
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	bra	HMD_timeout4
+	.else
 	bra	HMD_timeout
+	.endif
 HMD_DATA_70:
 	move.b	(a0),d0	;d0=L R X8 Y8|X7 X6 X5 X4|X3 X2 X1 X0|Y7 Y6 Y5 Y4|xxxx|Y3 Y2 Y1 Y0
 	lsl.b	#4,d0
@@ -193,6 +283,7 @@ HMD_DATA_70:
 	bsr	HMD_IDLE
 HMD_DATA_exit:
 	move.l	d2,_SYS_HMD_ERROR
+HMD_DATA_exit_noerrorset:
 	move.w	#0,Z80BusReq
 	movem.l	(sp)+,d1-d2/d6/d7/a0
 	rts
@@ -234,12 +325,24 @@ HMD_RESET:
 	move.b	#$40,(a0)	;reset req TH=1 TR=0
 	moveq	#0,d6
 	move.w	#$fffe,d6
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	moveq	#0,d2
+	.endif
 reset_lp:
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	move.b	(a0),d5
+	or.b	d5,d2
+	btst	#4,d5
+	.else
 	btst.b	#4,(a0)
+	.endif
 	beq	reset_exit
 	dbra	d6,reset_lp
 	bra	HMD_rst_FAIL
 reset_exit:
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	moveq	#0,d2
+	.endif
 	bsr	HMD_IDLE
 	moveq	#0,d5
 	move.w	#65,d5
@@ -258,15 +361,47 @@ HMD_ID_FAIL:
 
 HMD_FAIL:
 	move.l	#$80000001,_SYS_HMD_ERROR
+HMD_FAIL_NOERRORSET:
 	move.b	#$60,(a0)
 	move.w	#0,Z80BusReq
 	movem.l	(sp)+,d1-d2/d6/d7/a0
 	rts
 
 HMD_rst_FAIL:
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+	lsl.l	#8,d2
+	lsl.l	#8,d2
+	or.l	#$80000002,d2
+	.else
 	move.l	#$80000002,d2
+	.endif
 	move.b	#$60,(a0)
 	rts
+
+	.ifdef EXTRA_INIT_FAILURE_DIAG
+_EatSomeCycles:
+	nop
+	nop
+	nop
+	nop
+	rts
+	
+HMD_timeout0:
+	move.l	#$80000502,_SYS_HMD_ERROR
+	bra HMD_timeout_errorset
+HMD_timeout1:
+	move.l	#$80000503,_SYS_HMD_ERROR
+	bra HMD_timeout_errorset
+HMD_timeout2:
+	move.l	#$80000504,_SYS_HMD_ERROR
+	bra HMD_timeout_errorset
+HMD_timeout3:
+	move.l	#$80000505,_SYS_HMD_ERROR
+	bra HMD_timeout_errorset
+HMD_timeout4:
+	move.l	#$80000506,_SYS_HMD_ERROR
+	bra HMD_timeout_errorset
+	.endif
 
 ****************************************************************************
 *	HMD_timeout
@@ -275,6 +410,7 @@ HMD_rst_FAIL:
 
 HMD_timeout:
 	move.l	#1,_SYS_HMD_ERROR
+HMD_timeout_errorset:
 	move.b	#$60,(a0)
 	move.w	#0,Z80BusReq
 	movem.l	(sp)+,d1-d2/d6/d7/a0
