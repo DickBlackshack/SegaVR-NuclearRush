@@ -370,7 +370,6 @@ HMD_FAIL_NOERRORSET:
 HMD_rst_FAIL:
 	.ifdef EXTRA_INIT_FAILURE_DIAG
 	lsl.l	#8,d2
-	lsl.l	#8,d2
 	or.l	#$80000002,d2
 	.else
 	move.l	#$80000002,d2
