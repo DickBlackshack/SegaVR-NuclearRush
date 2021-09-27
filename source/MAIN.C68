@@ -583,6 +583,7 @@ MainGameLoop(void)
 			if (SYS_FLICKER)
 			{
 				extern ULONG	SYS_HMD_DATA;
+				extern WORD		SYS_READHEAD;
 				
 				//first lock to 15Hz (could go for 30, but even with a lot of extra cycles we still get dragged down by large scaled objects)
 				while (SYS_VCNT-SYS_OLDVCNT < 4)
@@ -592,9 +593,12 @@ MainGameLoop(void)
 				
 				//wait until sync'd up with the left eye before the next dma kick.
 				//this helps prevent one eye from occasionally trailing behind the other.
-				while ((SYS_HMD_DATA & 0xC0000) != 0x80000)
+				if (SYS_READHEAD)
 				{
-					SYS_WaitFrame();
+					while ((SYS_HMD_DATA & 0xC0000) != 0x80000)
+					{
+						SYS_WaitFrame();
+					}
 				}
 			}
 			else
